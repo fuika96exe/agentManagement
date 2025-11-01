@@ -1,0 +1,1571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Management App (Local Storage)</title>
+    <!-- Use Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Material Icons Rounded -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background-color: #f0f2f5; 
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 420px; 
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            width: 100%; 
+        }
+        
+        /* View Container */
+        .main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            /* Padding for general views, excluding form/detail sticky footer */
+            padding-bottom: 70px; 
+        }
+
+        /* Task Section */
+        .task-section { 
+            padding: 16px;
+        }
+        .task-section h2 { 
+            font-size: 18px;
+            font-weight: 700; 
+            color: #333;
+            margin-bottom: 15px; 
+            margin-left: 0; 
+            padding-top: 10px; 
+        }
+        /* Task List Card */
+        .task-list {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            overflow: hidden; 
+            border: 1px solid #e0e0e0; 
+        }
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            gap: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .task-item:hover {
+            background-color: #f9f9f9;
+        }
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        .task-item .icon {
+            font-size: 24px;
+            color: #3A86FF;
+        }
+        .task-item.incomplete .icon {
+            color: #FF4757; /* Red */
+        }
+        .task-item.incomplete {
+            background-color: #fff5f5; /* Light red background */
+        }
+        .task-item .task-info {
+            flex-grow: 1;
+        }
+        .task-item .task-info h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        .task-item.incomplete .task-info h3 {
+            color: #FF4757; 
+        }
+        .task-item .task-info p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: #999;
+        }
+        .task-item .action-btn {
+            background-color: #3A86FF; 
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s;
+            /* Fix button click area issue */
+            display: inline-block; 
+            line-height: normal;
+        }
+        .task-item .action-btn:active {
+            transform: scale(0.98);
+        }
+        .task-item .action-btn:hover {
+            background-color: #2e6ad9;
+        }
+
+        /* Bottom Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #fff;
+            border-top: 1px solid #eee;
+            padding: 10px 0;
+            position: fixed; 
+            bottom: 0;
+            width: 100%;
+            max-width: 420px; 
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+        .navbar a {
+            flex: 1;
+            text-align: center;
+            color: #999;
+            text-decoration: none;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+        .navbar a.active {
+            color: #3A86FF; 
+        }
+        .navbar a .material-icons-round {
+            font-size: 24px;
+        }
+
+        /* Property View Styling */
+        .property-header {
+            padding: 16px;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: relative; 
+        }
+        .search-icon {
+            position: absolute;
+            left: 15px; 
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999; 
+            font-size: 20px;
+            z-index: 2; 
+        }
+        .search-container input {
+            flex-grow: 1;
+            padding: 10px 15px 10px 45px; 
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-container input:focus {
+            border-color: #3A86FF;
+        }
+        .add-btn {
+            width: 45px;
+            height: 45px;
+            background-color: #3A86FF;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(58, 134, 255, 0.4);
+            transition: transform 0.1s;
+        }
+        .add-btn:active {
+            transform: scale(0.95);
+        }
+        .add-btn:hover {
+             background-color: #2e6ad9;
+        }
+        .add-menu {
+            position: absolute;
+            right: 0px; 
+            top: 60px; 
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 8px 0;
+            z-index: 10;
+            transform-origin: top right;
+            transition: opacity 0.2s, transform 0.2s;
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+        .add-menu.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+        .add-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            color: #333;
+            text-decoration: none;
+            font-size: 15px;
+        }
+        .add-menu a:hover {
+            background-color: #f0f2f5;
+        }
+        .property-list {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .property-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border-left: 5px solid #3A86FF;
+            cursor: pointer; 
+            position: relative;
+        }
+        .property-card.incomplete-details {
+            border-left: 5px solid #FF9800; 
+            background-color: #fff8e1;
+        }
+        .property-card h4 {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #3A86FF; 
+        }
+        .property-card p {
+            font-size: 13px;
+            color: #666;
+            margin: 0;
+        }
+        .status-tag-prop {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        .status-rented { background-color: #d4edda; color: #155724; }
+        .status-vacant { background-color: #fff3cd; color: #856404; }
+        .status-incomplete { background-color: #ffcc80; color: #e65100; }
+
+        /* Property Card Layout */
+        .property-details-section {
+            display: flex;
+            flex-direction: column; 
+            margin-top: 8px;
+        }
+        .detail-line {
+            display: flex;
+            margin-bottom: 2px;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #FF4757;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        .delete-btn:hover {
+            background-color: #ffeaea;
+        }
+
+
+        /* Form & Detail View Styling (Reusing form-view-content) */
+        .form-view-content {
+            padding: 16px;
+        }
+        .form-view-content h2 {
+            margin-top: 10px;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            background-color: #fff;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: #3A86FF;
+        }
+        .submit-btn {
+            width: 100%; 
+            padding: 15px;
+            background-color: #3A86FF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            display: block; 
+        }
+        .submit-btn:hover {
+            background-color: #2e6ad9;
+        }
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+        
+        /* Back button styling */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #3A86FF;
+            font-size: 15px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            padding: 5px 0; /* Add padding for better click area */
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        /* Message Box Styling */
+        .app-message-box {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s, bottom 0.3s;
+            z-index: 2000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+        .app-message-box.info { background-color: #3A86FF; }
+        .app-message-box.success { background-color: #28a745; }
+        .app-message-box.error { background-color: #dc3545; }
+        .app-message-box.visible { opacity: 1; bottom: 80px; }
+        
+        /* Custom Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+        }
+        .modal-content h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+        .btn-cancel, .btn-confirm {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            flex-grow: 1;
+        }
+        .btn-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        .btn-cancel:hover {
+            background-color: #ccc;
+        }
+        .btn-confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-confirm:hover {
+            background-color: #c82333;
+        }
+        
+        /* Detail View Title Alignment */
+        #detailView .property-header {
+            padding: 10px 16px; /* Adjust padding for a cleaner header */
+        }
+        #detailView .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #detailView .back-btn {
+            font-size: 16px;
+        }
+        #detailEditBtn {
+            background-color: #f7931e; /* Orange for Edit */
+            box-shadow: 0 4px 10px rgba(247, 147, 30, 0.4);
+            width: 40px; 
+            height: 40px;
+            margin-top: 10px;
+        }
+        
+        /* Detail View & Form Edit View Styles for Structure and Alignment */
+        .detail-card {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0; /* Border for visual separation */
+        }
+        .detail-card.rental-info {
+            background: #eef4ff; /* Lighter background for status/rental */
+            border: 1px solid #d0e0ff;
+        }
+
+        /* Container for key-value pairs (Flex for alignment) */
+        .detail-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px 0; /* Vertical spacing between items */
+        }
+        .detail-item-aligned {
+            /* Two columns for specs and some basic info */
+            width: 50%; 
+            box-sizing: border-box;
+            padding-right: 15px; /* Add spacing between columns */
+        }
+        .detail-item-full {
+            width: 100%;
+        }
+        
+        .detail-label {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #999; 
+            text-transform: uppercase;
+        }
+        .detail-value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        /* Input/Select styling within the edit view (Phase 3) */
+        .detail-item-aligned input,
+        .detail-item-aligned select,
+        .detail-item-full input,
+        .detail-item-full select,
+        /* Input/Select styling within the guided setup view (Phase 1/2) */
+        #formView .detail-card input,
+        #formView .detail-card select {
+            width: 100%;
+            padding: 8px; /* Slightly smaller padding for denser layout */
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 15px;
+            box-sizing: border-box;
+            font-weight: 500;
+            margin-top: 2px;
+            background-color: #fff;
+        }
+        #formView .detail-card input:focus,
+        #formView .detail-card select:focus {
+            border-color: #f7931e; /* Highlight border on focus for edit view */
+        }
+        
+        /* Form view adjustments for phase 3 (The sticky Save button) */
+        #formView .form-view-content {
+             padding-bottom: 0; /* Remove extra padding at bottom before footer */
+        }
+        .form-footer {
+            /* Stick form footer to the bottom of the main-content for the full-screen edit view */
+            padding: 15px;
+            border-top: 1px solid #eee;
+            background-color: #fff;
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+            max-width: 420px; /* Match container width */
+            box-sizing: border-box;
+            z-index: 100;
+            margin-top: 20px; /* Separator for setup phases */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            Loading Data...
+        </div>
+
+        <div class="main-content">
+            <!-- View Containers. Initially all hidden, will be shown by JS switchView('dashboard') -->
+            <div id="dashboardView" class="view" style="display: none;">
+                <!-- 1. Tasks View (Dashboard) -->
+                <div class="task-section">
+                    <h2>Pending Tasks</h2>
+                    <div id="taskList" class="task-list">
+                        <!-- Tasks rendered dynamically by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div id="propertyView" class="view" style="display: none;">
+                <!-- 2. Property Management View -->
+                <div class="property-header">
+                    <div class="search-container">
+                        <span class="material-icons-round search-icon">search</span>
+                        <input type="text" id="propertySearch" placeholder="Search properties, tenants, or owners...">
+                        <button id="addButton" onclick="window.app.toggleAddMenu()" class="add-btn">
+                            <span class="material-icons-round">add</span>
+                        </button>
+
+                        <!-- Add Menu -->
+                        <div id="addMenu" class="add-menu">
+                            <a href="#" onclick="window.app.handleNewEntry('property'); return false;">
+                                <span class="material-icons-round" style="font-size: 18px;">home</span> New Property
+                            </a>
+                            <a href="#" onclick="window.app.alertMessage('Adding Tenant is coming soon!', 'info'); return false;">
+                                <span class="material-icons-round" style="font-size: 18px;">person</span> New Tenant
+                            </a>
+                            <a href="#" onclick="window.app.alertMessage('Adding Owner is coming soon!', 'info'); return false;">
+                                <span class="material-icons-round" style="font-size: 18px;">group</span> New Owner
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="propertyList" class="property-list">
+                    <!-- Property cards rendered dynamically by JS -->
+                </div>
+            </div>
+            
+            <div id="formView" class="view" style="display: none;">
+                <!-- 3. Data Entry Form View -->
+                <!-- Note: The form-view-content now handles only the scrolling part, form-footer is sticky -->
+                <div class="property-header">
+                    <a href="#" id="formBackBtn" class="back-btn" onclick="window.app.goBackFromForm(); event.stopPropagation(); return false;">
+                        <span class="material-icons-round">arrow_back_ios</span>
+                        Back
+                    </a>
+                </div>
+
+                <div class="form-view-content">
+                    <h2 id="formTitle" style="margin-top: 5px;"></h2>
+
+                    <form id="dataEntryForm">
+                        <!-- Hidden field to track the current phase and property being edited -->
+                        <input type="hidden" id="currentFormPhase" name="phase" value="1">
+                        <input type="hidden" id="currentPropertyId" name="propId" value="">
+
+                        <div id="formFields">
+                            <!-- Dynamic fields placeholder -->
+                        </div>
+                        
+                        <!-- Form footer is moved below the main content to be sticky for full-screen edit -->
+                    </form>
+                </div>
+                
+                <div class="form-footer" id="formFooter">
+                    <!-- Submit button placeholder -->
+                    <button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm">
+                        Next
+                    </button>
+                </div>
+            </div>
+
+            <div id="detailView" class="view" style="display: none;">
+                <!-- 4. Property Detail View (Read-Only) -->
+                <div class="property-header">
+                    <a href="#" class="back-btn" onclick="window.app.switchView('property'); return false;" style="margin: 0; padding: 0;">
+                        <span class="material-icons-round">arrow_back_ios</span>
+                        Property List
+                    </a>
+                    <div class="header-content">
+                        <h2 id="detailPropertyName" style="margin: 10px 0 0; font-size: 24px; font-weight: 700; flex-grow: 1;">Property Name</h2>
+                        <button id="detailEditBtn" class="add-btn" onclick="">
+                            <span class="material-icons-round" style="font-size: 22px;">edit</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="detailContent" class="form-view-content" style="padding-top: 5px;">
+                    <!-- Details rendered dynamically by JS -->
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Navbar -->
+        <div class="navbar">
+            <a href="#" id="navDashboard" class="active" onclick="window.app.switchView('dashboard'); return false;">
+                <span class="material-icons-round">home</span>
+                Home
+            </a>
+            <a href="#" id="navProperty" onclick="window.app.switchView('property'); return false;">
+                <span class="material-icons-round">apartment</span>
+                Property
+            </a>
+            <a href="#" onclick="window.app.alertMessage('Navigating to Services page...', 'info'); return false;">
+                <span class="material-icons-round">apps</span>
+                Services
+            </a>
+            <a href="#" onclick="window.app.alertMessage('Navigating to More page...', 'info'); return false;">
+                <span class="material-icons-round">more_horiz</span>
+                More
+            </a>
+        </div>
+    </div>
+    
+    <!-- Custom Message Box Element -->
+    <div id="appMessageBox" class="app-message-box"></div>
+    
+    <!-- Custom Confirmation Modal (Replaces window.confirm) -->
+    <div id="confirmModal" style="display: none;" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="confirmModalTitle">Confirm Deletion</h3>
+            <p id="confirmModalMessage"></p>
+            <div class="modal-actions">
+                <button id="confirmModalCancel" class="btn-cancel">Cancel</button>
+                <button id="confirmModalConfirm" class="btn-confirm">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        let properties = [];
+        let tasks = [];
+        let currentUserId = 'local_user_123'; // Dummy user ID for local storage context
+
+        // ===================================
+        // Utility: Local Storage Management
+        // ===================================
+        
+        /**
+         * Loads properties and tasks from browser's localStorage.
+         */
+        function loadData() {
+            const storedProperties = localStorage.getItem('properties');
+            properties = storedProperties ? JSON.parse(storedProperties) : [];
+            
+            const storedTasks = localStorage.getItem('tasks');
+            tasks = storedTasks ? JSON.parse(storedTasks) : [];
+            
+            console.log("Data loaded from localStorage.");
+        }
+
+        /**
+         * Saves current properties and tasks to browser's localStorage.
+         */
+        function saveData() {
+            localStorage.setItem('properties', JSON.stringify(properties));
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            console.log("Data saved to localStorage.");
+            // Since we use localStorage, manually call rendering functions after saving
+            renderProperties();
+            renderTasks();
+        }
+        
+        // ===================================
+        // Utility: Message Box & Confirmation
+        // ===================================
+
+        const messageBox = document.getElementById('appMessageBox');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        let messageTimer;
+
+        function showLoading() { loadingOverlay.style.display = 'flex'; }
+        function hideLoading() { loadingOverlay.style.display = 'none'; }
+
+        function alertMessage(message, type = 'info') {
+            clearTimeout(messageTimer);
+
+            messageBox.textContent = message;
+            messageBox.className = `app-message-box ${type}`;
+            
+            requestAnimationFrame(() => {
+                messageBox.classList.add('visible');
+            });
+
+            messageTimer = setTimeout(() => {
+                messageBox.classList.remove('visible');
+            }, 3000);
+        }
+        
+        // Confirmation Modal Logic 
+        let confirmCallback = null;
+
+        function showConfirmation(title, message, callback) {
+            document.getElementById('confirmModalTitle').textContent = title;
+            document.getElementById('confirmModalMessage').textContent = message;
+            confirmCallback = callback;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function hideConfirmation() {
+            document.getElementById('confirmModal').style.display = 'none';
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirmModalCancel').onclick = hideConfirmation;
+        document.getElementById('confirmModalConfirm').onclick = () => {
+            if (confirmCallback) {
+                confirmCallback(true);
+            }
+            hideConfirmation();
+        };
+
+        // ===================================
+        // View Control and Navigation
+        // ===================================
+        let currentView = 'dashboard';
+        
+        function switchView(viewName) {
+            currentView = viewName;
+            
+            document.querySelectorAll('.view').forEach(view => {
+                view.style.display = 'none';
+            });
+
+            const targetView = document.getElementById(viewName + 'View');
+            if (targetView) {
+                targetView.style.display = 'flex'; // Use flex for view containers
+                targetView.style.flexDirection = 'column';
+            }
+            
+            // Handle footer visibility for Form/Detail views
+            const formFooter = document.getElementById('formFooter');
+            if (viewName === 'form') {
+                formFooter.style.display = 'block';
+                // Adjust main-content padding for form view to account for sticky footer
+                document.querySelector('.main-content').style.paddingBottom = '0'; 
+            } else {
+                formFooter.style.display = 'none';
+                 // Restore default padding for other views
+                document.querySelector('.main-content').style.paddingBottom = '70px'; 
+            }
+
+
+            // Highlight Navbar tab
+            document.querySelectorAll('.navbar a').forEach(link => link.classList.remove('active'));
+            if (viewName === 'dashboard') {
+                document.getElementById('navDashboard').classList.add('active');
+            } else if (viewName === 'property' || viewName === 'form' || viewName === 'detail') { 
+                document.getElementById('navProperty').classList.add('active');
+                toggleAddMenu(false); 
+            } 
+        }
+
+        /**
+         * Back button logic in the form view.
+         */
+        function goBackFromForm() {
+            const currentPhase = parseInt(document.getElementById('currentFormPhase').value);
+            const propId = document.getElementById('currentPropertyId').value;
+            
+            if (currentPhase === 3) {
+                // If in Edit mode (Phase 3), go back to the Detail View
+                viewPropertyDetails(propId);
+                alertMessage('Edit cancelled. Returned to Property Details.', 'info');
+            } else {
+                // If in initial setup (Phase 1 or 2), go back to Dashboard
+                switchView('dashboard');
+                alertMessage('Returned to Home page.', 'info');
+            }
+        }
+        
+        function toggleAddMenu(force) {
+            const menu = document.getElementById('addMenu');
+            const isVisible = menu.classList.contains('visible');
+            
+            let shouldBeVisible = (typeof force === 'boolean') ? force : !isVisible;
+            
+            if (shouldBeVisible) {
+                menu.classList.add('visible');
+            } else {
+                menu.classList.remove('visible');
+            }
+        }
+
+        /**
+         * Loads property data and renders the read-only detail view.
+         * @param {string} propId - ID of the property to view.
+         */
+        function viewPropertyDetails(propId) {
+            const prop = getPropertyById(propId);
+            if (!prop || prop.phase < 3) {
+                alertMessage('Error: Cannot view incomplete property details.', 'error');
+                switchView('property');
+                return;
+            }
+            renderDetailView(prop);
+            switchView('detail');
+        }
+
+        /**
+         * Navigates to the form view, either to continue an incomplete task or to edit a complete one.
+         * @param {string} propId - ID of the property.
+         * @param {boolean} [isEdit=false] - True if opened from the detail view (forces Phase 3: Edit All).
+         */
+        function continueFormTask(propId, isEdit = false) {
+            const prop = getPropertyById(propId);
+            if (!prop) {
+                alertMessage('Property data not found in local storage.', 'error');
+                return;
+            }
+            
+            // Determine the starting phase:
+            // If it's an edit, use Phase 3 (Edit All)
+            // If it's continuing a task, use the recorded phase (prop.phase or 1)
+            const startPhase = isEdit ? 3 : (prop.phase || 1); 
+
+            // Navigate to form
+            renderForm(propId, startPhase); 
+            switchView('form');
+            
+            if (isEdit) {
+                 alertMessage(`Editing details for "${prop.name || 'Property'}".`, 'info');
+            }
+        }
+
+        function deletePropertyHandler(propId, propName) {
+            const displayName = propName && propName.trim() !== '' ? propName : 'this property';
+            showConfirmation(
+                'Confirm Deletion',
+                `Are you sure you want to permanently delete the information for: ${displayName}? This action cannot be undone.`,
+                (confirmed) => {
+                    if (confirmed) {
+                        deleteProperty(propId, displayName);
+                    }
+                }
+            );
+        }
+
+        /**
+         * Handles new entry creation (Property, Tenant, etc.)
+         * @param {string} type - Type of entry to create ('property').
+         * @param {boolean} [shouldNavigate=true] - If true, immediately navigates to the form view.
+         */
+        function handleNewEntry(type, shouldNavigate = true) {
+            toggleAddMenu(false); 
+
+            if (type === 'property') {
+                // Ensure ID is unique
+                const newPropId = `prop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+                const newTaskId = `task-${newPropId}`;
+                
+                const initialPropData = {
+                    name: '', 
+                    address: '',
+                    phase: 1, 
+                    status: 'Incomplete', 
+                    ownerId: currentUserId 
+                };
+                
+                const isFirstTask = properties.length === 0;
+                
+                const initialTaskData = { 
+                    id: newTaskId,
+                    type: 'property', 
+                    propId: newPropId,
+                    phase: 1, 
+                    description: isFirstTask ? 'Add a new property' : 'Fill in basic details', 
+                    details: 'Step 1/2: Basic Details', 
+                    status: 'in_progress',
+                    userId: currentUserId 
+                };
+                
+                // If initiated by user, navigate immediately
+                if (shouldNavigate) {
+                    renderForm(newPropId, 1);
+                    switchView('form');
+                }
+                
+                // Update local data, which triggers saveData() and re-renders
+                updatePropertyData(newPropId, initialPropData);
+                updateTaskData(newTaskId, initialTaskData);
+                
+            } else {
+                alertMessage(`Adding ${type} functionality is coming soon!`, 'info');
+            }
+        }
+
+
+        // ===================================
+        // Local Data Logic 
+        // ===================================
+
+        function getTaskByPropId(propId) {
+            return tasks.find(t => t.propId === propId && t.type === 'property');
+        }
+        
+        function getPropertyById(propId) {
+            return properties.find(p => p.id === propId);
+        }
+
+        /**
+         * Updates a property item in the local array and saves to localStorage.
+         * @param {string} propId - ID of the property.
+         * @param {object} data - Data to merge/update.
+         */
+        function updatePropertyData(propId, data) {
+            let propIndex = properties.findIndex(p => p.id === propId);
+            
+            if (propIndex === -1) {
+                // New property
+                properties.push({ id: propId, ...data });
+            } else {
+                // Existing property: merge data
+                properties[propIndex] = { ...properties[propIndex], ...data };
+            }
+            saveData();
+            return true;
+        }
+
+        /**
+         * Updates a task item in the local array and saves to localStorage.
+         * @param {string} taskId - ID of the task.
+         * @param {object} data - Data to merge/update.
+         */
+        function updateTaskData(taskId, data) {
+            let taskIndex = tasks.findIndex(t => t.id === taskId);
+
+            if (taskIndex === -1) {
+                 // Should not happen for property tasks, but for robustness
+                 tasks.push({ id: taskId, ...data });
+            } else {
+                tasks[taskIndex] = { ...tasks[taskIndex], ...data };
+            }
+            saveData();
+            return true;
+        }
+
+        /**
+         * Deletes a property and its related task from local storage.
+         * @param {string} propId - ID of the property to delete.
+         * @param {string} propName - Display name for messaging.
+         */
+        function deleteProperty(propId, propName) {
+            showLoading();
+            try {
+                // Delete property
+                properties = properties.filter(p => p.id !== propId);
+                
+                // Delete associated task
+                tasks = tasks.filter(t => t.propId !== propId);
+                
+                saveData(); // Save changes and trigger re-render
+                
+                alertMessage(`Property "${propName}" deleted successfully.`, 'success');
+            } catch (error) {
+                console.error("Error deleting property:", error);
+                alertMessage('Failed to delete property and associated task.', 'error');
+            } finally {
+                // Always hide loading
+                hideLoading(); 
+                // Go back to the property list if we were on detail view
+                if (currentView === 'detail') {
+                    switchView('property');
+                }
+            }
+        }
+        
+        /**
+         * Checks if the list is empty and ensures the initial task exists.
+         */
+        function checkAndRestoreInitialTask() {
+            // Filter for in-progress property tasks
+            const pendingPropertyTasks = tasks.filter(t => t.type === 'property' && t.status === 'in_progress');
+
+            if (properties.length === 0 && pendingPropertyTasks.length === 0) {
+                console.log("No properties found. Automatically restoring initial 'Add a property' task.");
+                // Call handleNewEntry but prevent navigation (stay on dashboard)
+                handleNewEntry('property', false); 
+            }
+        }
+
+
+        // ===================================
+        // Rendering Functions 
+        // ===================================
+        
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            
+            const pendingPropertyTasks = tasks.filter(t => t.type === 'property' && t.status === 'in_progress');
+            
+            if (pendingPropertyTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="task-item">
+                        <span class="material-icons-round icon" style="color: #6c757d;">check_circle_outline</span>
+                        <div class="task-info">
+                            <h3>No Pending Tasks</h3>
+                            <p>All outstanding tasks are complete!</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            pendingPropertyTasks.forEach(task => {
+                const itemClass = 'task-item incomplete';
+                const iconName = 'edit_note';
+                
+                const buttonText = 'Edit'; 
+                const buttonAction = `window.app.continueFormTask('${task.propId}')`;
+                
+                const taskDescription = task.description; 
+                
+                let taskDetails;
+                if (task.phase === 1) {
+                    taskDetails = taskDescription === 'Add a new property' ? 'Start filling in basic details.' : 'Step 1/2: Fill in basic details.'; 
+                } else if (task.phase === 2) {
+                    taskDetails = 'Step 2/2: Fill in rental and specifications.'; 
+                } else {
+                    taskDetails = 'Missing details.'; 
+                }
+                
+                taskList.innerHTML += `
+                    <div class="${itemClass}" onclick="if(!event.target.closest('a')) { ${buttonAction}; }">
+                        <span class="material-icons-round icon">${iconName}</span>
+                        <div class="task-info">
+                            <h3>${taskDescription}</h3>
+                            <p>${taskDetails}</p>
+                        </div>
+                        <a href="#" class="action-btn" onclick="${buttonAction}; return false;">${buttonText}</a>
+                    </div>
+                `;
+            });
+        }
+        
+        function renderProperties() {
+            const listContainer = document.getElementById('propertyList');
+            listContainer.innerHTML = '';
+            
+            if (properties.length === 0) {
+                 listContainer.innerHTML = `<div class="property-card" style="text-align: center; border-left: 5px solid #ccc; color: #666;">No property data found. Click the "+" button to add one.</div>`;
+                 return;
+            }
+
+            // Sort by completeness (incomplete properties first)
+            properties.sort((a, b) => {
+                const aComplete = a.phase && a.phase > 2;
+                const bComplete = b.phase && b.phase > 2;
+                if (aComplete === bComplete) return 0;
+                return aComplete ? 1 : -1; 
+            });
+            
+            properties.forEach(p => {
+                const isComplete = p.phase && p.phase > 2;
+                
+                let statusClass;
+                let statusText;
+                let cardClass = 'property-card';
+                let action;
+
+                if (!isComplete) {
+                    statusClass = 'status-incomplete';
+                    statusText = 'Incomplete Details';
+                    cardClass += ' incomplete-details';
+                    action = `onclick="window.app.continueFormTask('${p.id}');"`;
+                } else {
+                    // Completed property: navigate to read-only detail view
+                    statusClass = p.status === 'Rented' ? 'status-rented' : 'status-vacant';
+                    statusText = p.status || 'Vacant';
+                    action = `onclick="window.app.viewPropertyDetails('${p.id}');"`;
+                }
+
+                const propName = p.name && p.name.trim() !== '' ? p.name : 'Property Name N/A';
+                const propAddress = p.address || 'Address N/A';
+                // Note: Using toLocaleString() for number formatting
+                const propRent = p.monthlyRent ? `RM${p.monthlyRent.toLocaleString()}` : 'N/A';
+                const propSize = p.sizeSqft ? `${p.sizeSqft.toLocaleString()} sqft` : 'N/A';
+                
+                listContainer.innerHTML += `
+                    <div class="${cardClass}" ${action}>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h4>${propName}</h4>
+                            <span class="status-tag-prop ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="property-details-section">
+                            <div class="detail-line address">
+                                <p class="detail-item"><strong>Address:</strong> ${propAddress}</p>
+                            </div>
+                            ${isComplete ? `
+                                <div class="detail-line rent-specs" style="justify-content: space-between; gap: 10px;">
+                                    <p class="detail-item" style="width: 45%;"><strong>Rent:</strong> ${propRent}</p>
+                                    <p class="detail-item" style="width: 45%;"><strong>Size:</strong> ${propSize}</p>
+                                </div>
+                            ` : `<p style="color: #e65100;">Missing Rental/Spec Details. Click to continue.</p>`}
+                        </div>
+                        <!-- Delete button (must stop propagation to prevent opening details) -->
+                        <button class="delete-btn" onclick="window.app.deletePropertyHandler('${p.id}', '${propName}'); event.stopPropagation();">
+                            <span class="material-icons-round" style="font-size: 20px;">delete</span>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+
+        // ===================================
+        // Detail View & Edit Form Logic (Unified)
+        // ===================================
+        
+        /**
+         * Helper function to render property fields either as read-only detail or editable form.
+         * @param {object} prop - The property data object.
+         * @param {boolean} isEditable - True to render inputs/selects, False for plain text.
+         * @returns {string} The generated HTML content.
+         */
+        function renderPropertyFields(prop, isEditable = false) {
+            
+            // Utility function to safely get value (0 for numbers if undefined)
+            const v = (key) => {
+                if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms'].includes(key)) {
+                    return prop[key] !== undefined ? (prop[key] || 0) : '';
+                }
+                return prop[key] !== undefined ? prop[key] : '';
+            };
+            
+            // Reusable component for a single field/detail item
+            const Item = (label, name, value, isFull, type = 'text', options = []) => {
+                const itemClass = isFull ? 'detail-item-full' : 'detail-item-aligned';
+                const isRequired = type !== 'text' || name === 'name'; // Assume mandatory unless it's the optional remark
+                
+                if (isEditable) {
+                    let inputField;
+                    if (type === 'select' && options.length > 0) {
+                        const optionHtml = options.map(opt => 
+                            `<option value="${opt}" ${String(value) === opt ? 'selected' : ''}>${opt}</option>`
+                        ).join('');
+                        inputField = `
+                            <select id="p-${name}" name="${name}" ${isRequired ? 'required' : ''}>
+                                <option value="" disabled ${!value ? 'selected' : ''}>Select ${label}</option>
+                                ${optionHtml}
+                            </select>
+                        `;
+                    } else {
+                        inputField = `<input type="${type}" id="p-${name}" name="${name}" value="${value}" ${isRequired ? 'required' : ''}>`;
+                    }
+                    
+                    return `
+                        <div class="${itemClass} form-group">
+                            <label for="p-${name}" class="detail-label">${label} ${isRequired && name !== 'remark' ? '<span style="color:red;">*</span>' : ''}</label>
+                            ${inputField}
+                        </div>
+                    `;
+                } else {
+                    const displayValue = ['monthlyRent', 'sizeSqft'].includes(name) ? (value).toLocaleString() : (value || 'N/A');
+                    
+                    return `
+                        <div class="${itemClass}">
+                            <p class="detail-label">${label}</p>
+                            <p class="detail-value">${displayValue}</p>
+                        </div>
+                    `;
+                }
+            };
+
+            let html = '';
+
+            // --- 1. STATUS & RENTAL CARD ---
+            let statusTag = '';
+            if (!isEditable) {
+                 const statusClass = prop.status === 'Rented' ? 'status-rented' : 'status-vacant';
+                 statusTag = `<span class="status-tag-prop ${statusClass}" style="margin-left: 10px; font-size: 13px;">${prop.status || 'Vacant'}</span>`;
+            }
+
+            html += `
+                <div class="detail-card rental-info">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF; display: flex; align-items: center;">
+                        STATUS & RENTAL ${!isEditable ? statusTag : ''}
+                    </h3>
+                    <div class="detail-group">
+                        ${Item('House Type', 'houseType', v('houseType'), true, 'select', ['Apartment', 'Condo', 'Landed'])}
+                        ${Item('Monthly Rent (RM)', 'monthlyRent', v('monthlyRent'), true, 'number')}
+                        ${Item('Status', 'status', v('status') || 'Vacant', true, 'select', ['Vacant', 'Rented'])}
+                    </div>
+                </div>
+            `;
+            
+            // --- 2. BASIC INFORMATION CARD ---
+            html += `
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 18px; font-weight: 700; color: #333;">Basic Information</h3>
+                    <div class="detail-group">
+                        ${Item('Property Name', 'name', v('name'), true)}
+                        ${Item('Address', 'address', v('address'), true)}
+                        ${Item('Postal Code', 'postalCode', v('postalCode'), false)}
+                        ${Item('City', 'city', v('city'), false)}
+                        ${Item('State', 'state', v('state'), false)}
+                        ${Item('Country', 'country', v('country') || 'Malaysia', false)}
+                        ${Item('Remark (Optional)', 'remark', v('remark'), true, 'text')}
+                    </div>
+                </div>
+            `;
+            
+            // --- 3. SPECIFICATIONS CARD ---
+            html += `
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 18px; font-weight: 700; color: #333;">Specifications</h3>
+                    <div class="detail-group">
+                        ${Item('Size (Sqft)', 'sizeSqft', v('sizeSqft'), false, 'number')}
+                        ${Item('Rooms', 'rooms', v('rooms'), false, 'number')}
+                        ${Item('Bathrooms', 'bathrooms', v('bathrooms'), false, 'number')}
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        /**
+         * Renders the content of the read-only property detail view.
+         * @param {object} prop - The property data object.
+         */
+        function renderDetailView(prop) {
+            const content = document.getElementById('detailContent');
+            
+            // Update Header Name
+            document.getElementById('detailPropertyName').textContent = prop.name || 'Property Details';
+            
+            // Set the Edit button to open the form view for editing (Phase 3)
+            document.getElementById('detailEditBtn').setAttribute('onclick', `window.app.continueFormTask('${prop.id}', true); return false;`);
+            
+            // Render read-only fields
+            content.innerHTML = renderPropertyFields(prop, false);
+        }
+
+        /**
+         * Renders the Property Form view for different phases (1, 2 for setup; 3 for full edit).
+         * @param {string} propId - ID of the property.
+         * @param {number} phase - Current phase (1, 2, or 3).
+         */
+        function renderForm(propId, phase) { 
+            const formTitle = document.getElementById('formTitle');
+            const formFields = document.getElementById('formFields');
+            const formSubmitButton = document.getElementById('formSubmitButton');
+            
+            document.getElementById('currentFormPhase').value = phase;
+            document.getElementById('currentPropertyId').value = propId;
+            
+            const prop = getPropertyById(propId);
+            const existingData = prop || {};
+            
+            let fieldsHTML = '';
+            
+            // Adjust back button text based on mode
+            document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> ${phase === 3 ? 'Details' : 'Back'}`;
+
+            if (phase === 1) {
+                // Phase 1: Basic Details (Initial setup flow)
+                formTitle.textContent = '1/2: Basic Details'; 
+                formSubmitButton.textContent = 'Next';
+                formSubmitButton.style.display = 'block';
+
+                // Simple layout for guided setup
+                fieldsHTML = `
+                    <div class="detail-card">
+                        <div class="detail-group">
+                            <div class="detail-item-full form-group">
+                                <label for="p-name">Property Name <span style="color:red">*</span></label>
+                                <input type="text" id="p-name" name="name" value="${existingData.name || ''}" required>
+                            </div>
+                            <div class="detail-item-full form-group">
+                                <label for="p-address">Address <span style="color:red">*</span></label>
+                                <input type="text" id="p-address" name="address" value="${existingData.address || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-postal">Postal Code <span style="color:red">*</span></label>
+                                <input type="text" id="p-postal" name="postalCode" value="${existingData.postalCode || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-city">City <span style="color:red">*</span></label>
+                                <input type="text" id="p-city" name="city" value="${existingData.city || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-state">State <span style="color:red">*</span></label>
+                                <input type="text" id="p-state" name="state" value="${existingData.state || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-country">Country <span style="color:red">*</span></label>
+                                <input type="text" id="p-country" name="country" value="${existingData.country || 'Malaysia'}" required>
+                            </div>
+                            <div class="detail-item-full form-group">
+                                <label for="p-remark">Remark (Optional)</label>
+                                <input type="text" id="p-remark" name="remark" value="${existingData.remark || ''}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (phase === 2) {
+                // Phase 2: Specifications (Initial setup flow)
+                formTitle.textContent = '2/2: Property Details'; 
+                formSubmitButton.textContent = 'Save';
+                formSubmitButton.style.display = 'block';
+
+                // Simple layout for guided setup
+                fieldsHTML = `
+                    <div class="detail-card">
+                        <div class="detail-group">
+                            <div class="detail-item-full form-group">
+                                <label for="p-type">House Type <span style="color:red">*</span></label>
+                                <select id="p-type" name="houseType" required>
+                                    <option value="" disabled ${!existingData.houseType ? 'selected' : ''}>Select Type</option>
+                                    <option value="Apartment" ${existingData.houseType === 'Apartment' ? 'selected' : ''}>Apartment</option>
+                                    <option value="Condo" ${existingData.houseType === 'Condo' ? 'selected' : ''}>Condo</option>
+                                    <option value="Landed" ${existingData.houseType === 'Landed' ? 'selected' : ''}>Landed House</option>
+                                </select>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-rent">Monthly Rental (RM) <span style="color:red">*</span></label>
+                                <input type="number" id="p-rent" name="monthlyRent" value="${existingData.monthlyRent || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-size">Size (Sqft) <span style="color:red">*</span></label>
+                                <input type="number" id="p-size" name="sizeSqft" value="${existingData.sizeSqft || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-rooms">No. of Rooms <span style="color:red">*</span></label>
+                                <input type="number" id="p-rooms" name="rooms" value="${existingData.rooms || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-bathrooms">No. of Bathrooms <span style="color:red">*</span></label>
+                                <input type="number" id="p-bathrooms" name="bathrooms" value="${existingData.bathrooms || ''}" required>
+                            </div>
+                        </div>
+                        <div class="detail-item-full form-group" style="margin-top: 15px;">
+                            <label for="p-status">Rental Status <span style="color:red">*</span></label>
+                            <select id="p-status" name="status" required>
+                                <option value="Vacant" ${existingData.status !== 'Rented' ? 'selected' : ''}>Vacant</option>
+                                <option value="Rented" ${existingData.status === 'Rented' ? 'selected' : ''}>Rented</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (phase === 3) {
+                // Phase 3: Full Edit Mode (Matches Detail View Layout)
+                formTitle.textContent = `Editing: ${prop.name || 'Property'}`;
+                formSubmitButton.textContent = 'Save Changes';
+                formSubmitButton.style.display = 'block';
+                
+                // Use the reusable function to render editable fields
+                fieldsHTML = renderPropertyFields(prop, true);
+                
+            } else {
+                formFields.innerHTML = '<p style="color: red;">Form phase error. Please restart the process.</p>';
+            }
+            
+            formFields.innerHTML = fieldsHTML;
+        }
+
+        document.getElementById('dataEntryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const propId = document.getElementById('currentPropertyId').value;
+            const currentPhase = parseInt(document.getElementById('currentFormPhase').value);
+            const prop = getPropertyById(propId);
+            const task = getTaskByPropId(propId);
+
+            if (!prop) {
+                alertMessage('Error: Property data missing.', 'error');
+                switchView('dashboard');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const updateData = {};
+            
+            // Collect form data
+            for (let [key, value] of formData.entries()) {
+                if (key === 'phase' || key === 'propId') continue; 
+                
+                if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms'].includes(key)) {
+                    // Convert to number, use existing value if field is left blank/zero in edit mode
+                    updateData[key] = parseFloat(value) || 0; 
+                } else {
+                    updateData[key] = value;
+                }
+            }
+            
+            // --- PHASE 1 SUBMIT (NEXT) ---
+            if (currentPhase === 1) {
+                // Navigate to Phase 2
+                const newPropName = updateData.name && updateData.name.trim() !== '' ? updateData.name : 'New Property';
+                
+                // Update property (set phase to 2) and update task description
+                updatePropertyData(propId, {...updateData, phase: 2});
+                updateTaskData(task.id, { 
+                    phase: 2, 
+                    description: `Complete Info for ${newPropName}`
+                });
+                
+                renderForm(propId, 2); 
+                alertMessage('Basic Details saved. Continuing to Step 2.', 'success');
+            } 
+            // --- PHASE 2 SUBMIT (SAVE initial setup) ---
+            else if (currentPhase === 2) {
+                showLoading();
+                
+                const propName = prop.name && prop.name.trim() !== '' ? prop.name : 'New Property';
+                
+                // Update property (set phase to 3/Complete)
+                updatePropertyData(propId, {...updateData, phase: 3, status: updateData.status || 'Vacant'});
+                
+                // Delete task (mark as complete by removing it)
+                if (task) {
+                    tasks = tasks.filter(t => t.id !== task.id);
+                }
+                
+                saveData(); // Save changes and trigger re-render
+                
+                alertMessage(`Property "${propName}" saved successfully!`, 'success');
+                
+                // This was a new completion, go to dashboard
+                document.getElementById('dataEntryForm').reset(); 
+                switchView('dashboard');
+                
+                hideLoading(); 
+            }
+            // --- PHASE 3 SUBMIT (SAVE FULL EDIT) ---
+            else if (currentPhase === 3) {
+                showLoading();
+                
+                // Update property with ALL data from the form, setting phase back to 3
+                updatePropertyData(propId, {...updateData, phase: 3, status: updateData.status || 'Vacant'});
+                
+                saveData(); // Save changes
+                
+                alertMessage(`Property "${updateData.name || prop.name}" updated successfully.`, 'success');
+                
+                // Go back to the newly updated read-only detail view
+                viewPropertyDetails(propId);
+                
+                hideLoading(); 
+            }
+        });
+
+        // ===================================
+        // Global App Exposure & Initialization
+        // ===================================
+
+        window.app = {
+            // Expose functions needed for inline HTML event handlers
+            startApp: function() {
+                showLoading();
+                loadData();
+                checkAndRestoreInitialTask(); // Ensure initial task exists. This might trigger saveData().
+                
+                renderProperties(); 
+                renderTasks();
+
+                switchView('dashboard'); 
+                
+                // CRITICAL FIX: Always hide the loading overlay after the entire startup process is complete.
+                hideLoading(); 
+            },
+            switchView: switchView,
+            toggleAddMenu: toggleAddMenu,
+            handleNewEntry: handleNewEntry,
+            continueFormTask: continueFormTask,
+            alertMessage: alertMessage,
+            goBackFromForm: goBackFromForm,
+            deletePropertyHandler: deletePropertyHandler,
+            viewPropertyDetails: viewPropertyDetails 
+        };
+
+        // Start the application on window load
+        window.onload = window.app.startApp;
+
+    </script>
+</body>
+</html>
