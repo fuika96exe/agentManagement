@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Property Management App (Local Storage)</title>
-    <!-- Use Inter font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Material Icons Rounded -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     
     <style>
@@ -122,6 +120,17 @@
         }
         .task-item .action-btn:hover {
             background-color: #2e6ad9;
+        }
+        /* Rent Reminder Button Style */
+        .task-item .action-btn.send-rent {
+            background-color: #28a745;
+        }
+        .task-item .action-btn.send-rent:hover {
+            background-color: #1e7e34;
+        }
+        .task-item .action-btn.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
 
         /* Bottom Navbar */
@@ -256,6 +265,7 @@
             border-left: 5px solid #3A86FF;
             cursor: pointer; 
             position: relative;
+            /* Remove fixed height to allow content flexibility */
         }
         .property-card.incomplete-details {
             border-left: 5px solid #FF9800; 
@@ -293,23 +303,7 @@
             margin-bottom: 2px;
         }
 
-        /* Delete Button */
-        .delete-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: #FF4757;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.2s;
-        }
-        .delete-btn:hover {
-            background-color: #ffeaea;
-        }
-
+        /* Delete Button - DELETED FROM LIST VIEW */
 
         /* Form & Detail View Styling (Reusing form-view-content) */
         .form-view-content {
@@ -472,18 +466,18 @@
         }
         
         /* Detail View Title Alignment */
-        #detailView .property-header {
+        #detailView .property-header, #ownerDetailView .property-header, #tenantDetailView .property-header {
             padding: 10px 16px; /* Adjust padding for a cleaner header */
         }
-        #detailView .header-content {
+        #detailView .header-content, #ownerDetailView .header-content, #tenantDetailView .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        #detailView .back-btn {
+        #detailView .back-btn, #ownerDetailView .back-btn, #tenantDetailView .back-btn {
             font-size: 16px;
         }
-        #detailEditBtn {
+        #detailEditBtn, #ownerEditBtn, #tenantEditBtn {
             background-color: #f7931e; /* Orange for Edit */
             box-shadow: 0 4px 10px rgba(247, 147, 30, 0.4);
             width: 40px; 
@@ -504,6 +498,33 @@
             background: #eef4ff; /* Lighter background for status/rental */
             border: 1px solid #d0e0ff;
         }
+        .detail-card.tenant-info {
+            background: #e6ffed; /* Lighter background for tenant */
+            border: 1px solid #b7e3c3;
+        }
+        .detail-card.owner-info {
+            background: #fcf4ff; /* Lighter background for owner */
+            border: 1px solid #e8d5f2;
+        }
+
+
+        /* New: Collapsible Card Header */
+        .collapse-card .collapse-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .collapse-card .collapse-header h3 {
+             margin: 0;
+        }
+        .collapse-card .collapse-icon {
+            transition: transform 0.2s;
+        }
+        .collapse-card .collapse-icon.rotate {
+            transform: rotate(180deg);
+        }
 
         /* Container for key-value pairs (Flex for alignment) */
         .detail-group {
@@ -521,9 +542,10 @@
             width: 100%;
         }
         
+        /* MODIFICATION: Reduced margin for tighter details view */
         .detail-label {
             display: block;
-            margin-bottom: 2px;
+            margin-bottom: 0px; 
             font-size: 13px;
             font-weight: 500;
             color: #999; 
@@ -533,18 +555,20 @@
             font-size: 16px;
             color: #333;
             font-weight: 600;
+            margin-top: 2px;
+            margin-bottom: 5px;
+            word-wrap: break-word; 
         }
-        
-        /* Input/Select styling within the edit view (Phase 3) */
+
+        /* Input/Select styling within the edit view */
         .detail-item-aligned input,
         .detail-item-aligned select,
         .detail-item-full input,
         .detail-item-full select,
-        /* Input/Select styling within the guided setup view (Phase 1/2) */
         #formView .detail-card input,
         #formView .detail-card select {
             width: 100%;
-            padding: 8px; /* Slightly smaller padding for denser layout */
+            padding: 8px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 15px;
@@ -552,53 +576,187 @@
             font-weight: 500;
             margin-top: 2px;
             background-color: #fff;
+            color: #333;
+            transition: color 0.3s;
         }
+
+        /* FIX: Select option color should always be black for readability */
+        .detail-item-aligned select option,
+        .detail-item-full select option,
+        #formView .detail-card select option {
+            color: #333; 
+        }
+        
+        /* Placeholder styling for Select */
+        .detail-item-aligned select:required:invalid,
+        .detail-item-full select:required:invalid,
+        #formView .detail-card select:required:invalid {
+            color: #999; 
+        }
+        .detail-item-aligned select:valid,
+        .detail-item-full select:valid,
+        #formView .detail-card select:valid {
+            color: #333; /* Selected value color */
+        }
+
+
         #formView .detail-card input:focus,
         #formView .detail-card select:focus {
-            border-color: #f7931e; /* Highlight border on focus for edit view */
+            border-color: #f7931e; 
         }
         
         /* Form view adjustments for phase 3 (The sticky Save button) */
         #formView .form-view-content {
-             padding-bottom: 0; /* Remove extra padding at bottom before footer */
+             padding-bottom: 0; 
         }
         .form-footer {
-            /* Stick form footer to the bottom of the main-content for the full-screen edit view */
             padding: 15px;
             border-top: 1px solid #eee;
             background-color: #fff;
-            position: sticky;
-            bottom: 0;
             width: 100%;
-            max-width: 420px; /* Match container width */
+            max-width: 420px; 
             box-sizing: border-box;
             z-index: 100;
-            margin-top: 20px; /* Separator for setup phases */
+            margin-top: 20px; 
+        }
+
+        /* Detail View Footer for Delete Button */
+        .detail-footer {
+            padding: 15px;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+        }
+        .delete-main-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        .delete-main-btn:hover {
+            background-color: #c82333;
+        }
+        
+        /* Style for Owner Select options in Phase 0 */
+        .owner-select-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .owner-select-item:hover {
+            background-color: #f5f5f5;
+        }
+        .owner-select-item.selected {
+            border-color: #3A86FF;
+            background-color: #eef4ff;
+            font-weight: 600;
+        }
+        .owner-info {
+            flex-grow: 1;
+        }
+        .owner-info h4 {
+            margin: 0;
+            font-size: 16px;
+        }
+        .owner-info p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* FIX: Phase 2 layout for rental label alignment */
+        .rental-detail-item {
+            width: 50%; 
+            box-sizing: border-box;
+            padding-right: 15px;
+        }
+        .rental-detail-item .detail-label {
+            min-height: 38px; 
+            display: flex;
+            align-items: center;
+        }
+
+        /* New: Owner Search Bar in Phase 0 */
+        #ownerSearch {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        /* New: Tab Bar Styling for Property View */
+        .tab-bar {
+            display: flex;
+            background-color: #fff;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 16px; 
+            padding: 0 16px;
+        }
+        .tab-bar a {
+            flex-grow: 1;
+            text-align: center;
+            padding: 10px 0;
+            color: #999;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s, border-bottom-color 0.2s;
+        }
+        .tab-bar a.active-tab {
+            color: #3A86FF;
+            border-bottom: 2px solid #3A86FF;
+        }
+
+        /* FIX: Owner Email/Management Fee alignment */
+        /* Owner Email takes up full width for better wrapping/readability */
+        #ownerDetails .detail-item-aligned:nth-child(3) { 
+            width: 100%; 
+        }
+        /* Management fee remains 50% width */
+        #ownerDetails .detail-item-aligned:nth-child(4) {
+            width: 50%;
+        }
+        .file-link {
+            color: #3A86FF;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         
-        <!-- Loading Overlay -->
         <div id="loadingOverlay" class="loading-overlay" style="display: none;">
             Loading Data...
         </div>
 
         <div class="main-content">
-            <!-- View Containers. Initially all hidden, will be shown by JS switchView('dashboard') -->
             <div id="dashboardView" class="view" style="display: none;">
-                <!-- 1. Tasks View (Dashboard) -->
                 <div class="task-section">
-                    <h2>Pending Tasks</h2>
+                    <h2>Tasks</h2>
                     <div id="taskList" class="task-list">
-                        <!-- Tasks rendered dynamically by JS -->
-                    </div>
+                        </div>
                 </div>
             </div>
 
             <div id="propertyView" class="view" style="display: none;">
-                <!-- 2. Property Management View -->
                 <div class="property-header">
                     <div class="search-container">
                         <span class="material-icons-round search-icon">search</span>
@@ -607,29 +765,35 @@
                             <span class="material-icons-round">add</span>
                         </button>
 
-                        <!-- Add Menu -->
                         <div id="addMenu" class="add-menu">
                             <a href="#" onclick="window.app.handleNewEntry('property'); return false;">
                                 <span class="material-icons-round" style="font-size: 18px;">home</span> New Property
                             </a>
-                            <a href="#" onclick="window.app.alertMessage('Adding Tenant is coming soon!', 'info'); return false;">
-                                <span class="material-icons-round" style="font-size: 18px;">person</span> New Tenant
+                            <a href="#" onclick="window.app.handleNewEntry('owner'); return false;">
+                                <span class="material-icons-round" style="font-size: 18px;">person</span> New Owner
                             </a>
-                            <a href="#" onclick="window.app.alertMessage('Adding Owner is coming soon!', 'info'); return false;">
-                                <span class="material-icons-round" style="font-size: 18px;">group</span> New Owner
+                            <a href="#" onclick="window.app.handleNewEntry('tenant'); return false;">
+                                <span class="material-icons-round" style="font-size: 18px;">group</span> New Tenant
                             </a>
                         </div>
                     </div>
                 </div>
-                
-                <div id="propertyList" class="property-list">
-                    <!-- Property cards rendered dynamically by JS -->
+
+                <div class="tab-bar">
+                    <a href="#" id="tabProperty" class="active-tab" onclick="window.app.switchPropertyTab('property'); return false;">Property</a>
+                    <a href="#" id="tabOwner" onclick="window.app.switchPropertyTab('owner'); return false;">Owner</a>
+                    <a href="#" id="tabTenant" onclick="window.app.switchPropertyTab('tenant'); return false;">Tenant</a>
                 </div>
+                
+                <div id="tabContentProperty" class="tab-content property-list" style="display: flex;">
+                    </div>
+                <div id="tabContentOwner" class="tab-content property-list" style="display: none;">
+                    </div>
+                <div id="tabContentTenant" class="tab-content property-list" style="display: none;">
+                    </div>
             </div>
             
             <div id="formView" class="view" style="display: none;">
-                <!-- 3. Data Entry Form View -->
-                <!-- Note: The form-view-content now handles only the scrolling part, form-footer is sticky -->
                 <div class="property-header">
                     <a href="#" id="formBackBtn" class="back-btn" onclick="window.app.goBackFromForm(); event.stopPropagation(); return false;">
                         <span class="material-icons-round">arrow_back_ios</span>
@@ -641,54 +805,90 @@
                     <h2 id="formTitle" style="margin-top: 5px;"></h2>
 
                     <form id="dataEntryForm">
-                        <!-- Hidden field to track the current phase and property being edited -->
-                        <input type="hidden" id="currentFormPhase" name="phase" value="1">
-                        <input type="hidden" id="currentPropertyId" name="propId" value="">
+                        <input type="hidden" id="currentFormType" name="type" value=""> <input type="hidden" id="currentFormPhase" name="phase" value="0">
+                        <input type="hidden" id="currentId" name="id" value=""> <input type="hidden" id="selectedOwnerId" name="ownerId" value="">
+                        <input type="hidden" id="selectedTenantId" name="tenantId" value="">
 
                         <div id="formFields">
-                            <!-- Dynamic fields placeholder -->
-                        </div>
-                        
-                        <!-- Form footer is moved below the main content to be sticky for full-screen edit -->
+                            </div>
                     </form>
-                </div>
-                
-                <div class="form-footer" id="formFooter">
-                    <!-- Submit button placeholder -->
-                    <button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm">
-                        Next
-                    </button>
                 </div>
             </div>
 
             <div id="detailView" class="view" style="display: none;">
-                <!-- 4. Property Detail View (Read-Only) -->
                 <div class="property-header">
-                    <a href="#" class="back-btn" onclick="window.app.switchView('property'); return false;" style="margin: 0; padding: 0;">
+                    <a href="#" class="back-btn" onclick="window.app.switchView('property'); window.app.switchPropertyTab('property'); return false;" style="margin: 0; padding: 0;">
                         <span class="material-icons-round">arrow_back_ios</span>
                         Property List
                     </a>
                     <div class="header-content">
                         <h2 id="detailPropertyName" style="margin: 10px 0 0; font-size: 24px; font-weight: 700; flex-grow: 1;">Property Name</h2>
-                        <button id="detailEditBtn" class="add-btn" onclick="">
+                        <button id="detailEditBtn" class="add-btn" onclick="/* Set by JS function */">
                             <span class="material-icons-round" style="font-size: 22px;">edit</span>
                         </button>
                     </div>
                 </div>
                 <div id="detailContent" class="form-view-content" style="padding-top: 5px;">
-                    <!-- Details rendered dynamically by JS -->
+                    </div>
+                <div class="detail-footer">
+                    <button class="delete-main-btn" onclick="window.app.deletePropertyHandler(document.getElementById('currentId').value, document.getElementById('detailPropertyName').textContent); return false;">
+                        Delete Property
+                    </button>
+                </div>
+            </div>
+            
+            <div id="ownerDetailView" class="view" style="display: none;">
+                <div class="property-header">
+                    <a href="#" class="back-btn" onclick="window.app.switchView('property'); window.app.switchPropertyTab('owner'); return false;" style="margin: 0; padding: 0;">
+                        <span class="material-icons-round">arrow_back_ios</span>
+                        Owner List
+                    </a>
+                    <div class="header-content">
+                        <h2 id="detailOwnerName" style="margin: 10px 0 0; font-size: 24px; font-weight: 700; flex-grow: 1;">Owner Name</h2>
+                        <button id="ownerEditBtn" class="add-btn" onclick="">
+                            <span class="material-icons-round" style="font-size: 22px;">edit</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="ownerDetailContent" class="form-view-content" style="padding-top: 5px;">
+                    </div>
+                <div class="detail-footer">
+                    <button class="delete-main-btn" onclick="window.app.deleteProfileHandler(document.getElementById('currentId').value, 'owner', document.getElementById('detailOwnerName').textContent); return false;">
+                        Delete Owner Profile
+                    </button>
+                </div>
+            </div>
+
+            <div id="tenantDetailView" class="view" style="display: none;">
+                <div class="property-header">
+                    <a href="#" class="back-btn" onclick="window.app.switchView('property'); window.app.switchPropertyTab('tenant'); return false;" style="margin: 0; padding: 0;">
+                        <span class="material-icons-round">arrow_back_ios</span>
+                        Tenant List
+                    </a>
+                    <div class="header-content">
+                        <h2 id="detailTenantName" style="margin: 10px 0 0; font-size: 24px; font-weight: 700; flex-grow: 1;">Tenant Name</h2>
+                        <button id="tenantEditBtn" class="add-btn" onclick="">
+                            <span class="material-icons-round" style="font-size: 22px;">edit</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="tenantDetailContent" class="form-view-content" style="padding-top: 5px;">
+                    </div>
+                <div class="detail-footer">
+                    <button class="delete-main-btn" onclick="window.app.deleteProfileHandler(document.getElementById('currentId').value, 'tenant', document.getElementById('detailTenantName').textContent); return false;">
+                        Delete Tenant Profile
+                    </button>
                 </div>
             </div>
 
         </div>
 
-        <!-- Bottom Navbar -->
         <div class="navbar">
             <a href="#" id="navDashboard" class="active" onclick="window.app.switchView('dashboard'); return false;">
                 <span class="material-icons-round">home</span>
                 Home
             </a>
-            <a href="#" id="navProperty" onclick="window.app.switchView('property'); return false;">
+            <a href="#" id="navProperty" onclick="window.app.switchView('property'); window.app.switchPropertyTab('property'); return false;">
                 <span class="material-icons-round">apartment</span>
                 Property
             </a>
@@ -703,10 +903,8 @@
         </div>
     </div>
     
-    <!-- Custom Message Box Element -->
     <div id="appMessageBox" class="app-message-box"></div>
     
-    <!-- Custom Confirmation Modal (Replaces window.confirm) -->
     <div id="confirmModal" style="display: none;" class="modal-overlay">
         <div class="modal-content">
             <h3 id="confirmModalTitle">Confirm Deletion</h3>
@@ -722,15 +920,39 @@
         
         let properties = [];
         let tasks = [];
-        let currentUserId = 'local_user_123'; // Dummy user ID for local storage context
+        let owners = []; 
+        let tenants = []; 
+        let currentUserId = 'local_user_123'; 
+        
+        // MALAYSIAN STATES for select dropdown
+        const MALAYSIAN_STATES = [
+            "Johor", "Kedah", "Kelantan", "Melaka", "Negeri Sembilan", "Pahang", 
+            "Penang", "Perak", "Perlis", "Sabah", "Sarawak", "Selangor", "Terengganu",
+            "Kuala Lumpur", "Labuan", "Putrajaya"
+        ];
+        
+        // HOUSE TYPES for select dropdown
+        const HOUSE_TYPES = [
+            "Apartment", "Condo", "Landed House", "Studio", "Duplex", "Townhouse", "Shop Lot"
+        ];
+        
+        // RENTAL TYPES for select dropdown (Removed Chinese for consistency)
+        const RENTAL_TYPES = [
+            {val: 'whole_unit', label: 'Whole Unit Rental'},
+            {val: 'room_by_room', label: 'Room-by-Room Rental'}
+        ];
+        
+        // Rent Reminder Message (Point 3)
+        const RENT_REMINDER_MESSAGE = "Kindly reminder: Your rent is due on the 1st of this month. Please make the payment promptly. Thank you!";
+        
+        // Rent Reminder Date (Point 3)
+        const RENT_REMINDER_DAY = 4;
+
 
         // ===================================
         // Utility: Local Storage Management
         // ===================================
         
-        /**
-         * Loads properties and tasks from browser's localStorage.
-         */
         function loadData() {
             const storedProperties = localStorage.getItem('properties');
             properties = storedProperties ? JSON.parse(storedProperties) : [];
@@ -738,19 +960,30 @@
             const storedTasks = localStorage.getItem('tasks');
             tasks = storedTasks ? JSON.parse(storedTasks) : [];
             
+            const storedOwners = localStorage.getItem('owners');
+            owners = storedOwners ? JSON.parse(storedOwners) : [];
+
+            const storedTenants = localStorage.getItem('tenants');
+            tenants = storedTenants ? JSON.parse(storedTenants) : [];
+            
             console.log("Data loaded from localStorage.");
         }
 
-        /**
-         * Saves current properties and tasks to browser's localStorage.
-         */
         function saveData() {
             localStorage.setItem('properties', JSON.stringify(properties));
             localStorage.setItem('tasks', JSON.stringify(tasks));
+            localStorage.setItem('owners', JSON.stringify(owners));
+            localStorage.setItem('tenants', JSON.stringify(tenants));
             console.log("Data saved to localStorage.");
-            // Since we use localStorage, manually call rendering functions after saving
-            renderProperties();
-            renderTasks();
+            
+            // Re-render based on current active tab
+            if (currentView === 'property') {
+                renderProperties();
+                renderOwners();
+                renderTenants();
+            } else if (currentView === 'dashboard') {
+                renderTasks();
+            }
         }
         
         // ===================================
@@ -806,6 +1039,7 @@
         // View Control and Navigation
         // ===================================
         let currentView = 'dashboard';
+        let currentPropertyTab = 'property'; // State for the current tab in propertyView
         
         function switchView(viewName) {
             currentView = viewName;
@@ -815,49 +1049,110 @@
             });
 
             const targetView = document.getElementById(viewName + 'View');
+            const detailViews = ['detail', 'ownerDetail', 'tenantDetail'];
+
             if (targetView) {
-                targetView.style.display = 'flex'; // Use flex for view containers
+                targetView.style.display = 'flex'; 
                 targetView.style.flexDirection = 'column';
+            } else if (detailViews.includes(viewName)) {
+                // Handle new detail views
+                document.getElementById(viewName + 'View').style.display = 'flex';
+                document.getElementById(viewName + 'View').style.flexDirection = 'column';
             }
             
-            // Handle footer visibility for Form/Detail views
-            const formFooter = document.getElementById('formFooter');
-            if (viewName === 'form') {
-                formFooter.style.display = 'block';
-                // Adjust main-content padding for form view to account for sticky footer
-                document.querySelector('.main-content').style.paddingBottom = '0'; 
-            } else {
-                formFooter.style.display = 'none';
-                 // Restore default padding for other views
-                document.querySelector('.main-content').style.paddingBottom = '70px'; 
-            }
+            document.querySelector('.main-content').style.paddingBottom = '70px'; 
 
-
-            // Highlight Navbar tab
             document.querySelectorAll('.navbar a').forEach(link => link.classList.remove('active'));
             if (viewName === 'dashboard') {
                 document.getElementById('navDashboard').classList.add('active');
-            } else if (viewName === 'property' || viewName === 'form' || viewName === 'detail') { 
+            } else if (['property', 'form', 'detail', 'ownerDetail', 'tenantDetail'].includes(viewName)) { 
                 document.getElementById('navProperty').classList.add('active');
                 toggleAddMenu(false); 
             } 
         }
 
+        function switchPropertyTab(tabName) {
+            currentPropertyTab = tabName;
+            document.querySelectorAll('.tab-bar a').forEach(link => link.classList.remove('active-tab'));
+            document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active-tab');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+            document.getElementById(`tabContent${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).style.display = 'flex';
+
+            // Ensure the correct data is rendered when switching tabs
+            if (tabName === 'property') renderProperties();
+            if (tabName === 'owner') renderOwners();
+            if (tabName === 'tenant') renderTenants();
+        }
+
         /**
-         * Back button logic in the form view.
+         * Toggles the visibility of a detail card and rotates the icon (Point 2)
          */
-        function goBackFromForm() {
-            const currentPhase = parseInt(document.getElementById('currentFormPhase').value);
-            const propId = document.getElementById('currentPropertyId').value;
-            
-            if (currentPhase === 3) {
-                // If in Edit mode (Phase 3), go back to the Detail View
-                viewPropertyDetails(propId);
-                alertMessage('Edit cancelled. Returned to Property Details.', 'info');
+        function toggleCollapse(elementId) {
+            const content = document.getElementById(elementId);
+            const icon = document.getElementById(elementId + 'Icon');
+
+            if (!content || !icon) return;
+
+            const isVisible = content.style.display !== 'none';
+
+            if (isVisible) {
+                content.style.display = 'none';
+                icon.classList.remove('rotate');
             } else {
-                // If in initial setup (Phase 1 or 2), go back to Dashboard
+                content.style.display = 'flex';
+                content.style.flexWrap = 'wrap'; 
+                icon.classList.add('rotate');
+            }
+        }
+
+        function goBackFromForm() {
+            const currentFormType = document.getElementById('currentFormType').value;
+            const currentPhase = document.getElementById('currentFormPhase').value;
+            const currentId = document.getElementById('currentId').value;
+            
+            if (currentFormType === 'owner') {
+                 // Check if coming from property creation flow (Phase 0)
+                const selectedOwnerIdField = document.getElementById('selectedOwnerId');
+                if (selectedOwnerIdField.value && selectedOwnerIdField.value.startsWith('prop-')) {
+                    renderForm(selectedOwnerIdField.value, 0, 'property');
+                    return;
+                }
+                 switchView('property'); 
+                 switchPropertyTab('owner');
+            } else if (currentFormType === 'tenant') {
+				 // Tenant creation: always go back to property list and remove pending task/data if not complete
+				 const tenant = getTenantById(currentId);
+				 // 检查：如果 Tenant 档案的 Phase < 3 (即未完成设置)，则删除档案和任务。
+				 // ⬇️ MODIFICATION START: Remove deletion on "Back"
+				 if (tenant && tenant.phase < 3) { 
+					 alertMessage('Tenant creation paused. Continue later from Tenant List.', 'info');
+				 }
+				 // ⬆️ MODIFICATION END
+				 switchView('property'); 
+				 switchPropertyTab('tenant');
+			} else if (currentFormType === 'property') {
+                if (currentPhase === '3') {
+                    // Back from edit mode goes to detail view
+                    viewPropertyDetails(currentId);
+                } else if (currentPhase === '2') {
+                    // Phase 2 is removed from the flow, so this should not happen
+                    renderForm(currentId, 1, 'property');
+                } else if (currentPhase === '1') {
+                    renderForm(currentId, 0, 'property'); 
+                } else if (currentPhase === '0') {
+                    // Guardrail: Delete property if user backs out of Phase 0 without selecting owner
+                    const prop = getPropertyById(currentId);
+                    if (prop && !prop.ownerId) { 
+                        properties = properties.filter(p => p.id !== currentId);
+                        tasks = tasks.filter(t => t.propId !== currentId);
+                        saveData();
+                        alertMessage('New Property creation cancelled.', 'info');
+                    }
+                    switchView('dashboard');
+                }
+            } else {
                 switchView('dashboard');
-                alertMessage('Returned to Home page.', 'info');
             }
         }
         
@@ -873,46 +1168,139 @@
                 menu.classList.remove('visible');
             }
         }
+        
+        // --- Added for Tenant/Owner Handling ---
+        function handleNewEntry(type) {
+             toggleAddMenu(false);
+			 let newId;
+			 if (type === 'property') { // <-- 确保 type 匹配 'property'
+				 newId = `prop-${Date.now()}`;
+				 // Start with Phase 0 for Owner selection
+				 renderForm(newId, 0, 'property'); // <-- 必须调用 renderForm
+				 // Create initial property task
+				 updateTaskData(`task-${newId}`, { // <-- 必须调用 updateTaskData
+					 id: `task-${newId}`, 
+					 type: 'property', 
+					 propId: newId, 
+					 phase: 0, 
+					 description: 'Setup New Property', 
+					 details: 'Step 1/2: Select Owner Profile.', // Updated detail
+					 status: 'in_progress', 
+					 userId: currentUserId 
+				 });
+			 } else if (type === 'owner') {
+                 newId = `owner-${Date.now()}`;
+                 renderForm(newId, 0, 'owner'); 
+             } else if (type === 'tenant') {
+                  newId = `tenant-${Date.now()}`;
+                  // Tenant creation starts at phase 0
+                  renderForm(newId, 0, 'tenant');
+                  // Create initial tenant task
+                  updateTaskData(`task-${newId}`, { 
+                     id: `task-${newId}`, 
+                     type: 'tenant_setup', 
+                     tenantId: newId, 
+                     phase: 0, 
+                     description: 'Setup Tenancy for New Tenant', 
+                     details: 'Step 1/3: Enter basic tenant information.', 
+                     status: 'in_progress', 
+                     userId: currentUserId 
+                 });
+             }
+         }
+         
+         function continueFormTask(id, isEditMode, type) {
+			console.log(`DEBUG: Entering continueFormTask. ID: ${id}, isEditMode: ${isEditMode}, Type: ${type}`);
+			
+			let currentPhase;
+			if (type === 'property') {
+			   const prop = getPropertyById(id);
+			   currentPhase = prop ? (prop.phase || 0) : 0;
+			   
+			   console.log(`DEBUG: Property Phase Check. Current Phase: ${currentPhase}`);
+			   
+			   // If it's a full detail edit (phase 3), force to phase 3 form (Point 1)
+			   if(isEditMode) { 
+				   console.log("DEBUG: Forcing transition to Phase 3 Full Edit Form.");
+				   renderForm(id, 3, 'property');
+				   return;
+			   }
+             } else if (type === 'tenant') {
+                 const tenant = getTenantById(id);
+                 currentPhase = tenant ? (tenant.phase || 0) : 0;
+                 // If the tenant is complete (phase >= 3), force to single-step edit (Phase 3 mode)
+                 if (currentPhase >= 3) {
+                     console.log("DEBUG: Forcing transition to Phase 3 Single-Step Tenant Edit Form.");
+                     renderForm(id, 3, 'tenant');
+                     return;
+                 }
+                 // If the task exists for an INCOMPLETE profile, start at the task's phase
+                 const task = getTaskByTenantId(id);
+                 if (task) currentPhase = task.phase;
+             } else if (type === 'owner') {
+                 // Owners do not have phases, always edit (Point 4)
+                 renderForm(id, 0, 'owner');
+                 return;
+             }
+             renderForm(id, currentPhase, type);
+         }
 
-        /**
-         * Loads property data and renders the read-only detail view.
-         * @param {string} propId - ID of the property to view.
-         */
+        // ===================================
+        // Detail View Navigators
+        // ===================================
+
         function viewPropertyDetails(propId) {
-            const prop = getPropertyById(propId);
-            if (!prop || prop.phase < 3) {
-                alertMessage('Error: Cannot view incomplete property details.', 'error');
-                switchView('property');
-                return;
-            }
-            renderDetailView(prop);
-            switchView('detail');
+			const prop = getPropertyById(propId);
+			if (!prop || prop.phase < 3) return;
+			const owner = getOwnerById(prop.ownerId); 
+			const tenant = getTenantById(prop.tenantId); 
+			
+			document.getElementById('currentId').value = propId;
+			renderPropertyDetailsContent(prop, owner, tenant); 
+			
+			const editBtn = document.getElementById('detailEditBtn'); 
+			
+			if (editBtn) {
+				console.log(`DEBUG: Binding Edit Button for Property ID: ${prop.id}`); 
+				
+				editBtn.onclick = function(event) { 
+					event.preventDefault(); 
+					console.log("DEBUG: Edit Button Clicked. Executing continueFormTask.");
+					window.app.continueFormTask(prop.id, true, 'property'); 
+					return false; 
+				};
+			} else {
+				console.error("ERROR: Detail Edit Button element not found!");
+			}
+			
+			switchView('detail');
+		}
+
+        function viewOwnerDetails(ownerId) {
+            const owner = getOwnerById(ownerId);
+            if (!owner) return;
+            
+            document.getElementById('currentId').value = ownerId;
+            renderOwnerDetailView(owner);
+            
+            // Set edit button action for owner
+            document.getElementById('ownerEditBtn').setAttribute('onclick', `window.app.continueFormTask('${owner.id}', true, 'owner'); return false;`);
+            
+            switchView('ownerDetail');
         }
 
-        /**
-         * Navigates to the form view, either to continue an incomplete task or to edit a complete one.
-         * @param {string} propId - ID of the property.
-         * @param {boolean} [isEdit=false] - True if opened from the detail view (forces Phase 3: Edit All).
-         */
-        function continueFormTask(propId, isEdit = false) {
-            const prop = getPropertyById(propId);
-            if (!prop) {
-                alertMessage('Property data not found in local storage.', 'error');
-                return;
-            }
+        function viewTenantDetails(tenantId) {
+            const tenant = getTenantById(tenantId);
+            if (!tenant) return;
             
-            // Determine the starting phase:
-            // If it's an edit, use Phase 3 (Edit All)
-            // If it's continuing a task, use the recorded phase (prop.phase or 1)
-            const startPhase = isEdit ? 3 : (prop.phase || 1); 
-
-            // Navigate to form
-            renderForm(propId, startPhase); 
-            switchView('form');
+            document.getElementById('currentId').value = tenantId;
+            renderTenantDetailView(tenant);
             
-            if (isEdit) {
-                 alertMessage(`Editing details for "${prop.name || 'Property'}".`, 'info');
-            }
+            // Set edit button action for tenant
+            const action = tenant.phase >= 3 ? `window.app.continueFormTask('${tenant.id}', true, 'tenant'); return false;` : `window.app.continueFormTask('${tenant.id}', false, 'tenant'); return false;`;
+            document.getElementById('tenantEditBtn').setAttribute('onclick', action);
+            
+            switchView('tenantDetail');
         }
 
         function deletePropertyHandler(propId, propName) {
@@ -923,171 +1311,214 @@
                 (confirmed) => {
                     if (confirmed) {
                         deleteProperty(propId, displayName);
+                        switchView('property');
+                        switchPropertyTab('property');
                     }
                 }
             );
         }
 
-        /**
-         * Handles new entry creation (Property, Tenant, etc.)
-         * @param {string} type - Type of entry to create ('property').
-         * @param {boolean} [shouldNavigate=true] - If true, immediately navigates to the form view.
-         */
-        function handleNewEntry(type, shouldNavigate = true) {
-            toggleAddMenu(false); 
+        function deleteProfileHandler(id, type, name) {
+             const displayName = name && name.trim() !== '' ? name : `this ${type} profile`;
+             const associatedProperties = properties.filter(p => p[`${type}Id`] === id);
 
-            if (type === 'property') {
-                // Ensure ID is unique
-                const newPropId = `prop-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-                const newTaskId = `task-${newPropId}`;
-                
-                const initialPropData = {
-                    name: '', 
-                    address: '',
-                    phase: 1, 
-                    status: 'Incomplete', 
-                    ownerId: currentUserId 
-                };
-                
-                const isFirstTask = properties.length === 0;
-                
-                const initialTaskData = { 
-                    id: newTaskId,
-                    type: 'property', 
-                    propId: newPropId,
-                    phase: 1, 
-                    description: isFirstTask ? 'Add a new property' : 'Fill in basic details', 
-                    details: 'Step 1/2: Basic Details', 
-                    status: 'in_progress',
-                    userId: currentUserId 
-                };
-                
-                // If initiated by user, navigate immediately
-                if (shouldNavigate) {
-                    renderForm(newPropId, 1);
-                    switchView('form');
+             if (associatedProperties.length > 0) {
+                 const propNames = associatedProperties.map(p => p.name).join(', ');
+                 alertMessage(`Cannot delete ${type} profile. It is still linked to property/properties: ${propNames}.`, 'error');
+                 return;
+             }
+
+             showConfirmation(
+                'Confirm Deletion',
+                `Are you sure you want to permanently delete the profile for: ${displayName}? This action cannot be undone.`,
+                (confirmed) => {
+                    if (confirmed) {
+                        if (type === 'owner') {
+                            owners = owners.filter(o => o.id !== id);
+                            saveData();
+                            switchView('property');
+                            switchPropertyTab('owner');
+                            alertMessage(`${displayName} deleted successfully.`, 'success');
+                        } else if (type === 'tenant') {
+                             tenants = tenants.filter(t => t.id !== id);
+                             tasks = tasks.filter(t => t.tenantId !== id); // Remove associated tasks
+                             saveData();
+                             switchView('property');
+                             switchPropertyTab('tenant');
+                             alertMessage(`${displayName} deleted successfully.`, 'success');
+                        }
+                    }
                 }
-                
-                // Update local data, which triggers saveData() and re-renders
-                updatePropertyData(newPropId, initialPropData);
-                updateTaskData(newTaskId, initialTaskData);
-                
-            } else {
-                alertMessage(`Adding ${type} functionality is coming soon!`, 'info');
-            }
-        }
-
-
-        // ===================================
-        // Local Data Logic 
-        // ===================================
-
-        function getTaskByPropId(propId) {
-            return tasks.find(t => t.propId === propId && t.type === 'property');
+            );
         }
         
-        function getPropertyById(propId) {
-            return properties.find(p => p.id === propId);
+        function viewDummyFile(fileName) {
+            alertMessage(`Simulating file view for: ${fileName}`, 'info');
+        }
+        
+        // Rent Reminder Logic (Point 3)
+        function sendRentReminder(taskId, propId) {
+             const prop = getPropertyById(propId);
+             const tenant = getTenantById(prop.tenantId);
+             const propName = prop.name;
+             const tenantName = tenant ? tenant.fullName : 'Tenant';
+            
+             // Copy message to clipboard
+             const message = RENT_REMINDER_MESSAGE.replace('Tenant Name', tenantName).replace('Property Name', propName);
+             navigator.clipboard.writeText(message).then(() => {
+                 alertMessage(`Reminder message for ${propName} copied to clipboard! Task updated.`, 'success');
+
+                 // 1. Mark current task as completed
+                 const taskIndex = tasks.findIndex(t => t.id === taskId);
+					 if (taskIndex !== -1) {
+						 tasks[taskIndex].status = 'completed'; // <-- 必须确保这行代码正确执行
+						 tasks[taskIndex].completedDate = new Date().toISOString().split('T')[0];
+                     
+                     // 2. Generate a new recurring task for the next month
+                     const now = new Date();
+                     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, RENT_REMINDER_DAY); // Next 4th day
+                     const nextMonthString = nextMonth.toISOString().split('T')[0];
+                     
+                     const nextTaskId = `rent-${propId}-${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}`;
+                     
+                     updateTaskData(nextTaskId, { 
+                         id: nextTaskId, 
+                         type: 'rent_reminder', 
+                         propId: propId, 
+                         isRent: true,
+                         sendDate: nextMonthString, 
+                         description: `Collect Rent for ${propName}`, 
+                         details: `Due on 1st, Send reminder on ${nextMonthString}.`, 
+                         status: 'in_progress', 
+                         userId: currentUserId 
+                     });
+
+                     saveData();
+                 }
+                 renderTasks();
+
+             }).catch(err => {
+                 console.error('Could not copy text: ', err);
+                 alertMessage('Failed to copy message to clipboard.', 'error');
+             });
+        }
+        
+        // Generates the first rent reminder task for a newly assigned tenant (Point 3)
+        function createFirstRentTask(propId, propName) {
+            const now = new Date();
+            const nextMonth = new Date(now.getFullYear(), now.getMonth(), RENT_REMINDER_DAY);
+            
+            // If today is past the 4th, set the task for the next month
+            if (now.getDate() > RENT_REMINDER_DAY) {
+                 nextMonth.setMonth(now.getMonth() + 1);
+            }
+            // Ensure day is 4th
+            nextMonth.setDate(RENT_REMINDER_DAY);
+
+            const nextMonthString = nextMonth.toISOString().split('T')[0];
+            const nextTaskId = `rent-${propId}-${nextMonth.getFullYear()}-${nextMonth.getMonth() + 1}`;
+            
+            // Check if task already exists to prevent duplication on edit save
+            if (tasks.some(t => t.id === nextTaskId)) return;
+            
+            updateTaskData(nextTaskId, { 
+                id: nextTaskId, 
+                type: 'rent_reminder', 
+                propId: propId, 
+                isRent: true,
+                sendDate: nextMonthString, 
+                description: `Collect Rent for ${propName}`, 
+                details: `Due on 1st, Send reminder on ${nextMonthString}.`, 
+                status: 'in_progress', 
+                userId: currentUserId 
+            });
         }
 
-        /**
-         * Updates a property item in the local array and saves to localStorage.
-         * @param {string} propId - ID of the property.
-         * @param {object} data - Data to merge/update.
-         */
+
+        // ===================================
+        // Local Data Logic (getters/updaters)
+        // ===================================
+        function getTaskByPropId(propId) { return tasks.find(t => t.propId === propId && t.type === 'property'); }
+        function getTaskByTenantId(tenantId) { return tasks.find(t => t.tenantId === tenantId && t.type === 'tenant_setup'); }
+        function getPropertyById(propId) { return properties.find(p => p.id === propId); }
+        function getOwnerById(ownerId) { return owners.find(o => o.id === ownerId); }
+        function getTenantById(tenantId) { return tenants.find(t => t.id === tenantId); }
+        
         function updatePropertyData(propId, data) {
             let propIndex = properties.findIndex(p => p.id === propId);
-            
-            if (propIndex === -1) {
-                // New property
-                properties.push({ id: propId, ...data });
-            } else {
-                // Existing property: merge data
-                properties[propIndex] = { ...properties[propIndex], ...data };
-            }
+            if (propIndex === -1) { properties.push({ id: propId, ...data }); } 
+            else { properties[propIndex] = { ...properties[propIndex], ...data }; }
             saveData();
             return true;
         }
 
-        /**
-         * Updates a task item in the local array and saves to localStorage.
-         * @param {string} taskId - ID of the task.
-         * @param {object} data - Data to merge/update.
-         */
         function updateTaskData(taskId, data) {
             let taskIndex = tasks.findIndex(t => t.id === taskId);
-
-            if (taskIndex === -1) {
-                 // Should not happen for property tasks, but for robustness
-                 tasks.push({ id: taskId, ...data });
-            } else {
-                tasks[taskIndex] = { ...tasks[taskIndex], ...data };
-            }
+            if (taskIndex === -1) { tasks.push({ id: taskId, ...data }); } 
+            else { tasks[taskIndex] = { ...tasks[taskIndex], ...data }; }
             saveData();
             return true;
         }
 
-        /**
-         * Deletes a property and its related task from local storage.
-         * @param {string} propId - ID of the property to delete.
-         * @param {string} propName - Display name for messaging.
-         */
+        function saveOwnerData(ownerId, data) {
+            let ownerIndex = owners.findIndex(o => o.id === ownerId);
+            if (ownerIndex === -1) { owners.push({ id: ownerId, ...data }); } 
+            else { owners[ownerIndex] = { ...owners[ownerIndex], ...data }; }
+            saveData();
+            return true;
+        }
+
+        function saveTenantData(tenantId, data) {
+            let tenantIndex = tenants.findIndex(t => t.id === tenantId);
+            if (tenantIndex === -1) { tenants.push({ id: tenantId, ...data }); } 
+            else { tenants[tenantIndex] = { ...tenants[tenantIndex], ...data }; }
+            saveData();
+            return true;
+        }
+
         function deleteProperty(propId, propName) {
             showLoading();
             try {
-                // Delete property
                 properties = properties.filter(p => p.id !== propId);
-                
-                // Delete associated task
                 tasks = tasks.filter(t => t.propId !== propId);
-                
-                saveData(); // Save changes and trigger re-render
-                
+                saveData(); 
                 alertMessage(`Property "${propName}" deleted successfully.`, 'success');
             } catch (error) {
                 console.error("Error deleting property:", error);
                 alertMessage('Failed to delete property and associated task.', 'error');
             } finally {
-                // Always hide loading
                 hideLoading(); 
-                // Go back to the property list if we were on detail view
-                if (currentView === 'detail') {
-                    switchView('property');
-                }
-            }
-        }
-        
-        /**
-         * Checks if the list is empty and ensures the initial task exists.
-         */
-        function checkAndRestoreInitialTask() {
-            // Filter for in-progress property tasks
-            const pendingPropertyTasks = tasks.filter(t => t.type === 'property' && t.status === 'in_progress');
-
-            if (properties.length === 0 && pendingPropertyTasks.length === 0) {
-                console.log("No properties found. Automatically restoring initial 'Add a property' task.");
-                // Call handleNewEntry but prevent navigation (stay on dashboard)
-                handleNewEntry('property', false); 
             }
         }
 
 
         // ===================================
-        // Rendering Functions 
+        // Rendering Functions (Tabs)
         // ===================================
         
         function renderTasks() {
             const taskList = document.getElementById('taskList');
             taskList.innerHTML = '';
+            const now = new Date();
+            const todayDate = now.toISOString().split('T')[0];
+            const isSendDay = now.getDate() === RENT_REMINDER_DAY; // Point 3: Only clickable on the 4th
+
+            // Filter out recurring tasks that are set for future months but not current/past
+            const pendingTasks = tasks.filter(t => 
+				t.status === 'in_progress' && (t.type !== 'rent_reminder' || t.sendDate <= todayDate)
+			).sort((a, b) => {
+                 // Sort priority tasks first (rent/property setup)
+                 if (a.isRent && !b.isRent) return -1;
+                 if (!a.isRent && b.isRent) return 1;
+                 return 0;
+            });
             
-            const pendingPropertyTasks = tasks.filter(t => t.type === 'property' && t.status === 'in_progress');
-            
-            if (pendingPropertyTasks.length === 0) {
+            if (pendingTasks.length === 0) {
                 taskList.innerHTML = `
                     <div class="task-item">
                         <span class="material-icons-round icon" style="color: #6c757d;">check_circle_outline</span>
                         <div class="task-info">
-                            <h3>No Pending Tasks</h3>
+                            <h3>No Tasks</h3>
                             <p>All outstanding tasks are complete!</p>
                         </div>
                     </div>
@@ -1095,55 +1526,96 @@
                 return;
             }
             
-            pendingPropertyTasks.forEach(task => {
-                const itemClass = 'task-item incomplete';
-                const iconName = 'edit_note';
-                
-                const buttonText = 'Edit'; 
-                const buttonAction = `window.app.continueFormTask('${task.propId}')`;
-                
-                const taskDescription = task.description; 
-                
-                let taskDetails;
-                if (task.phase === 1) {
-                    taskDetails = taskDescription === 'Add a new property' ? 'Start filling in basic details.' : 'Step 1/2: Fill in basic details.'; 
-                } else if (task.phase === 2) {
-                    taskDetails = 'Step 2/2: Fill in rental and specifications.'; 
-                } else {
-                    taskDetails = 'Missing details.'; 
+            pendingTasks.forEach(task => {
+                let taskDescription = task.description;
+                let taskDetails = task.details;
+                let buttonAction;
+                let buttonText = 'Edit';
+                let buttonClass = 'action-btn';
+                let iconName = 'edit_note';
+
+                if (task.type === 'property') {
+                    buttonAction = `window.app.continueFormTask('${task.propId}', false, 'property')`;
+                } else if (task.type === 'tenant_setup') {
+                    buttonAction = `window.app.continueFormTask('${task.tenantId}', false, 'tenant')`;
+                    const tenant = getTenantById(task.tenantId);
+                    taskDescription = `Setup Tenancy for ${tenant ? tenant.fullName : 'New Tenant'}`;
+                } else if (task.type === 'rent_reminder' && task.isRent) {
+                    // Rent Reminder Task Logic (Point 3)
+                    buttonText = 'Send';
+                    buttonClass += ` send-rent ${!isSendDay ? 'disabled' : ''}`;
+                    buttonAction = `window.app.sendRentReminder('${task.id}', '${task.propId}')`;
+                    iconName = 'payments';
+                    taskDetails += isSendDay ? '' : ' (Active only on the 4th)';
                 }
-                
+
                 taskList.innerHTML += `
-                    <div class="${itemClass}" onclick="if(!event.target.closest('a')) { ${buttonAction}; }">
+                    <div class="task-item incomplete" onclick="if(!event.target.closest('a') && !event.target.classList.contains('disabled')) { ${buttonAction}; }">
                         <span class="material-icons-round icon">${iconName}</span>
                         <div class="task-info">
                             <h3>${taskDescription}</h3>
                             <p>${taskDetails}</p>
                         </div>
-                        <a href="#" class="action-btn" onclick="${buttonAction}; return false;">${buttonText}</a>
+                        <a href="#" class="${buttonClass}" 
+                           onclick="${buttonAction}; return false;"
+                           ${!isSendDay && task.type === 'rent_reminder' ? 'disabled' : ''}>
+                           ${buttonText}
+                        </a>
                     </div>
                 `;
             });
         }
         
-        function renderProperties() {
-            const listContainer = document.getElementById('propertyList');
+        // Caches property list when running filter
+        let currentProperties = [];
+
+        function filterProperties() {
+            const searchTerm = (document.getElementById('propertySearch')?.value || '').toLowerCase().trim();
+            if (!searchTerm) {
+                currentProperties = properties;
+                renderPropertiesList(currentProperties);
+                return;
+            }
+
+            // Fixed filter logic (Point 5)
+            currentProperties = properties.filter(p => {
+                const owner = getOwnerById(p.ownerId);
+                const tenant = getTenantById(p.tenantId);
+
+                return (
+                    (p.name && p.name.toLowerCase().includes(searchTerm)) ||
+                    (owner && owner.fullName && owner.fullName.toLowerCase().includes(searchTerm)) ||
+                    (tenant && tenant.fullName && tenant.fullName.toLowerCase().includes(searchTerm))
+                );
+            });
+
+            renderPropertiesList(currentProperties);
+        }
+
+        function renderPropertiesList(list) {
+            const listContainer = document.getElementById('tabContentProperty');
             listContainer.innerHTML = '';
             
-            if (properties.length === 0) {
+            if (list.length === 0) {
                  listContainer.innerHTML = `<div class="property-card" style="text-align: center; border-left: 5px solid #ccc; color: #666;">No property data found. Click the "+" button to add one.</div>`;
                  return;
             }
 
-            // Sort by completeness (incomplete properties first)
-            properties.sort((a, b) => {
+            // Sort logic - Rented comes before Vacant, both after Incomplete
+            list.sort((a, b) => {
                 const aComplete = a.phase && a.phase > 2;
                 const bComplete = b.phase && b.phase > 2;
-                if (aComplete === bComplete) return 0;
-                return aComplete ? 1 : -1; 
+                
+                if (aComplete !== bComplete) return aComplete ? 1 : -1;
+                
+                if (aComplete && bComplete) {
+                    if (a.status === 'Rented' && b.status !== 'Rented') return -1;
+                    if (a.status !== 'Rented' && b.status === 'Rented') return 1;
+                }
+                return 0; 
             });
             
-            properties.forEach(p => {
+            list.forEach(p => {
                 const isComplete = p.phase && p.phase > 2;
                 
                 let statusClass;
@@ -1155,9 +1627,8 @@
                     statusClass = 'status-incomplete';
                     statusText = 'Incomplete Details';
                     cardClass += ' incomplete-details';
-                    action = `onclick="window.app.continueFormTask('${p.id}');"`;
+                    action = `onclick="window.app.continueFormTask('${p.id}', false, 'property');"`;
                 } else {
-                    // Completed property: navigate to read-only detail view
                     statusClass = p.status === 'Rented' ? 'status-rented' : 'status-vacant';
                     statusText = p.status || 'Vacant';
                     action = `onclick="window.app.viewPropertyDetails('${p.id}');"`;
@@ -1165,7 +1636,6 @@
 
                 const propName = p.name && p.name.trim() !== '' ? p.name : 'Property Name N/A';
                 const propAddress = p.address || 'Address N/A';
-                // Note: Using toLocaleString() for number formatting
                 const propRent = p.monthlyRent ? `RM${p.monthlyRent.toLocaleString()}` : 'N/A';
                 const propSize = p.sizeSqft ? `${p.sizeSqft.toLocaleString()} sqft` : 'N/A';
                 
@@ -1186,371 +1656,1047 @@
                                 </div>
                             ` : `<p style="color: #e65100;">Missing Rental/Spec Details. Click to continue.</p>`}
                         </div>
-                        <!-- Delete button (must stop propagation to prevent opening details) -->
-                        <button class="delete-btn" onclick="window.app.deletePropertyHandler('${p.id}', '${propName}'); event.stopPropagation();">
-                            <span class="material-icons-round" style="font-size: 20px;">delete</span>
-                        </button>
+                        </div>
+                `;
+            });
+        }
+        
+        function renderProperties() {
+            // Check if there is a search term and use the filter logic
+            filterProperties(); 
+        }
+
+        function renderOwners() {
+            const listContainer = document.getElementById('tabContentOwner');
+            listContainer.innerHTML = '';
+
+            if (owners.length === 0) {
+                 listContainer.innerHTML = `<div class="property-card" style="text-align: center; border-left: 5px solid #ccc; color: #666;">No owner profiles found. Click the "+" button to add one.</div>`;
+                 return;
+            }
+
+            owners.forEach(o => {
+                const associatedCount = properties.filter(p => p.ownerId === o.id).length;
+                const statusText = associatedCount > 0 ? `${associatedCount} Properties` : 'No Properties';
+                
+                listContainer.innerHTML += `
+                    <div class="property-card" onclick="window.app.viewOwnerDetails('${o.id}');">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h4>${o.fullName || 'Owner Name N/A'}</h4>
+                            <span class="status-tag-prop status-vacant" style="background-color: #eef4ff; color: #3A86FF;">${statusText}</span>
+                        </div>
+                        <div class="property-details-section">
+                            <div class="detail-line address">
+                                <p class="detail-item"><strong>Contact:</strong> ${o.phone || o.email || 'N/A'}</p>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
         }
 
+        function renderTenants() {
+             const listContainer = document.getElementById('tabContentTenant');
+            listContainer.innerHTML = '';
+            
+            if (tenants.length === 0) {
+                 listContainer.innerHTML = `<div class="property-card" style="text-align: center; border-left: 5px solid #ccc; color: #666;">No tenant profiles found. Click the "+" button to add one.</div>`;
+                 return;
+            }
+
+            tenants.forEach(t => {
+                const associatedProperty = properties.find(p => p.tenantId === t.id);
+                const isComplete = t.phase && t.phase >= 3; // Phase 3 means complete setup (uploaded agreement)
+
+                let statusText;
+                let statusClass;
+                let action;
+                let phaseDisplay = t.phase < 3 ? `${t.phase}/3 complete` : 'Setup Complete';
+
+
+                if (associatedProperty) {
+                    statusText = `Renting: ${associatedProperty.name}`;
+                    statusClass = 'status-rented';
+                    action = `onclick="window.app.viewTenantDetails('${t.id}');"`;
+                } else if (!isComplete) {
+                    statusText = `Setup: ${phaseDisplay}`;
+                    statusClass = 'status-incomplete';
+                    action = `onclick="window.app.continueFormTask('${t.id}', false, 'tenant');"`; 
+                } else {
+                    statusText = 'Unassigned (Setup Complete)';
+                    statusClass = 'status-vacant';
+                    action = `onclick="window.app.viewTenantDetails('${t.id}');"`;
+                }
+                
+                listContainer.innerHTML += `
+                    <div class="property-card ${statusClass === 'status-incomplete' ? 'incomplete-details' : ''}" ${action}>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h4>${t.fullName || 'Tenant Name N/A'}</h4>
+                            <span class="status-tag-prop ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="property-details-section">
+                            <div class="detail-line address">
+                                <p class="detail-item"><strong>Contact:</strong> ${t.phone || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
 
         // ===================================
-        // Detail View & Edit Form Logic (Unified)
+        // Detail View Rendering Functions
         // ===================================
         
         /**
-         * Helper function to render property fields either as read-only detail or editable form.
-         * @param {object} prop - The property data object.
-         * @param {boolean} isEditable - True to render inputs/selects, False for plain text.
-         * @returns {string} The generated HTML content.
+         * Renders the Property Detail Content with collapsible cards (Point 2)
          */
-        function renderPropertyFields(prop, isEditable = false) {
+        function renderPropertyDetailsContent(prop, owner, tenant) {
+            document.getElementById('detailPropertyName').textContent = prop.name || 'Property Profile';
             
-            // Utility function to safely get value (0 for numbers if undefined)
-            const v = (key) => {
-                if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms'].includes(key)) {
-                    return prop[key] !== undefined ? (prop[key] || 0) : '';
-                }
-                return prop[key] !== undefined ? prop[key] : '';
-            };
-            
-            // Reusable component for a single field/detail item
-            const Item = (label, name, value, isFull, type = 'text', options = []) => {
-                const itemClass = isFull ? 'detail-item-full' : 'detail-item-aligned';
-                const isRequired = type !== 'text' || name === 'name'; // Assume mandatory unless it's the optional remark
-                
-                if (isEditable) {
-                    let inputField;
-                    if (type === 'select' && options.length > 0) {
-                        const optionHtml = options.map(opt => 
-                            `<option value="${opt}" ${String(value) === opt ? 'selected' : ''}>${opt}</option>`
-                        ).join('');
-                        inputField = `
-                            <select id="p-${name}" name="${name}" ${isRequired ? 'required' : ''}>
-                                <option value="" disabled ${!value ? 'selected' : ''}>Select ${label}</option>
-                                ${optionHtml}
-                            </select>
-                        `;
-                    } else {
-                        inputField = `<input type="${type}" id="p-${name}" name="${name}" value="${value}" ${isRequired ? 'required' : ''}>`;
-                    }
-                    
-                    return `
-                        <div class="${itemClass} form-group">
-                            <label for="p-${name}" class="detail-label">${label} ${isRequired && name !== 'remark' ? '<span style="color:red;">*</span>' : ''}</label>
-                            ${inputField}
-                        </div>
-                    `;
-                } else {
-                    const displayValue = ['monthlyRent', 'sizeSqft'].includes(name) ? (value).toLocaleString() : (value || 'N/A');
-                    
-                    return `
-                        <div class="${itemClass}">
-                            <p class="detail-label">${label}</p>
-                            <p class="detail-value">${displayValue}</p>
-                        </div>
-                    `;
-                }
-            };
-
-            let html = '';
-
-            // --- 1. STATUS & RENTAL CARD ---
-            let statusTag = '';
-            if (!isEditable) {
-                 const statusClass = prop.status === 'Rented' ? 'status-rented' : 'status-vacant';
-                 statusTag = `<span class="status-tag-prop ${statusClass}" style="margin-left: 10px; font-size: 13px;">${prop.status || 'Vacant'}</span>`;
-            }
-
-            html += `
-                <div class="detail-card rental-info">
-                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF; display: flex; align-items: center;">
-                        STATUS & RENTAL ${!isEditable ? statusTag : ''}
-                    </h3>
-                    <div class="detail-group">
-                        ${Item('House Type', 'houseType', v('houseType'), true, 'select', ['Apartment', 'Condo', 'Landed'])}
-                        ${Item('Monthly Rent (RM)', 'monthlyRent', v('monthlyRent'), true, 'number')}
-                        ${Item('Status', 'status', v('status') || 'Vacant', true, 'select', ['Vacant', 'Rented'])}
-                    </div>
-                </div>
-            `;
-            
-            // --- 2. BASIC INFORMATION CARD ---
-            html += `
-                <div class="detail-card">
-                    <h3 style="margin: 0 0 15px; font-size: 18px; font-weight: 700; color: #333;">Basic Information</h3>
-                    <div class="detail-group">
-                        ${Item('Property Name', 'name', v('name'), true)}
-                        ${Item('Address', 'address', v('address'), true)}
-                        ${Item('Postal Code', 'postalCode', v('postalCode'), false)}
-                        ${Item('City', 'city', v('city'), false)}
-                        ${Item('State', 'state', v('state'), false)}
-                        ${Item('Country', 'country', v('country') || 'Malaysia', false)}
-                        ${Item('Remark (Optional)', 'remark', v('remark'), true, 'text')}
-                    </div>
-                </div>
-            `;
-            
-            // --- 3. SPECIFICATIONS CARD ---
-            html += `
-                <div class="detail-card">
-                    <h3 style="margin: 0 0 15px; font-size: 18px; font-weight: 700; color: #333;">Specifications</h3>
-                    <div class="detail-group">
-                        ${Item('Size (Sqft)', 'sizeSqft', v('sizeSqft'), false, 'number')}
-                        ${Item('Rooms', 'rooms', v('rooms'), false, 'number')}
-                        ${Item('Bathrooms', 'bathrooms', v('bathrooms'), false, 'number')}
-                    </div>
-                </div>
-            `;
-
-            return html;
-        }
-
-        /**
-         * Renders the content of the read-only property detail view.
-         * @param {object} prop - The property data object.
-         */
-        function renderDetailView(prop) {
             const content = document.getElementById('detailContent');
-            
-            // Update Header Name
-            document.getElementById('detailPropertyName').textContent = prop.name || 'Property Details';
-            
-            // Set the Edit button to open the form view for editing (Phase 3)
-            document.getElementById('detailEditBtn').setAttribute('onclick', `window.app.continueFormTask('${prop.id}', true); return false;`);
-            
-            // Render read-only fields
-            content.innerHTML = renderPropertyFields(prop, false);
-        }
-
-        /**
-         * Renders the Property Form view for different phases (1, 2 for setup; 3 for full edit).
-         * @param {string} propId - ID of the property.
-         * @param {number} phase - Current phase (1, 2, or 3).
-         */
-        function renderForm(propId, phase) { 
-            const formTitle = document.getElementById('formTitle');
-            const formFields = document.getElementById('formFields');
-            const formSubmitButton = document.getElementById('formSubmitButton');
-            
-            document.getElementById('currentFormPhase').value = phase;
-            document.getElementById('currentPropertyId').value = propId;
-            
-            const prop = getPropertyById(propId);
-            const existingData = prop || {};
-            
-            let fieldsHTML = '';
-            
-            // Adjust back button text based on mode
-            document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> ${phase === 3 ? 'Details' : 'Back'}`;
-
-            if (phase === 1) {
-                // Phase 1: Basic Details (Initial setup flow)
-                formTitle.textContent = '1/2: Basic Details'; 
-                formSubmitButton.textContent = 'Next';
-                formSubmitButton.style.display = 'block';
-
-                // Simple layout for guided setup
-                fieldsHTML = `
-                    <div class="detail-card">
-                        <div class="detail-group">
-                            <div class="detail-item-full form-group">
-                                <label for="p-name">Property Name <span style="color:red">*</span></label>
-                                <input type="text" id="p-name" name="name" value="${existingData.name || ''}" required>
-                            </div>
-                            <div class="detail-item-full form-group">
-                                <label for="p-address">Address <span style="color:red">*</span></label>
-                                <input type="text" id="p-address" name="address" value="${existingData.address || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-postal">Postal Code <span style="color:red">*</span></label>
-                                <input type="text" id="p-postal" name="postalCode" value="${existingData.postalCode || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-city">City <span style="color:red">*</span></label>
-                                <input type="text" id="p-city" name="city" value="${existingData.city || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-state">State <span style="color:red">*</span></label>
-                                <input type="text" id="p-state" name="state" value="${existingData.state || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-country">Country <span style="color:red">*</span></label>
-                                <input type="text" id="p-country" name="country" value="${existingData.country || 'Malaysia'}" required>
-                            </div>
-                            <div class="detail-item-full form-group">
-                                <label for="p-remark">Remark (Optional)</label>
-                                <input type="text" id="p-remark" name="remark" value="${existingData.remark || ''}">
-                            </div>
+            content.innerHTML = `
+                <div class="detail-card rental-info">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF;">RENTAL INFORMATION</h3>
+                    <div class="detail-group">
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Status</p>
+                            <span class="status-tag-prop ${prop.status === 'Rented' ? 'status-rented' : 'status-vacant'} detail-value" style="margin-top: 2px;">
+                                ${prop.status || 'Vacant'}
+                            </span>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Rental Type</p>
+                            <p class="detail-value">
+                                ${RENTAL_TYPES.find(r => r.val === prop.rentalType)?.label || prop.rentalType || '-'}
+                            </p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Monthly Rent (RM)</p>
+                            <p class="detail-value">${prop.monthlyRent ? prop.monthlyRent.toLocaleString() : '-'}</p>
                         </div>
                     </div>
-                `;
-            } else if (phase === 2) {
-                // Phase 2: Specifications (Initial setup flow)
-                formTitle.textContent = '2/2: Property Details'; 
-                formSubmitButton.textContent = 'Save';
-                formSubmitButton.style.display = 'block';
+                </div>
 
-                // Simple layout for guided setup
-                fieldsHTML = `
-                    <div class="detail-card">
-                        <div class="detail-group">
-                            <div class="detail-item-full form-group">
-                                <label for="p-type">House Type <span style="color:red">*</span></label>
-                                <select id="p-type" name="houseType" required>
-                                    <option value="" disabled ${!existingData.houseType ? 'selected' : ''}>Select Type</option>
-                                    <option value="Apartment" ${existingData.houseType === 'Apartment' ? 'selected' : ''}>Apartment</option>
-                                    <option value="Condo" ${existingData.houseType === 'Condo' ? 'selected' : ''}>Condo</option>
-                                    <option value="Landed" ${existingData.houseType === 'Landed' ? 'selected' : ''}>Landed House</option>
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">BASIC INFORMATION</h3>
+                    <div class="detail-group">
+                         <div class="detail-item-full">
+                            <p class="detail-label">Property Name</p>
+                            <p class="detail-value">${prop.name || '-'}</p>
+                        </div>
+                        <div class="detail-item-full">
+                            <p class="detail-label">Address</p>
+                            <p class="detail-value">${prop.address || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">City, State</p>
+                            <p class="detail-value">${prop.city || '-'}, ${prop.state || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Postal Code</p>
+                            <p class="detail-value">${prop.postalCode || '-'}</p>
+                        </div>
+                        <div class="detail-item-full">
+                            <p class="detail-label">Remark</p>
+                            <p class="detail-value">${prop.remark || '-'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">SPECIFICATIONS</h3>
+                    <div class="detail-group">
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">House Type</p>
+                            <p class="detail-value">${prop.houseType || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Size (Sqft)</p>
+                            <p class="detail-value">${prop.sizeSqft ? prop.sizeSqft.toLocaleString() : '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Rooms</p>
+                            <p class="detail-value">${prop.rooms || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Bathrooms</p>
+                            <p class="detail-value">${prop.bathrooms || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Carpark</p>
+                            <p class="detail-value">${prop.carpark || '-'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card owner-info collapse-card">
+                    <div class="collapse-header" onclick="window.app.toggleCollapse('ownerDetailContentBody')">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #9B59B6;">
+                            OWNER DETAILS ${owner ? `(${owner.fullName || 'N/A'})` : '(Not Assigned)'}
+                        </h3>
+                        <span class="material-icons-round collapse-icon" id="ownerDetailContentBodyIcon">expand_more</span>
+                    </div>
+                    <div id="ownerDetailContentBody" class="detail-group" style="display: none;">
+                        ${owner ? `
+                             <div class="detail-item-full" style="margin-bottom: 5px;">
+                                <a href="#" onclick="window.app.viewOwnerDetails('${owner.id}'); return false;" style="font-size: 13px; color: #3A86FF; font-weight: 600;">
+                                    <span class="material-icons-round" style="font-size: 18px; vertical-align: middle;">person</span> View Owner Profile
+                                </a>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Full Name</p>
+                                <p class="detail-value">${owner.fullName || '-'}</p>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Phone Number</p>
+                                <p class="detail-value">${owner.phone || '-'}</p>
+                            </div>
+                            <div class="detail-item-full"> 
+                                <p class="detail-label">Email Address</p>
+                                <p class="detail-value">${owner.email || '-'}</p>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Management Fee</p>
+                                <p class="detail-value">${owner.managementFee ? owner.managementFee + '%' : '-'}</p>
+                            </div>
+                        ` : '<p class="detail-value" style="color: #999;">No owner is currently assigned.</p>'}
+                    </div>
+                </div>
+
+                <div class="detail-card tenant-info collapse-card">
+                     <div class="collapse-header" onclick="window.app.toggleCollapse('tenantDetailContentBody')">
+                        <h3 style="font-size: 16px; font-weight: 700; color: #155724;">
+                            TENANT DETAILS ${tenant ? `(${tenant.fullName || 'N/A'})` : '(Vacant)'}
+                        </h3>
+                        <span class="material-icons-round collapse-icon" id="tenantDetailContentBodyIcon">expand_more</span>
+                    </div>
+                    <div id="tenantDetailContentBody" class="detail-group" style="display: none;">
+                        ${tenant ? `
+                             <div class="detail-item-full" style="margin-bottom: 5px;">
+                                <a href="#" onclick="window.app.viewTenantDetails('${tenant.id}'); return false;" style="font-size: 13px; color: #3A86FF; font-weight: 600;">
+                                    <span class="material-icons-round" style="font-size: 18px; vertical-align: middle;">person</span> View Tenant Profile
+                                </a>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Full Name</p>
+                                <p class="detail-value">${tenant.fullName || '-'}</p>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Phone Number</p>
+                                <p class="detail-value">${tenant.phone || '-'}</p>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Lease Start</p>
+                                <p class="detail-value">${tenant.leaseStart || '-'}</p>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Lease End</p>
+                                <p class="detail-value">${tenant.leaseEnd || '-'}</p>
+                            </div>
+                        ` : '<p class="detail-value" style="color: #999;">No tenant is currently assigned to this property.</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderOwnerDetailView(owner) {
+            document.getElementById('detailOwnerName').textContent = owner.fullName || 'Owner Profile';
+            document.getElementById('ownerEditBtn').setAttribute('onclick', `window.app.continueFormTask('${owner.id}', true, 'owner'); return false;`); // Changed to continueFormTask (Point 4)
+            
+            const associatedProperties = properties.filter(p => p.ownerId === owner.id);
+            const propList = associatedProperties.map(p => 
+                `<p class="detail-value" style="font-size: 15px; margin-bottom: 5px;">
+                    <a href="#" onclick="window.app.viewPropertyDetails('${p.id}'); return false;">
+                        ${p.name} (${p.status})
+                    </a>
+                 </p>`
+            ).join('');
+
+            const content = document.getElementById('ownerDetailContent');
+            content.innerHTML = `
+                <div class="detail-card owner-info">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #9B59B6;">OWNER DETAILS</h3>
+                    <div id="ownerDetails" class="detail-group">
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Full Name</p>
+                            <p class="detail-value">${owner.fullName || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Phone Number</p>
+                            <p class="detail-value">${owner.phone || '-'}</p>
+                        </div>
+                        <div class="detail-item-full"> 
+                            <p class="detail-label">Email Address</p>
+                            <p class="detail-value">${owner.email || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Management Fee</p>
+                            <p class="detail-value">${owner.managementFee ? owner.managementFee + '%' : '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Bank Account Details</p>
+                            <p class="detail-value">${owner.bankDetails || '-'}</p>
+                        </div>
+                        <div class="detail-item-full">
+                            <p class="detail-label">Mailing Address</p>
+                            <p class="detail-value">${owner.address || '-'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">ASSOCIATED PROPERTIES (${associatedProperties.length})</h3>
+                    <div class="detail-group">
+                        ${associatedProperties.length > 0 ? propList : '<p class="detail-value" style="color: #999;">No properties currently linked.</p>'}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderTenantDetailView(tenant) {
+            document.getElementById('detailTenantName').textContent = tenant.fullName || 'Tenant Profile';
+            const action = tenant.phase >= 3 ? `window.app.continueFormTask('${tenant.id}', true, 'tenant'); return false;` : `window.app.continueFormTask('${tenant.id}', false, 'tenant'); return false;`; 
+            document.getElementById('tenantEditBtn').setAttribute('onclick', action);
+            
+            const associatedProperty = properties.find(p => p.tenantId === tenant.id);
+            
+            const content = document.getElementById('tenantDetailContent');
+            content.innerHTML = `
+                <div class="detail-card tenant-info">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #155724;">TENANT DETAILS</h3>
+                    <div class="detail-group">
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Full Name</p>
+                            <p class="detail-value">${tenant.fullName || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Phone Number</p>
+                            <p class="detail-value">${tenant.phone || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Email Address</p>
+                            <p class="detail-value">${tenant.email || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">IC/Passport</p>
+                            <p class="detail-value">${tenant.icPassport || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Lease Start</p>
+                            <p class="detail-value">${tenant.leaseStart || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Lease End</p>
+                            <p class="detail-value">${tenant.leaseEnd || '-'}</p>
+                        </div>
+                        <div class="detail-item-full">
+                            <p class="detail-label">Tenancy Agreement</p>
+                            <p class="detail-value">
+                                ${tenant.agreementFile ? `
+                                    <a href="#" onclick="window.app.viewDummyFile('${tenant.agreementFile}'); return false;" class="file-link">
+                                        <span class="material-icons-round">description</span> View Signed Agreement
+                                    </a>
+                                ` : 'N/A (Agreement Missing)'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">ASSOCIATED PROPERTY</h3>
+                    <div class="detail-group">
+                        ${associatedProperty ? `
+                            <p class="detail-value" style="font-size: 15px;">
+                                <a href="#" onclick="window.app.viewPropertyDetails('${associatedProperty.id}'); return false;">
+                                    ${associatedProperty.name} (${associatedProperty.address})
+                                </a>
+                            </p>
+                        ` : '<p class="detail-value" style="color: #999;">Not currently linked to a property.</p>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===================================
+        // Form Logic
+        // ===================================
+
+        function renderPropertyFields(prop, isEditMode) {
+            const existingData = prop || {};
+            const houseTypeOptions = HOUSE_TYPES.map(type => 
+                `<option value="${type}" ${existingData.houseType === type ? 'selected' : ''}>${type}</option>`
+            ).join('');
+            
+            const rentalTypeOptions = RENTAL_TYPES.map(opt => `<option value="${opt.val}" ${existingData.rentalType === opt.val ? 'selected' : ''}>${opt.label}</option>`).join('');
+
+            const stateOptions = MALAYSIAN_STATES.map(state => 
+                `<option value="${state}" ${existingData.state === state ? 'selected' : ''}>${state}</option>`
+            ).join('');
+
+            // Basic Info (Part of Point 2 from previous request)
+            let basicHtml = `
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">BASIC INFORMATION</h3>
+                    <div class="detail-group">
+                        <div class="detail-item-full form-group">
+                            <label for="p-name">Property Name <span style="color:red">*</span></label>
+                            <input type="text" id="p-name" name="name" value="${existingData.name || ''}" required>
+                        </div>
+                        <div class="detail-item-full form-group">
+                            <label for="p-address">Address <span style="color:red">*</span></label>
+                            <input type="text" id="p-address" name="address" value="${existingData.address || ''}" required>
+                        </div>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-postal">Postal Code <span style="color:red">*</span></label>
+                            <input type="text" id="p-postal" name="postalCode" value="${existingData.postalCode || ''}" required>
+                        </div>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-city">City <span style="color:red">*</span></label>
+                            <input type="text" id="p-city" name="city" value="${existingData.city || ''}" required>
+                        </div>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-state">State <span style="color:red">*</span></label>
+                            <select id="p-state" name="state" required onchange="window.app.checkSelectPlaceholder(this.id)">
+                                <option value="" disabled ${!existingData.state ? 'selected' : ''}>Select State</option>
+                                ${stateOptions}
+                            </select>
+                        </div>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-country">Country <span style="color:red">*</span></label>
+                            <input type="text" id="p-country" name="country" value="${existingData.country || 'Malaysia'}" required>
+                        </div>
+                        <div class="detail-item-full form-group">
+                            <label for="p-remark">Remark</label>
+                            <input type="text" id="p-remark" name="remark" value="${existingData.remark || ''}">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Rental Info
+            let rentalHtml = `
+                <div class="detail-card rental-info">
+                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF;">RENTAL INFORMATION</h3>
+                    <div class="detail-group">
+                        <div class="detail-item-full form-group" style="margin-bottom: 10px;">
+                            <label for="p-rentalType">Rental Type <span style="color:red">*</span></label>
+                            <select id="p-rentalType" name="rentalType" required 
+                                onchange="window.app.updateRentLabel(this.value); window.app.checkSelectPlaceholder(this.id);">
+                                <option value="" disabled ${!existingData.rentalType ? 'selected' : ''}>Select Rental Type</option>
+                                ${rentalTypeOptions}
+                            </select>
+                        </div>
+                        
+                        <div class="rental-detail-item form-group">
+                            <label for="p-type">House Type <span style="color:red">*</span></label>
+                            <select id="p-type" name="houseType" required onchange="window.app.checkSelectPlaceholder(this.id)">
+                                <option value="" disabled ${!existingData.houseType ? 'selected' : ''}>Select Type</option>
+                                ${houseTypeOptions}
+                            </select>
+                        </div>
+                        <div class="rental-detail-item form-group">
+                            <label id="rentLabel" for="p-rent" class="detail-label">Monthly Rental (RM) <span style="color:red">*</span></label>
+                            <input type="number" id="p-rent" name="monthlyRent" value="${existingData.monthlyRent || ''}" required>
+                        </div>
+                        
+                         ${isEditMode ? `
+                            <div class="detail-item-aligned form-group" style="margin-top: 15px;">
+                                <label for="p-status">Rental Status <span style="color:red">*</span></label>
+                                <select id="p-status" name="status" required onchange="window.app.checkSelectPlaceholder(this.id)">
+                                    <option value="" disabled ${!existingData.status ? 'selected' : ''}>Select Status</option>
+                                    <option value="Vacant" ${existingData.status === 'Vacant' ? 'selected' : ''}>Vacant</option>
+                                    <option value="Rented" ${existingData.status === 'Rented' ? 'selected' : ''}>Rented</option>
                                 </select>
                             </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-rent">Monthly Rental (RM) <span style="color:red">*</span></label>
-                                <input type="number" id="p-rent" name="monthlyRent" value="${existingData.monthlyRent || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-size">Size (Sqft) <span style="color:red">*</span></label>
-                                <input type="number" id="p-size" name="sizeSqft" value="${existingData.sizeSqft || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-rooms">No. of Rooms <span style="color:red">*</span></label>
-                                <input type="number" id="p-rooms" name="rooms" value="${existingData.rooms || ''}" required>
-                            </div>
-                            <div class="detail-item-aligned form-group">
-                                <label for="p-bathrooms">No. of Bathrooms <span style="color:red">*</span></label>
-                                <input type="number" id="p-bathrooms" name="bathrooms" value="${existingData.bathrooms || ''}" required>
-                            </div>
+                            <div class="detail-item-aligned form-group" style="margin-top: 15px;"></div> 
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            // Specification
+            let specHtml = `
+                <div class="detail-card">
+                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">SPECIFICATIONS</h3>
+                    <div class="detail-group">
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-size">Size (Sqft)</label>
+                            <input type="number" id="p-size" name="sizeSqft" value="${existingData.sizeSqft || ''}">
                         </div>
-                        <div class="detail-item-full form-group" style="margin-top: 15px;">
-                            <label for="p-status">Rental Status <span style="color:red">*</span></label>
-                            <select id="p-status" name="status" required>
-                                <option value="Vacant" ${existingData.status !== 'Rented' ? 'selected' : ''}>Vacant</option>
-                                <option value="Rented" ${existingData.status === 'Rented' ? 'selected' : ''}>Rented</option>
-                            </select>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-rooms">No. of Rooms <span style="color:red">*</span></label>
+                            <input type="number" id="p-rooms" name="rooms" value="${existingData.rooms || ''}" required>
+                        </div>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-bathrooms">No. of Bathrooms <span style="color:red">*</span></label>
+                            <input type="number" id="p-bathrooms" name="bathrooms" value="${existingData.bathrooms || ''}" required>
+                        </div>
+                        <div class="detail-item-aligned form-group">
+                            <label for="p-carpark">Carpark</label>
+                            <input type="number" id="p-carpark" name="carpark" value="${existingData.carpark || ''}">
                         </div>
                     </div>
-                `;
-            } else if (phase === 3) {
-                // Phase 3: Full Edit Mode (Matches Detail View Layout)
-                formTitle.textContent = `Editing: ${prop.name || 'Property'}`;
-                formSubmitButton.textContent = 'Save Changes';
-                formSubmitButton.style.display = 'block';
-                
-                // Use the reusable function to render editable fields
-                fieldsHTML = renderPropertyFields(prop, true);
-                
-            } else {
-                formFields.innerHTML = '<p style="color: red;">Form phase error. Please restart the process.</p>';
-            }
+                </div>
+            `;
             
-            formFields.innerHTML = fieldsHTML;
+            // Order required: Rental, Basic, Specification (Point 2)
+            return rentalHtml + basicHtml + specHtml;
         }
 
-        document.getElementById('dataEntryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const propId = document.getElementById('currentPropertyId').value;
-            const currentPhase = parseInt(document.getElementById('currentFormPhase').value);
-            const prop = getPropertyById(propId);
-            const task = getTaskByPropId(propId);
 
-            if (!prop) {
-                alertMessage('Error: Property data missing.', 'error');
-                switchView('dashboard');
-                return;
+        /**
+         * Dynamic update Monthly Rent label based on rentalType selection.
+         */
+        function updateRentLabel(rentalType) {
+            const labelElement = document.getElementById('rentLabel');
+            if (!labelElement) return;
+
+            if (rentalType === 'whole_unit') {
+                labelElement.innerHTML = 'Monthly Rental (Whole Unit) <span style="color:red">*</span>';
+            } else if (rentalType === 'room_by_room') {
+                labelElement.innerHTML = 'Monthly Rental (Estimated Total) <span style="color:red">*</span>';
+            } else {
+                labelElement.innerHTML = 'Monthly Rental (RM) <span style="color:red">*</span>';
             }
+        }
+
+        /**
+         * Helper to visually adjust select color based on value.
+         */
+        function checkSelectPlaceholder(id) {
+            const select = document.getElementById(id);
+            if (select) {
+                // Use a proper class/check to ensure selected options are dark
+                if (select.value === "" || select.value === null || select.selectedIndex === 0) {
+                    select.style.color = '#999'; 
+                } else {
+                    select.style.color = '#333'; 
+                }
+            }
+        }
+        
+        function selectTenant(tenantId) {
+             const select = document.getElementById('p-tenantId');
+             if (select) {
+                 select.value = tenantId;
+             }
+             // checkSelectPlaceholder will handle the color change automatically
+        }
+
+
+        function handleFormSubmit(e) {
+             e.preventDefault();
             
+            const currentId = document.getElementById('currentId').value;
+            const currentPhase = document.getElementById('currentFormPhase').value;
+            const currentFormType = document.getElementById('currentFormType').value;
             const formData = new FormData(e.target);
-            const updateData = {};
             
-            // Collect form data
+            const updateData = {};
             for (let [key, value] of formData.entries()) {
-                if (key === 'phase' || key === 'propId') continue; 
+                if (key === 'phase' || key === 'type' || key === 'id' || key === 'ownerId' || key === 'tenantId') continue; 
                 
-                if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms'].includes(key)) {
-                    // Convert to number, use existing value if field is left blank/zero in edit mode
+                if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms', 'carpark', 'managementFee'].includes(key)) {
                     updateData[key] = parseFloat(value) || 0; 
                 } else {
                     updateData[key] = value;
                 }
             }
             
-            // --- PHASE 1 SUBMIT (NEXT) ---
-            if (currentPhase === 1) {
-                // Navigate to Phase 2
-                const newPropName = updateData.name && updateData.name.trim() !== '' ? updateData.name : 'New Property';
-                
-                // Update property (set phase to 2) and update task description
-                updatePropertyData(propId, {...updateData, phase: 2});
-                updateTaskData(task.id, { 
-                    phase: 2, 
-                    description: `Complete Info for ${newPropName}`
-                });
-                
-                renderForm(propId, 2); 
-                alertMessage('Basic Details saved. Continuing to Step 2.', 'success');
-            } 
-            // --- PHASE 2 SUBMIT (SAVE initial setup) ---
-            else if (currentPhase === 2) {
-                showLoading();
-                
-                const propName = prop.name && prop.name.trim() !== '' ? prop.name : 'New Property';
-                
-                // Update property (set phase to 3/Complete)
-                updatePropertyData(propId, {...updateData, phase: 3, status: updateData.status || 'Vacant'});
-                
-                // Delete task (mark as complete by removing it)
-                if (task) {
+            if (currentFormType === 'owner') {
+                createOwnerHandler(formData); // This handles save/update logic
+                return;
+            }
+
+            // Tenant Multi-Step Logic (Only for INCOMPLETE setup - Phase 0, 1, 2)
+            if (currentFormType === 'tenant') {
+                 const tenant = getTenantById(currentId);
+                 const task = getTaskByTenantId(currentId);
+                 const nextPhase = parseInt(currentPhase) + 1;
+                 
+                 // Note: Single-page edit (Phase >= 3) has its own handler
+                 if (currentPhase === '0') {
+                    saveTenantData(currentId, {...updateData, phase: nextPhase});
+                    updateTaskData(`task-${currentId}`, { id: `task-${currentId}`, type: 'tenant_setup', tenantId: currentId, phase: nextPhase, description: `Setup Tenancy for ${updateData.fullName || 'New Tenant'}`, details: 'Step 2/3: Send and await signed tenancy agreement.', status: 'in_progress', userId: currentUserId });
+                    renderForm(currentId, nextPhase, 'tenant');
+                } else if (currentPhase === '1') {
+                    // Save is only a click to continue, no data to save other than phase update
+                    saveTenantData(currentId, { ...tenant, phase: nextPhase }); 
+                    updateTaskData(task.id, { phase: nextPhase, details: 'Step 3/3: Upload the signed tenancy agreement.' });
+                    renderForm(currentId, nextPhase, 'tenant');
+                } else if (currentPhase === '2') {
+                    const agreementFile = document.getElementById('t-agreementFile').files[0];
+                    if (!agreementFile) { alertMessage('Please upload the signed Tenancy Agreement.', 'error'); return; }
+                    const fileName = agreementFile.name;
+                    saveTenantData(currentId, { ...tenant, ...updateData, agreementFile: fileName, phase: nextPhase });
                     tasks = tasks.filter(t => t.id !== task.id);
+                    saveData();
+                    alertMessage(`Tenant ${tenant.fullName || 'Tenant'} setup successfully!`, 'success');
+                    switchView('property'); 
+                    switchPropertyTab('tenant');
                 }
+                return;
+            }
+
+            // Property Logic 
+            const prop = getPropertyById(currentId);
+            const task = getTaskByPropId(currentId);
+            
+            if (currentPhase === '0') {
+                const selectedOwnerId = document.getElementById('selectedOwnerId').value;
+                if (!selectedOwnerId) { alertMessage('Please select or create an Owner Profile first.', 'error'); return; }
+                updatePropertyData(currentId, {...updateData, phase: 1, ownerId: selectedOwnerId});
+                updateTaskData(task.id, { phase: 1, description: `Fill in details for New Property`, details: 'Step 2/2: Enter property specifications.'}); // Updated detail
+                renderForm(currentId, 1, 'property'); 
+            } 
+            else if (currentPhase === '1') {
+                 // --- NEW LOGIC: JUMP FROM PHASE 1 TO PHASE 3 ---
+                showLoading();
+                const propName = updateData.name && updateData.name.trim() !== '' ? updateData.name : 'New Property';
                 
-                saveData(); // Save changes and trigger re-render
+                // Update data, set phase to 3, and default status to 'Vacant'
+                updatePropertyData(currentId, {...updateData, phase: 3, status: 'Vacant'});
                 
-                alertMessage(`Property "${propName}" saved successfully!`, 'success');
-                
-                // This was a new completion, go to dashboard
+                if (task) { tasks = tasks.filter(t => t.id !== task.id); } // Remove setup task
+                saveData(); 
+                alertMessage(`Property "${propName}" created successfully! Defaulted to Vacant status.`, 'success');
                 document.getElementById('dataEntryForm').reset(); 
                 switchView('dashboard');
-                
                 hideLoading(); 
+            } 
+            else if (currentPhase === '2') {
+                // Guardrail against old Phase 2 logic (should be skipped now)
+                console.error("DEBUG: Phase 2 encountered but should be skipped. Redirecting.");
+                alertMessage("Property setup complete.", "info");
+                switchView('dashboard');
             }
-            // --- PHASE 3 SUBMIT (SAVE FULL EDIT) ---
-            else if (currentPhase === 3) {
+            else if (currentPhase === '3') {
+                // Phase 3 Edit Mode (Point 1: Full Edit)
                 showLoading();
+                const oldTenantId = prop.tenantId;
+                const newTenantId = document.getElementById('p-tenantId')?.value || '';
                 
-                // Update property with ALL data from the form, setting phase back to 3
-                updatePropertyData(propId, {...updateData, phase: 3, status: updateData.status || 'Vacant'});
+                // Update Property data
+                updatePropertyData(currentId, {...updateData, phase: 3, status: updateData.status || 'Vacant', tenantId: newTenantId});
                 
-                saveData(); // Save changes
+                // If a new tenant is assigned, create the recurring rent task
+                if (newTenantId && newTenantId !== oldTenantId) {
+                     alertMessage('Tenant successfully assigned. Creating monthly rent reminder task.', 'info');
+                     createFirstRentTask(currentId, updateData.name || prop.name);
+                }
                 
+                saveData(); 
                 alertMessage(`Property "${updateData.name || prop.name}" updated successfully.`, 'success');
-                
-                // Go back to the newly updated read-only detail view
-                viewPropertyDetails(propId);
-                
+                viewPropertyDetails(currentId);
                 hideLoading(); 
             }
-        });
+        }
+
+        function renderForm(id, phase, type) { 
+            const formTitle = document.getElementById('formTitle');
+            const formFields = document.getElementById('formFields');
+            const form = document.getElementById('dataEntryForm');
+            
+            document.getElementById('currentFormType').value = type;
+            document.getElementById('currentFormPhase').value = phase;
+            document.getElementById('currentId').value = id;
+            document.getElementById('selectedOwnerId').value = id.startsWith('prop-') ? document.getElementById('selectedOwnerId').value : ''; 
+            
+            // Re-bind default handler first
+            form.onsubmit = window.app.handleFormSubmit;
+
+            if (type === 'owner') { 
+                // Owner Form Logic 
+                const ownerToEdit = getOwnerById(id);
+                document.getElementById('formTitle').textContent = ownerToEdit ? 'Edit Owner Profile' : 'Create New Owner Profile';
+                document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> Cancel`;
+                
+                let existingData = ownerToEdit || {};
+                 let fieldsHTML = `
+                    <div class="detail-card">
+                        <div class="detail-group">
+                            <div class="detail-item-full form-group">
+                                <label for="p-fullName">Full Name <span style="color:red">*</span></label>
+                                <input type="text" id="p-fullName" name="fullName" value="${existingData.fullName || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-phone">Phone Number <span style="color:red">*</span></label>
+                                <input type="tel" id="p-phone" name="phone" value="${existingData.phone || ''}" required>
+                            </div>
+                            <div class="detail-item-aligned form-group">
+                                <label for="p-email">Email Address <span style="color:red">*</span></label>
+                                <input type="email" id="p-email" name="email" value="${existingData.email || ''}" required>
+                            </div>
+                            <div class="detail-item-full form-group">
+                                <label for="p-address">Mailing Address</label>
+                                <input type="text" id="p-address" name="address" value="${existingData.address || ''}">
+                            </div>
+                            <div class="detail-item-full form-group">
+                                <label for="p-bankDetails">Bank Account Details <span style="color:red">*</span></label>
+                                <input type="text" id="p-bankDetails" name="bankDetails" value="${existingData.bankDetails || ''}" required>
+                            </div>
+                            <div class="detail-item-full form-group">
+                                <label for="p-managementFee">Management Fee (%)</label>
+                                <input type="number" id="p-managementFee" name="managementFee" value="${existingData.managementFee || ''}" placeholder="e.g., 8">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                fieldsHTML += `
+                    <div class="form-footer">
+                        <button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm">
+                            ${ownerToEdit ? 'Save Changes' : 'Create Owner'}
+                        </button>
+                    </div>
+                `;
+                document.getElementById('formFields').innerHTML = fieldsHTML;
+                switchView('form');
+                return;
+            }
+             if (type === 'tenant') { 
+				// Tenant Form Logic (Point 4)
+				const tenant = getTenantById(id);
+				let existingData = tenant || {};
+				let formTitleText = '';
+				let submitButtonText = '';
+				let fieldsHTML = '';
+
+				// ⬇️ MODIFICATION START: Single-page Edit for Complete Profile (phase >= 3)
+				if (tenant && tenant.phase >= 3) {
+					formTitleText = 'Edit Tenant Information';
+					submitButtonText = 'Save Changes & Return';
+
+					// Re-render only Phase 0 fields (basic info)
+					fieldsHTML = `
+						 <div class="detail-card">
+							<p style="color: #666; margin-top: 0;">Update the tenant's key details.</p>
+							<div class="detail-group">
+								<div class="detail-item-full form-group">
+									<label for="t-fullName">Full Name <span style="color:red">*</span></label>
+									<input type="text" id="t-fullName" name="fullName" value="${existingData.fullName || ''}" required>
+								</div>
+								<div class="detail-item-aligned form-group">
+									<label for="t-phone">Phone Number <span style="color:red">*</span></label>
+									<input type="tel" id="t-phone" name="phone" value="${existingData.phone || ''}" required>
+								</div>
+								<div class="detail-item-aligned form-group">
+									<label for="t-email">Email Address</label>
+									<input type="email" id="t-email" name="email" value="${existingData.email || ''}">
+								</div>
+								<div class="detail-item-full form-group">
+									<label for="t-icPassport">IC/Passport Number <span style="color:red">*</span></label>
+									<input type="text" id="t-icPassport" name="icPassport" value="${existingData.icPassport || ''}" required>
+								</div>
+								<div class="detail-item-aligned form-group">
+									<label for="t-leaseStart">Lease Start Date</label>
+									<input type="date" id="t-leaseStart" name="leaseStart" value="${existingData.leaseStart || ''}">
+								</div>
+								<div class="detail-item-aligned form-group">
+									<label for="t-leaseEnd">Lease End Date</label>
+									<input type="date" id="t-leaseEnd" name="leaseEnd" value="${existingData.leaseEnd || ''}">
+								</div>
+							</div>
+						</div>
+					`;
+					// Set a different submit handler for immediate save/return
+					form.onsubmit = function(event) {
+						event.preventDefault();
+						window.app.saveTenantForm0AndReturn();
+						return false;
+					};
+
+				} else if (phase === 0) {
+                    formTitleText = '1/3: Basic Tenant Information';
+                    submitButtonText = 'Save & Next';
+                    fieldsHTML = `
+                        <div class="detail-card">
+                            <p style="color: #666; margin-top: 0;">Fill in the tenant's key details.</p>
+                            <div class="detail-group">
+                                <div class="detail-item-full form-group">
+                                    <label for="t-fullName">Full Name <span style="color:red">*</span></label>
+                                    <input type="text" id="t-fullName" name="fullName" value="${existingData.fullName || ''}" required>
+                                </div>
+                                <div class="detail-item-aligned form-group">
+                                    <label for="t-phone">Phone Number <span style="color:red">*</span></label>
+                                    <input type="tel" id="t-phone" name="phone" value="${existingData.phone || ''}" required>
+                                </div>
+                                <div class="detail-item-aligned form-group">
+                                    <label for="t-email">Email Address</label>
+                                    <input type="email" id="t-email" name="email" value="${existingData.email || ''}">
+                                </div>
+                                <div class="detail-item-full form-group">
+                                    <label for="t-icPassport">IC/Passport Number <span style="color:red">*</span></label>
+                                    <input type="text" id="t-icPassport" name="icPassport" value="${existingData.icPassport || ''}" required>
+                                </div>
+                                <div class="detail-item-aligned form-group">
+                                    <label for="t-leaseStart">Lease Start Date</label>
+                                    <input type="date" id="t-leaseStart" name="leaseStart" value="${existingData.leaseStart || ''}">
+                                </div>
+                                <div class="detail-item-aligned form-group">
+                                    <label for="t-leaseEnd">Lease End Date</label>
+                                    <input type="date" id="t-leaseEnd" name="leaseEnd" value="${existingData.leaseEnd || ''}">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+					form.onsubmit = window.app.handleFormSubmit; // Re-bind default handler
+                 } else if (phase === 1) {
+                    formTitleText = '2/3: Send Tenancy Agreement';
+                    submitButtonText = 'Save & Next: Upload Agreement';
+                    fieldsHTML = `
+                        <div class="detail-card">
+                            <p style="color: #666; margin-top: 0;">Tenancy Agreement needs to be sent to the tenant for signing.</p>
+                            <div class="detail-item-full form-group">
+                                <label>Tenant: ${existingData.fullName || 'N/A'}</label>
+                                <p style="font-size: 14px; color: #3A86FF;">
+                                    Contact: ${existingData.phone || 'N/A'}
+                                </p>
+                            </div>
+                            <p style="font-size: 14px; color: #555;">
+                                Click the button below to simulate sending the agreement via WhatsApp/Email.
+                            </p>
+                            <a href="#" class="submit-btn" style="background-color: #25d366; margin-bottom: 10px;" onclick="window.app.alertMessage('Simulating WhatsApp message sent!', 'success'); return false;">
+                                <span class="material-icons-round" style="vertical-align: middle;">whatsapp</span> Send via WhatsApp
+                            </a>
+                            <a href="#" class="submit-btn" style="background-color: #f7931e;" onclick="window.app.alertMessage('Simulating Email sent!', 'success'); return false;">
+                                <span class="material-icons-round" style="vertical-align: middle;">mail</span> Send via Email
+                            </a>
+                        </div>
+                    `;
+					form.onsubmit = window.app.handleFormSubmit;
+                 } else if (phase === 2) {
+                    formTitleText = '3/3: Upload Signed Agreement';
+                    submitButtonText = 'Complete Tenant Setup';
+
+                    fieldsHTML = `
+                        <div class="detail-card">
+                            <p style="color: #666; margin-top: 0;">Upload the signed Tenancy Agreement received from the tenant.</p>
+                            
+                            <div class="detail-item-full form-group">
+                                <label for="t-agreementFile">Tenancy Agreement File <span style="color:red">*</span></label>
+                                <input type="file" id="t-agreementFile" name="agreementFile" required>
+                            </div>
+                            
+                            ${existingData.agreementFile ? `
+                                <p style="font-size: 14px; color: #555; margin-top: 15px;">
+                                    Current File: 
+                                    <a href="#" onclick="window.app.viewDummyFile('${existingData.agreementFile}'); return false;" class="file-link">
+                                        <span class="material-icons-round">insert_drive_file</span> ${existingData.agreementFile}
+                                    </a>
+                                </p>
+                            ` : ''}
+                        </div>
+                    `;
+					form.onsubmit = window.app.handleFormSubmit;
+                 }
+                document.getElementById('formTitle').textContent = formTitleText;
+				document.getElementById('formFields').innerHTML = fieldsHTML + `
+					<div class="form-footer">
+						<button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm">
+							${submitButtonText}
+						</button>
+					</div>
+				`;
+				switchView('form'); 
+				return;
+            }
+
+            const prop = getPropertyById(id);
+            const existingData = prop || {};
+            let currentOwnerId = existingData.ownerId;
+            let submitButtonText = '';
+            let fieldsHTML = '';
+
+            // Adjust back button text based on mode
+            document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> ${phase === 3 ? 'Details' : 'Back'}`;
+            
+            // --- PHASE 0: OWNER SELECTION/CREATION ---
+            if (phase === 0) {
+                formTitle.textContent = '0/2: Select Property Owner';
+                if (!currentOwnerId) document.getElementById('selectedOwnerId').value = ''; 
+
+                fieldsHTML = `
+                    <div class="detail-card">
+                        <p style="margin-top: 0; color: #555;">Select an existing owner or create a new one for this property.</p>
+                        
+                        <input type="text" id="ownerSearch" placeholder="Search owner by name or phone..." oninput="window.app.filterOwners(this.value)">
+
+                        <div id="ownerListContainer" style="min-height: 100px;">
+                            <p style="text-align: center; color: #999; padding: 10px;">Start typing above to search for owners.</p>
+                        </div>
+                    </div>
+
+                    <div class="detail-card" style="margin-top: 10px;">
+                        <a href="#" onclick="window.app.handleNewEntry('owner'); document.getElementById('selectedOwnerId').value = '${id}'; return false;" style="display: block; text-align: center; color: #3A86FF; font-weight: 600; text-decoration: none; padding: 5px;">
+                            <span class="material-icons-round" style="font-size: 18px; vertical-align: middle;">add</span> Create New Owner Profile
+                        </a>
+                    </div>
+                `;
+                submitButtonText = 'Next: Go to Step 1';
+            }
+            // --- PHASE 1: BASIC PROPERTY DETAILS ---
+            else if (phase === 1) {
+				formTitle.textContent = '1/2: Basic Property Details'; // Title changed from 1/3 to 1/2
+				submitButtonText = 'Save Property'; // Button text changed to reflect completion
+
+				fieldsHTML = renderPropertyFields(prop, false);
+				// ... (remaining Phase 1 code)
+			} 
+			// --- PHASE 2: REMOVED ---
+			// else if (phase === 2) { 
+			//     // THIS BLOCK IS REMOVED
+			// }
+            // --- PHASE 3: FULL EDIT MODE (Point 1) ---
+            else if (phase === 3) {
+                formTitle.textContent = `Editing: ${prop.name || 'Property'}`;
+                submitButtonText = 'Save Changes';
+                document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> Details`;
+                
+                // Get tenants not associated with any *other* property
+                const assignedTenantIds = properties.filter(p => p.id !== id && p.tenantId).map(p => p.tenantId);
+                const vacantTenants = tenants.filter(t => t.phase >= 3 && !assignedTenantIds.includes(t.id)); 
+                const currentTenant = existingData.tenantId ? getTenantById(existingData.tenantId) : null;
+                
+                let tenantOptions = '';
+                if(currentTenant) {
+                    tenantOptions += `<option value="${currentTenant.id}" selected>${currentTenant.fullName || 'Tenant N/A'} (Current)</option>`;
+                }
+                tenantOptions += vacantTenants.map(t => 
+                    `<option value="${t.id}" ${existingData.tenantId === t.id && !currentTenant ? 'selected' : ''}>${t.fullName || 'Tenant N/A'} (${t.phone || 'Contact N/A'})</option>`
+                ).join('');
+
+                // Render Basic, Rental, Specification
+                fieldsHTML = renderPropertyFields(prop, true);
+                
+                // Manually inject the corrected Tenant Assignment Card
+                fieldsHTML += `
+                    <div class="detail-card tenant-info">
+                        <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #155724;">
+                            TENANT ASSIGNMENT
+                        </h3>
+                        <div class="detail-group">
+                            <div class="detail-item-full form-group">
+                                <label for="p-tenantId" class="detail-label">Current Tenant</label>
+                                <select id="p-tenantId" name="tenantId" onchange="window.app.selectTenant(this.value); window.app.checkSelectPlaceholder(this.id);" class="placeholder-text">
+                                    <option value="" ${!existingData.tenantId ? 'selected' : ''}>-- Select Current Tenant (Vacant) --</option>
+                                    ${tenantOptions}
+                                </select>
+                            </div>
+                            <div class="detail-item-full form-group" style="margin-top: 10px;">
+
+                            </div>
+                            <div class="detail-item-full form-group" style="margin-top: 10px;">
+                                <p style="font-size: 12px; color: #555;">Note: Only 'Setup Complete' tenants who are not currently assigned to another property are shown above.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Manually apply select color checks after fields are added
+                window.app.checkSelectPlaceholder('p-state');
+                window.app.checkSelectPlaceholder('p-rentalType');
+                window.app.checkSelectPlaceholder('p-type');
+                window.app.checkSelectPlaceholder('p-status');
+                window.app.checkSelectPlaceholder('p-tenantId');
+
+                if (existingData.rentalType) {
+                    updateRentLabel(existingData.rentalType);
+                }
+            } else {
+                formFields.innerHTML = '<p style="color: red;">Form phase error. Please restart the process.</p>';
+                return; 
+            }
+            
+            // Inject submit button after fields for all phases
+            fieldsHTML += `
+				<div class="form-footer">
+					<button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm" 
+						${phase === 0 && !currentOwnerId && !document.getElementById('selectedOwnerId').value ? 'disabled' : ''}>
+						${submitButtonText}
+					</button>
+				</div>
+			`;
+            
+            formFields.innerHTML = fieldsHTML;
+			
+			switchView('form'); 
+
+            // CRITICAL: Handle Phase 0 owner selection styling/state
+            if (phase === 0) {
+                if (currentOwnerId) {
+                    window.app.selectOwner(currentOwnerId);
+                }
+                const selectedOwnerIdField = document.getElementById('selectedOwnerId');
+                if (selectedOwnerIdField.value.startsWith('owner-')) {
+                    window.app.selectOwner(selectedOwnerIdField.value);
+                }
+            }
+        }
+        
+        function createOwnerHandler(formData) {
+			const ownerId = document.getElementById('currentId').value;
+			const data = {};
+			for (let [key, value] of formData.entries()) {
+				if (!['phase', 'type', 'id', 'ownerId', 'tenantId'].includes(key)) {
+					data[key] = value;
+				}
+			}
+
+			saveOwnerData(ownerId, data);
+			alertMessage(`Owner ${data.fullName || ''} saved successfully.`, 'success');
+
+			// Check if we came from the Property Phase 0 flow
+			const selectedOwnerIdField = document.getElementById('selectedOwnerId');
+			if (selectedOwnerIdField.value && selectedOwnerIdField.value.startsWith('prop-')) {
+				const propId = selectedOwnerIdField.value;
+				selectedOwnerIdField.value = ownerId; // Set the newly created owner as selected
+				renderForm(propId, 0, 'property');
+				window.app.selectOwner(ownerId);
+			} else {
+				 // Stand-alone owner creation, go back to owner list.
+				switchView('property'); 
+				switchPropertyTab('owner');
+			}
+		}
+        
+        // NEW FUNCTION for single-page edit of complete tenant profiles
+        function saveTenantForm0AndReturn(formElement) {
+            const formData = new FormData(formElement);
+            const currentId = document.getElementById('currentId').value;
+            const tenant = getTenantById(currentId);
+            
+            const updateData = {};
+            for (let [key, value] of formData.entries()) {
+                if (key === 'phase' || key === 'type' || key === 'id' || key === 'ownerId' || key === 'tenantId') continue; 
+                updateData[key] = value;
+            }
+            
+            // This will save the changes and keep the current phase (which is >= 3 for complete profiles)
+            saveTenantData(currentId, { ...tenant, ...updateData }); 
+            alertMessage(`Tenant ${updateData.fullName || 'Profile'} updated successfully.`, 'success');
+            
+            // Return to the Tenant List view
+            switchView('property'); 
+            switchPropertyTab('tenant');
+        }
+
 
         // ===================================
         // Global App Exposure & Initialization
         // ===================================
 
         window.app = {
-            // Expose functions needed for inline HTML event handlers
             startApp: function() {
                 showLoading();
                 loadData();
-                checkAndRestoreInitialTask(); // Ensure initial task exists. This might trigger saveData().
-                
                 renderProperties(); 
                 renderTasks();
-
                 switchView('dashboard'); 
                 
-                // CRITICAL FIX: Always hide the loading overlay after the entire startup process is complete.
+                // Bind search bar for real-time filtering (Point 5)
+                document.getElementById('propertySearch').addEventListener('input', window.app.filterProperties);
+                
                 hideLoading(); 
             },
             switchView: switchView,
@@ -1560,12 +2706,127 @@
             alertMessage: alertMessage,
             goBackFromForm: goBackFromForm,
             deletePropertyHandler: deletePropertyHandler,
-            viewPropertyDetails: viewPropertyDetails 
+            deleteProfileHandler: deleteProfileHandler,
+            viewPropertyDetails: viewPropertyDetails,
+            viewOwnerDetails: viewOwnerDetails,
+            viewTenantDetails: viewTenantDetails,
+            renderForm: renderForm, 
+            sendRentReminder: sendRentReminder, // (Point 3)
+            saveTenantForm0AndReturn: saveTenantForm0AndReturn, // NEW
+			saveTenantForm0AndReturn: function() {
+				const form = document.getElementById('dataEntryForm');
+				const formData = new FormData(form);
+				const currentId = document.getElementById('currentId').value;
+				const tenant = getTenantById(currentId);
+
+				const updateData = {};
+				for (let [key, value] of formData.entries()) {
+					if (key === 'phase' || key === 'type' || key === 'id' || key === 'ownerId' || key === 'tenantId') continue; 
+					updateData[key] = value;
+				}
+
+				// This will save the changes and keep the current phase (which is >= 3 for complete profiles)
+				saveTenantData(currentId, { ...tenant, ...updateData }); 
+				alertMessage(`Tenant ${updateData.fullName || 'Profile'} updated successfully.`, 'success');
+
+				switchView('property'); 
+				switchPropertyTab('tenant');
+			},
+			
+            selectOwner: function(ownerId) { 
+                document.getElementById('selectedOwnerId').value = ownerId;
+                document.getElementById('formSubmitButton').disabled = false;
+                document.getElementById('formSubmitButton').textContent = 'Next: Go to Step 1';
+                document.querySelectorAll('.owner-select-item').forEach(item => {
+                    const icon = item.querySelector('.material-icons-round');
+                    if (item.getAttribute('data-owner-id') === ownerId) {
+                        item.classList.add('selected');
+                        icon.textContent = 'radio_button_checked';
+                    } else {
+                        item.classList.remove('selected');
+                        icon.textContent = 'radio_button_unchecked';
+                    }
+                });
+            },
+            handleFormSubmit: handleFormSubmit, 
+            updateRentLabel: updateRentLabel, 
+            toggleCollapse: toggleCollapse, 
+            viewDummyFile: viewDummyFile, 
+            selectTenant: selectTenant, 
+            checkSelectPlaceholder: checkSelectPlaceholder,
+            switchPropertyTab: switchPropertyTab,
+            filterProperties: filterProperties, 
+            filterOwners: (filter) => { 
+                const ownerListContainer = document.getElementById('ownerListContainer');
+                const ownerSearch = document.getElementById('ownerSearch');
+                const currentId = document.getElementById('currentId').value;
+                const prop = getPropertyById(currentId);
+                const currentOwnerId = prop ? prop.ownerId : null;
+
+                const filterValue = (filter || '').toLowerCase().trim();
+
+                if (ownerSearch) ownerSearch.value = filterValue; // Preserve filter text
+
+                if (filterValue.length === 0) {
+                     ownerListContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 10px;">Start typing above to search for owners.</p>';
+                     document.getElementById('formSubmitButton').disabled = !document.getElementById('selectedOwnerId').value;
+
+                     if (currentOwnerId || document.getElementById('selectedOwnerId').value) {
+                         const targetOwnerId = document.getElementById('selectedOwnerId').value || currentOwnerId;
+                         const currentOwner = getOwnerById(targetOwnerId);
+                         if (currentOwner) {
+                             ownerListContainer.innerHTML = `
+                                  <p style="text-align: center; color: #999; padding: 10px;">Current Selection:</p>
+                                  <div class="owner-select-item selected" onclick="window.app.selectOwner('${targetOwnerId}')" data-owner-id="${targetOwnerId}">
+                                      <div class="owner-info">
+                                          <h4>${currentOwner.fullName || 'Owner Name N/A'}</h4>
+                                          <p>${currentOwner.email || currentOwner.phone || 'Contact N/A'}</p>
+                                      </div>
+                                      <span class="material-icons-round" style="color: #3A86FF;">radio_button_checked</span>
+                                  </div>
+                              `;
+                          }
+                     }
+
+                     return;
+                }
+                
+                const filteredOwners = owners.filter(o => 
+                    (o.fullName && o.fullName.toLowerCase().includes(filterValue)) ||
+                    (o.phone && o.phone.includes(filterValue)) ||
+                    (o.email && o.email.toLowerCase().includes(filterValue))
+                );
+
+                const selectedOwnerId = document.getElementById('selectedOwnerId').value;
+                
+                if (filteredOwners.length === 0) {
+                    ownerListContainer.innerHTML = '<p style="text-align: center; color: #999; padding: 10px;">No matching Owners found.</p>';
+                    document.getElementById('formSubmitButton').disabled = true; 
+                    return;
+                }
+
+                ownerListContainer.innerHTML = filteredOwners.map(o => {
+                    const isSelected = selectedOwnerId === o.id;
+                    return `
+                        <div class="owner-select-item ${isSelected ? 'selected' : ''}" onclick="window.app.selectOwner('${o.id}')" data-owner-id="${o.id}">
+                            <div class="owner-info">
+                                <h4>${o.fullName || 'Owner Name N/A'}</h4>
+                                <p>${o.email || o.phone || 'Contact N/A'}</p>
+                            </div>
+                            <span class="material-icons-round" style="color: #3A86FF;">${isSelected ? 'radio_button_checked' : 'radio_button_unchecked'}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                if (selectedOwnerId) {
+                    document.getElementById('formSubmitButton').disabled = false;
+                    document.getElementById('formSubmitButton').textContent = 'Next: Go to Step 1';
+                }
+            }
         };
 
         // Start the application on window load
         window.onload = window.app.startApp;
-
     </script>
 </body>
 </html>
