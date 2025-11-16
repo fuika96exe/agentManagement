@@ -1,0 +1,729 @@
+/* Global Styles */
+body {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5; 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 420px; 
+    margin: 0 auto;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%; 
+}
+
+/* View Container */
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    /* Padding for general views, excluding form/detail sticky footer */
+    padding-bottom: 70px; 
+}
+
+/* Task Section */
+.task-section { 
+    padding: 16px;
+}
+.task-section h2 { 
+    font-size: 18px;
+    font-weight: 700; 
+    color: #333;
+    margin-bottom: 15px; 
+    margin-left: 0; 
+    padding-top: 10px; 
+}
+/* Task List Card */
+.task-list {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+    overflow: hidden; 
+    border: 1px solid #e0e0e0; 
+}
+.task-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    gap: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.task-item:hover {
+    background-color: #f9f9f9;
+}
+.task-item:last-child {
+    border-bottom: none;
+}
+.task-item .icon {
+    font-size: 24px;
+    color: #3A86FF;
+}
+.task-item.incomplete .icon {
+    color: #FF4757; /* Red */
+}
+.task-item.incomplete {
+    background-color: #fff5f5; /* Light red background */
+}
+.task-item .task-info {
+    flex-grow: 1;
+}
+.task-item .task-info h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+}
+.task-item.incomplete .task-info h3 {
+    color: #FF4757; 
+}
+.task-item .task-info p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #999;
+}
+.task-item .action-btn {
+    background-color: #3A86FF; 
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+    /* Fix button click area issue */
+    display: inline-block; 
+    line-height: normal;
+}
+.task-item .action-btn:active {
+    transform: scale(0.98);
+}
+.task-item .action-btn:hover {
+    background-color: #2e6ad9;
+}
+/* Rent Reminder Button Style */
+.task-item .action-btn.send-rent {
+    background-color: #28a745;
+}
+.task-item .action-btn.send-rent:hover {
+    background-color: #1e7e34;
+}
+.task-item .action-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Bottom Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #fff;
+    border-top: 1px solid #eee;
+    padding: 10px 0;
+    position: fixed; 
+    bottom: 0;
+    width: 100%;
+    max-width: 420px; 
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.05);
+    z-index: 1000;
+}
+.navbar a {
+    flex: 1;
+    text-align: center;
+    color: #999;
+    text-decoration: none;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s;
+}
+.navbar a.active {
+    color: #3A86FF; 
+}
+.navbar a .material-icons-round {
+    font-size: 24px;
+}
+
+/* Property View Styling */
+.property-header {
+    padding: 16px;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+}
+.search-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    position: relative; 
+}
+.search-icon {
+    position: absolute;
+    left: 15px; 
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999; 
+    font-size: 20px;
+    z-index: 2; 
+}
+.search-container input {
+    flex-grow: 1;
+    padding: 10px 15px 10px 45px; 
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+.search-container input:focus {
+    border-color: #3A86FF;
+}
+.add-btn {
+    width: 45px;
+    height: 45px;
+    background-color: #3A86FF;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(58, 134, 255, 0.4);
+    transition: transform 0.1s;
+}
+.add-btn:active {
+    transform: scale(0.95);
+}
+.add-btn:hover {
+     background-color: #2e6ad9;
+}
+.add-menu {
+    position: absolute;
+    right: 0px; 
+    top: 60px; 
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 8px 0;
+    z-index: 10;
+    transform-origin: top right;
+    transition: opacity 0.2s, transform 0.2s;
+    opacity: 0;
+    transform: scale(0.9);
+    pointer-events: none;
+}
+.add-menu.visible {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+.add-menu a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 15px;
+}
+.add-menu a:hover {
+    background-color: #f0f2f5;
+}
+.property-list {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.property-card {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-left: 5px solid #3A86FF;
+    cursor: pointer; 
+    position: relative;
+    /* Remove fixed height to allow content flexibility */
+}
+.property-card.incomplete-details {
+    border-left: 5px solid #FF9800; 
+    background-color: #fff8e1;
+}
+.property-card h4 {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #3A86FF; 
+}
+.property-card p {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+}
+.status-tag-prop {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+.status-rented { background-color: #d4edda; color: #155724; }
+.status-vacant { background-color: #fff3cd; color: #856404; }
+.status-incomplete { background-color: #ffcc80; color: #e65100; }
+
+/* Property Card Layout */
+.property-details-section {
+    display: flex;
+    flex-direction: column; 
+    margin-top: 8px;
+}
+.detail-line {
+    display: flex;
+    margin-bottom: 2px;
+}
+
+/* Delete Button - DELETED FROM LIST VIEW */
+
+/* Form & Detail View Styling (Reusing form-view-content) */
+.form-view-content {
+    padding: 16px;
+}
+.form-view-content h2 {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+}
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s;
+    background-color: #fff;
+}
+.form-group input:focus, .form-group select:focus {
+    border-color: #3A86FF;
+}
+.submit-btn {
+    width: 100%; 
+    padding: 15px;
+    background-color: #3A86FF;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+    display: block; 
+}
+.submit-btn:hover {
+    background-color: #2e6ad9;
+}
+.submit-btn:active {
+    transform: scale(0.98);
+}
+
+/* Back button styling */
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #3A86FF;
+    font-size: 15px;
+    text-decoration: none;
+    margin-bottom: 10px;
+    padding: 5px 0; /* Add padding for better click area */
+}
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Message Box Styling */
+.app-message-box {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s, bottom 0.3s;
+    z-index: 2000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+.app-message-box.info { background-color: #3A86FF; }
+.app-message-box.success { background-color: #28a745; }
+.app-message-box.error { background-color: #dc3545; }
+.app-message-box.visible { opacity: 1; bottom: 80px; }
+
+/* Custom Confirmation Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5000;
+}
+.modal-content {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    max-width: 350px;
+    width: 90%;
+    text-align: center;
+}
+.modal-content h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #333;
+}
+.modal-content p {
+    color: #666;
+    margin-bottom: 20px;
+}
+.modal-actions {
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+}
+.btn-cancel, .btn-confirm {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    flex-grow: 1;
+}
+.btn-cancel {
+    background-color: #e0e0e0;
+    color: #333;
+}
+.btn-cancel:hover {
+    background-color: #ccc;
+}
+.btn-confirm {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-confirm:hover {
+    background-color: #c82333;
+}
+
+/* Detail View Title Alignment */
+#detailView .property-header, #ownerDetailView .property-header, #tenantDetailView .property-header {
+    padding: 10px 16px; /* Adjust padding for a cleaner header */
+}
+#detailView .header-content, #ownerDetailView .header-content, #tenantDetailView .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#detailView .back-btn, #ownerDetailView .back-btn, #tenantDetailView .back-btn {
+    font-size: 16px;
+}
+#detailEditBtn, #ownerEditBtn, #tenantEditBtn {
+    background-color: #f7931e; /* Orange for Edit */
+    box-shadow: 0 4px 10px rgba(247, 147, 30, 0.4);
+    width: 40px; 
+    height: 40px;
+    margin-top: 10px;
+}
+
+/* Detail View & Form Edit View Styles for Structure and Alignment */
+.detail-card {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0; /* Border for visual separation */
+}
+.detail-card.rental-info {
+    background: #eef4ff; /* Lighter background for status/rental */
+    border: 1px solid #d0e0ff;
+}
+.detail-card.tenant-info {
+    background: #e6ffed; /* Lighter background for tenant */
+    border: 1px solid #b7e3c3;
+}
+.detail-card.owner-info {
+    background: #fcf4ff; /* Lighter background for owner */
+    border: 1px solid #e8d5f2;
+}
+
+/* New: Collapsible Card Header */
+.collapse-card .collapse-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+.collapse-card .collapse-header h3 {
+     margin: 0;
+}
+.collapse-card .collapse-icon {
+    transition: transform 0.2s;
+}
+.collapse-card .collapse-icon.rotate {
+    transform: rotate(180deg);
+}
+
+/* Container for key-value pairs (Flex for alignment) */
+.detail-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px 0; /* Vertical spacing between items */
+}
+.detail-item-aligned {
+    /* Two columns for specs and some basic info */
+    width: 50%; 
+    box-sizing: border-box;
+    padding-right: 15px; /* Add spacing between columns */
+}
+.detail-item-full {
+    width: 100%;
+}
+
+/* MODIFICATION: Reduced margin for tighter details view */
+.detail-label {
+    display: block;
+    margin-bottom: 0px; 
+    font-size: 13px;
+    font-weight: 500;
+    color: #999; 
+    text-transform: uppercase;
+}
+.detail-value {
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    margin-top: 2px;
+    margin-bottom: 5px;
+    word-wrap: break-word; 
+}
+
+/* Input/Select styling within the edit view */
+.detail-item-aligned input,
+.detail-item-aligned select,
+.detail-item-full input,
+.detail-item-full select,
+#formView .detail-card input,
+#formView .detail-card select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 15px;
+    box-sizing: border-box;
+    font-weight: 500;
+    margin-top: 2px;
+    background-color: #fff;
+    color: #333;
+    transition: color 0.3s;
+}
+
+/* FIX: Select option color should always be black for readability */
+.detail-item-aligned select option,
+.detail-item-full select option,
+#formView .detail-card select option {
+    color: #333; 
+}
+
+/* Placeholder styling for Select */
+.detail-item-aligned select:required:invalid,
+.detail-item-full select:required:invalid,
+#formView .detail-card select:required:invalid {
+    color: #999; 
+}
+.detail-item-aligned select:valid,
+.detail-item-full select:valid,
+#formView .detail-card select:valid {
+    color: #333; /* Selected value color */
+}
+
+
+#formView .detail-card input:focus,
+#formView .detail-card select:focus {
+    border-color: #f7931e; 
+}
+
+/* Form view adjustments for phase 3 (The sticky Save button) */
+#formView .form-view-content {
+     padding-bottom: 0; 
+}
+.form-footer {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    background-color: #fff;
+    width: 100%;
+    max-width: 420px; 
+    box-sizing: border-box;
+    z-index: 100;
+    margin-top: 20px; 
+}
+
+/* Detail View Footer for Delete Button */
+.detail-footer {
+    padding: 15px;
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+}
+.delete-main-btn {
+    width: 100%;
+    padding: 15px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
+}
+.delete-main-btn:hover {
+    background-color: #c82333;
+}
+
+/* Style for Owner Select options in Phase 0 */
+.owner-select-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.owner-select-item:hover {
+    background-color: #f5f5f5;
+}
+.owner-select-item.selected {
+    border-color: #3A86FF;
+    background-color: #eef4ff;
+    font-weight: 600;
+}
+.owner-info {
+    flex-grow: 1;
+}
+.owner-info h4 {
+    margin: 0;
+    font-size: 16px;
+}
+.owner-info p {
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: #999;
+}
+
+/* FIX: Phase 2 layout for rental label alignment */
+.rental-detail-item {
+    width: 50%; 
+    box-sizing: border-box;
+    padding-right: 15px;
+}
+.rental-detail-item .detail-label {
+    min-height: 38px; 
+    display: flex;
+    align-items: center;
+}
+
+/* New: Owner Search Bar in Phase 0 */
+#ownerSearch {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+}
+
+/* New: Tab Bar Styling for Property View */
+.tab-bar {
+    display: flex;
+    background-color: #fff;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 16px; 
+    padding: 0 16px;
+}
+.tab-bar a {
+    flex-grow: 1;
+    text-align: center;
+    padding: 10px 0;
+    color: #999;
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-bottom-color 0.2s;
+}
+.tab-bar a.active-tab {
+    color: #3A86FF;
+    border-bottom: 2px solid #3A86FF;
+}
+
+/* FIX: Owner Email/Management Fee alignment */
+/* Owner Email takes up full width for better wrapping/readability */
+#ownerDetails .detail-item-aligned:nth-child(3) { 
+    width: 100%; 
+}
+/* Management fee remains 50% width */
+#ownerDetails .detail-item-aligned:nth-child(4) {
+    width: 50%;
+}
+.file-link {
+    color: #3A86FF;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+}
