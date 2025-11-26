@@ -184,6 +184,17 @@
         </div>
     </div>
 
+	<style>
+        /* 蓝色确认按钮样式，用于非删除类的确认操作 */
+        .btn-primary-modal {
+            background-color: #3A86FF !important; /* 强制覆盖原本的红色 */
+            color: white;
+        }
+        .btn-primary-modal:hover {
+            background-color: #2e6ad9 !important;
+        }
+    </style>
+
     <script>
         
         let properties = [];
@@ -283,9 +294,14 @@
         // Confirmation Modal Logic 
         let confirmCallback = null;
 
-        function showConfirmation(title, message, callback) {
+        function showConfirmation(title, message, callback, confirmBtnText = 'Delete', confirmBtnClass = 'btn-confirm') {
             document.getElementById('confirmModalTitle').textContent = title;
             document.getElementById('confirmModalMessage').textContent = message;
+            
+            const confirmBtn = document.getElementById('confirmModalConfirm');
+            confirmBtn.textContent = confirmBtnText; // 设置按钮文字
+            confirmBtn.className = confirmBtnClass;  // 设置按钮颜色样式
+            
             confirmCallback = callback;
             document.getElementById('confirmModal').style.display = 'flex';
         }
@@ -403,7 +419,15 @@
             }
             
             if (currentFormType === 'tenant') {
-                // Do not delete tenant on back. Only navigate back to Tenant tab
+                const tenant = getTenantById(currentId);
+                
+                // 如果是已完成设置的租客 (Phase >= 4)，Back 应该返回详情页 (Profile Page)
+                // 只有在创建新租客或未完成流程时，Back 才返回列表页
+                if (tenant && tenant.phase >= 4) {
+                    viewTenantDetails(currentId);
+                    return;
+                }
+                
                 switchView('property');
                 switchPropertyTab('tenant');
                 return;
@@ -450,66 +474,68 @@
                 menu.classList.remove('visible');
             }
         }
-
+        
         // --- Added for Tenant/Owner Handling ---
         function handleNewEntry(type) {
-            toggleAddMenu(false);
-            let newId;
-            if (type === 'property') {
-                newId = `prop-${Date.now()}`;
-                // Start with Phase 0 for Owner selection
-                renderForm(newId, 0, 'property');
-            } else if (type === 'owner') {
-                newId = `owner-${Date.now()}`;
-                renderForm(newId, 0, 'owner');
-            } else if (type === 'tenant') {
-                newId = `tenant-${Date.now()}`;
-                // Tenant creation starts at phase 0
-                renderForm(newId, 0, 'tenant');
-            }
-        }
-
-        function continueFormTask(id, isEditMode, type) {
-            // ⬇️ MODIFICATION START: Add Debug Log for Entry Point
-            console.log(`DEBUG: Entering continueFormTask. ID: ${id}, isEditMode: ${isEditMode}, Type: ${type}`);
-            // ⬆️ MODIFICATION END
-            
-            let currentPhase;
-            if (type === 'property') {
-               const prop = getPropertyById(id);
-               currentPhase = prop ? (prop.phase || 0) : 0;
-               
-               // ⬇️ MODIFICATION START: Add Debug Log for Phase Check
-               console.log(`DEBUG: Property Phase Check. Current Phase: ${currentPhase}`);
-               // ⬆️ MODIFICATION END
-               
-               // If it's a full detail edit (phase 3), force to phase 3 form (Point 1)
-               // 【关键修改】我们强制让 'isEditMode' 忽略 Phase 检查，直接进入 Phase 3 全面编辑表单
-               if(isEditMode) { // <-- 简化判断条件，只要是编辑模式就进入 Phase 3
-                   console.log("DEBUG: Forcing transition to Phase 3 Full Edit Form.");
-                   renderForm(id, 3, 'property');
-                   return;
-               }
-            } else if (type === 'tenant') {
-                const tenant = getTenantById(id);
-                currentPhase = tenant ? (tenant.phase || 0) : 0;
-                // If editing a created/completed tenant, enable simple edit on phase 0 only
-                if (isEditMode && tenant && (tenant.created === true || tenant.phase >= 3)) {
-                    window.app.simpleTenantEdit = true;
-                    renderForm(id, 0, 'tenant');
-                    return;
-                }
-                // If the tenant is incomplete, continue multi-step flow
-                if (currentPhase >= 3) currentPhase = 0;
-                const task = getTaskByTenantId(id);
-                if (task) currentPhase = task.phase;
-            } else if (type === 'owner') {
-                // Owners do not have phases, always edit (Point 4)
-                renderForm(id, 0, 'owner');
-                return;
-            }
-            renderForm(id, currentPhase, type);
-        }
+             toggleAddMenu(false);
+			 let newId;
+			 if (type === 'property') { // <-- 确保 type 匹配 'property'
+				 newId = `prop-${Date.now()}`;
+				 // Start with Phase 0 for Owner selection
+				 renderForm(newId, 0, 'property'); // <-- 必须调用 renderForm
+				 // Create initial property task
+				 
+			 } else if (type === 'owner') {
+                 newId = `owner-${Date.now()}`;
+                 renderForm(newId, 0, 'owner'); 
+             } else if (type === 'tenant') {
+                  newId = `tenant-${Date.now()}`;
+                  // Tenant creation starts at phase 0
+                  renderForm(newId, 0, 'tenant');
+             }
+         }
+         
+         function continueFormTask(id, isEditMode, type) {
+			// ⬇️ MODIFICATION START: Add Debug Log for Entry Point
+			console.log(`DEBUG: Entering continueFormTask. ID: ${id}, isEditMode: ${isEditMode}, Type: ${type}`);
+			// ⬆️ MODIFICATION END
+			
+			let currentPhase;
+			if (type === 'property') {
+			   const prop = getPropertyById(id);
+			   currentPhase = prop ? (prop.phase || 0) : 0;
+			   
+			   // ⬇️ MODIFICATION START: Add Debug Log for Phase Check
+			   console.log(`DEBUG: Property Phase Check. Current Phase: ${currentPhase}`);
+			   // ⬆️ MODIFICATION END
+			   
+			   // If it's a full detail edit (phase 3), force to phase 3 form (Point 1)
+			   // 【关键修改】我们强制让 'isEditMode' 忽略 Phase 检查，直接进入 Phase 3 全面编辑表单
+			   if(isEditMode) { // <-- 简化判断条件，只要是编辑模式就进入 Phase 3
+				   console.log("DEBUG: Forcing transition to Phase 3 Full Edit Form.");
+				   renderForm(id, 3, 'property');
+				   return;
+			   }
+             } else if (type === 'tenant') {
+                 const tenant = getTenantById(id);
+                 currentPhase = tenant ? (tenant.phase || 0) : 0;
+                 // If editing a completed tenant, enable simple edit on phase 0 only
+                 if (isEditMode && tenant && tenant.phase >= 3) {
+                     window.app.simpleTenantEdit = true;
+                     renderForm(id, 0, 'tenant');
+                     return;
+                 }
+                 // If the tenant is incomplete, continue multi-step flow
+                 if (currentPhase >= 3) currentPhase = 0;
+                 const task = getTaskByTenantId(id);
+                 if (task) currentPhase = task.phase;
+             } else if (type === 'owner') {
+                 // Owners do not have phases, always edit (Point 4)
+                 renderForm(id, 0, 'owner');
+                 return;
+             }
+             renderForm(id, currentPhase, type);
+         }
 
         // ===================================
         // Detail View Navigators
@@ -867,11 +893,13 @@
                 const aComplete = a.phase && a.phase > 2;
                 const bComplete = b.phase && b.phase > 2;
                 
+                // 1. 优先显示未完成的 (Incomplete properties on top)
                 if (aComplete !== bComplete) return aComplete ? 1 : -1;
                 
+                // 2. 都是已完成的情况下，Vacant 排在 Rented 前面
                 if (aComplete && bComplete) {
-                    if (a.status === 'Rented' && b.status !== 'Rented') return -1;
-                    if (a.status !== 'Rented' && b.status === 'Rented') return 1;
+                    if (a.status === 'Vacant' && b.status !== 'Vacant') return -1; // Vacant 往前排
+                    if (a.status !== 'Vacant' && b.status === 'Vacant') return 1;
                 }
                 return 0; 
             });
@@ -895,12 +923,14 @@
                     action = `onclick="window.app.viewPropertyDetails('${p.id}');"`;
                 }
 
+                // 获取租客名字 (如果存在)
+                const tenant = getTenantById(p.tenantId);
+                const tenantName = tenant ? tenant.fullName : 'Tenant N/A';
+
                 const propName = p.name && p.name.trim() !== '' ? p.name : 'Property Name N/A';
                 const propAddress = p.address || 'Address N/A';
-                const propRent = p.monthlyRent ? `RM${p.monthlyRent.toLocaleString()}` : null;
-                const tenant = p.tenantId ? getTenantById(p.tenantId) : null;
-                const rooms = (p.rooms || p.rooms === 0) ? p.rooms : null;
-                const baths = (p.bathrooms || p.bathrooms === 0) ? p.bathrooms : null;
+                const propRent = p.monthlyRent ? `RM${p.monthlyRent.toLocaleString()}` : 'N/A';
+                const propSize = p.sizeSqft ? `${p.sizeSqft.toLocaleString()} sqft` : 'N/A';
                 
                 listContainer.innerHTML += `
                     <div class="${cardClass}" ${action}>
@@ -912,21 +942,24 @@
                             <div class="detail-line address">
                                 <p class="detail-item"><strong>Address:</strong> ${propAddress}</p>
                             </div>
+                            
                             ${isComplete ? (
-                                p.status === 'Rented' && tenant ? `
-                                    <div class="detail-line" style="justify-content: space-between; gap: 10px;">
-                                        <p class="detail-item" style="width: 100%;"><strong>Tenant:</strong> ${tenant.fullName || 'Tenant'}</p>
+                                p.status === 'Rented' ? `
+                                    <div class="detail-line" style="margin-top: 5px;">
+                                        <p class="detail-item" style="color: #333; font-weight: 500;">
+                                            <span class="material-icons-round" style="font-size: 16px; vertical-align: text-bottom; margin-right: 4px; color: #155724;">person</span>
+                                            <strong>Tenant:</strong> ${tenantName}
+                                        </p>
                                     </div>
                                 ` : `
                                     <div class="detail-line rent-specs" style="justify-content: space-between; gap: 10px;">
-                                        ${propRent ? `<p class=\"detail-item\" style=\"width: 33%;\"><strong>Rent:</strong> ${propRent}</p>` : ''}
-                                        ${rooms !== null ? `<p class=\"detail-item\" style=\"width: 33%;\"><strong>Rooms:</strong> ${rooms}</p>` : ''}
-                                        ${baths !== null ? `<p class=\"detail-item\" style=\"width: 33%;\"><strong>Bathrooms:</strong> ${baths}</p>` : ''}
+                                        <p class="detail-item" style="width: 45%;"><strong>Rent:</strong> ${propRent}</p>
+                                        <p class="detail-item" style="width: 45%;"><strong>Size:</strong> ${propSize}</p>
                                     </div>
                                 `
                             ) : `<p style="color: #e65100;">Missing Rental/Spec Details. Click to continue.</p>`}
                         </div>
-                        </div>
+                    </div>
                 `;
             });
         }
@@ -976,12 +1009,14 @@
 
             tenants.forEach(t => {
                 const associatedProperty = properties.find(p => p.tenantId === t.id);
-                const isComplete = t.phase && t.phase >= 3; // Phase 3 means complete setup (uploaded agreement)
+                // 【修改】：将 >= 3 改为 >= 4
+                const isComplete = t.phase && t.phase >= 4; 
 
                 let statusText;
                 let statusClass;
                 let action;
-                let phaseDisplay = t.phase < 3 ? `${t.phase}/3 complete` : 'Setup Complete';
+                // 【修改】：显示的进度分母改为 4
+                let phaseDisplay = t.phase < 4 ? `${t.phase}/4 complete` : 'Setup Complete';
 
 
                 if (associatedProperty) {
@@ -998,10 +1033,14 @@
                     action = `onclick="window.app.viewTenantDetails('${t.id}');"`;
                 }
                 
+                const displayName = t.preferredName 
+                    ? `${t.fullName} (${t.preferredName})` 
+                    : (t.fullName || 'Tenant Name N/A');
+
                 listContainer.innerHTML += `
                     <div class="property-card ${statusClass === 'status-incomplete' ? 'incomplete-details' : ''}" ${action}>
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <h4>${t.fullName || 'Tenant Name N/A'}</h4>
+                            <h4>${displayName}</h4>
                             <span class="status-tag-prop ${statusClass}">${statusText}</span>
                         </div>
                         <div class="property-details-section">
@@ -1157,11 +1196,11 @@
                                 <p class="detail-value">${tenant.phone || '-'}</p>
                             </div>
                             <div class="detail-item-aligned">
-                                <p class="detail-label">Lease Start</p>
+                                <p class="detail-label">Tenancy Start</p>
                                 <p class="detail-value">${tenant.leaseStart || '-'}</p>
                             </div>
                             <div class="detail-item-aligned">
-                                <p class="detail-label">Lease End</p>
+                                <p class="detail-label">Tenancy End</p>
                                 <p class="detail-value">${tenant.leaseEnd || '-'}</p>
                             </div>
                         ` : '<p class="detail-value" style="color: #999;">No tenant is currently assigned to this property.</p>'}
@@ -1176,13 +1215,11 @@
             
             const associatedProperties = properties.filter(p => p.ownerId === owner.id);
             const propList = associatedProperties.map(p => 
-                `<div class="detail-item-full" style="margin-bottom: 6px;">
-                    <p class="detail-value" style="font-size: 15px; margin: 0;">
-                        <a href="#" onclick="window.app.viewPropertyDetails('${p.id}'); return false;">
-                            ${p.name} (${p.status})
-                        </a>
-                    </p>
-                 </div>`
+                `<p class="detail-value" style="font-size: 15px; margin-bottom: 5px;">
+                    <a href="#" onclick="window.app.viewPropertyDetails('${p.id}'); return false;">
+                        ${p.name} (${p.status})
+                    </a>
+                 </p>`
             ).join('');
 
             const content = document.getElementById('ownerDetailContent');
@@ -1243,6 +1280,10 @@
                             <p class="detail-value">${tenant.fullName || '-'}</p>
                         </div>
                         <div class="detail-item-aligned">
+                            <p class="detail-label">Preferred Name</p>
+                            <p class="detail-value">${tenant.preferredName || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
                             <p class="detail-label">Phone Number</p>
                             <p class="detail-value">${tenant.phone || '-'}</p>
                         </div>
@@ -1254,12 +1295,18 @@
                             <p class="detail-label">IC/Passport</p>
                             <p class="detail-value">${tenant.icPassport || '-'}</p>
                         </div>
+                        
+                        <div class="detail-item-full" style="margin-top: 5px;">
+                            <p class="detail-label">Registered Address</p>
+                            <p class="detail-value">${tenant.regAddress || '-'}</p>
+                        </div>
+
                         <div class="detail-item-aligned">
-                            <p class="detail-label">Lease Start</p>
+                            <p class="detail-label">Tenancy Start</p>
                             <p class="detail-value">${tenant.leaseStart || '-'}</p>
                         </div>
                         <div class="detail-item-aligned">
-                            <p class="detail-label">Lease End</p>
+                            <p class="detail-label">Tenancy End</p>
                             <p class="detail-value">${tenant.leaseEnd || '-'}</p>
                         </div>
                         <div class="detail-item-full">
@@ -1372,21 +1419,12 @@
                             <input type="number" id="p-rent" name="monthlyRent" value="${existingData.monthlyRent || ''}" required>
                         </div>
                         
-                         ${isEditMode ? `
-                            <div class="detail-item-full form-group" style="margin-top: 15px;">
-                                <label for="p-status">Rental Status <span style="color:red">*</span></label>
-                                <select id="p-status" name="status" required onchange="window.app.checkSelectPlaceholder(this.id)">
-                                    <option value="" disabled ${!existingData.status ? 'selected' : ''}>Select Status</option>
-                                    <option value="Vacant" ${existingData.status === 'Vacant' ? 'selected' : ''}>Vacant</option>
-                                    <option value="Rented" ${existingData.status === 'Rented' ? 'selected' : ''}>Rented</option>
-                                </select>
-                            </div>
-                        ` : ''}
+
                     </div>
                 </div>
             `;
 
-            // Specification (reordered: Rooms/Bathrooms first row, then Size/Carpark)
+            // Specification
             let specHtml = `
                 <div class="detail-card">
                      <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">SPECIFICATIONS</h3>
@@ -1399,6 +1437,7 @@
                             <label for="p-bathrooms">No. of Bathrooms <span style="color:red">*</span></label>
                             <input type="number" id="p-bathrooms" name="bathrooms" value="${existingData.bathrooms || ''}" required>
                         </div>
+
                         <div class="detail-item-aligned form-group">
                             <label for="p-size">Size (Sqft)</label>
                             <input type="number" id="p-size" name="sizeSqft" value="${existingData.sizeSqft || ''}">
@@ -1457,14 +1496,16 @@
 
 
         function handleFormSubmit(e) {
-             e.preventDefault();
+            e.preventDefault();
             
             const currentId = document.getElementById('currentId').value;
             const currentPhase = document.getElementById('currentFormPhase').value;
             const currentFormType = document.getElementById('currentFormType').value;
             const formEl = document.getElementById('dataEntryForm');
+            // 获取我们在 renderForm 中绑定的简单编辑状态
             const isSimpleTenantEdit = formEl && formEl.dataset && formEl.dataset.simpleEdit === 'true';
-            const formData = new FormData(formEl);
+            
+            const formData = new FormData(e.target);
             
             const updateData = {};
             for (let [key, value] of formData.entries()) {
@@ -1477,80 +1518,143 @@
                 }
             }
             
+            // --- 1. Owner Logic ---
             if (currentFormType === 'owner') {
-                createOwnerHandler(formData); // This handles save/update logic
+                createOwnerHandler(formData); 
                 return;
             }
 
-            // Tenant Multi-Step Logic
+            // --- 2. Tenant Logic ---
             if (currentFormType === 'tenant') {
                  const tenant = getTenantById(currentId);
                  const task = getTaskByTenantId(currentId);
-                 // Simple edit path: update basic info only and return to tenant list
+                 
+                 // 情况 A: 简单编辑 (Edit Profile) -> 保存并返回列表
                  if (isSimpleTenantEdit) {
-                    saveTenantData(currentId, { ...(tenant || {}), ...updateData, created: true, phase: tenant && tenant.phase ? tenant.phase : 3 });
+                    saveTenantData(currentId, { ...(tenant || {}), ...updateData, phase: tenant && tenant.phase ? tenant.phase : 4 });
                     saveData();
-                    window.app.simpleTenantEdit = false;
                     alertMessage('Tenant updated.', 'success');
-                    // 返回到 Tenant Profile 页面
-                    viewTenantDetails(currentId);
+                    switchView('property');
+                    switchPropertyTab('tenant');
                     return;
                  }
+
+                 // 情况 B: 创建流程 (Multi-step Setup)
                  const nextPhase = parseInt(currentPhase) + 1;
                  
                  if (currentPhase === '0') {
+                    // Step 1 -> 2
                     saveTenantData(currentId, {...updateData, phase: nextPhase});
-                    updateTaskData(`task-${currentId}`, { id: `task-${currentId}`, type: 'tenant_setup', tenantId: currentId, phase: nextPhase, description: `Setup Tenancy for ${updateData.fullName || 'New Tenant'}`, details: 'Step 2/3: Send and await signed tenancy agreement.', status: 'in_progress', userId: currentUserId });
-                    renderForm(currentId, nextPhase, 'tenant');
-                } else if (currentPhase === '1') {
-                    // ⬇️ 关键修改 START：确保现有 tenant 数据被保留
-                    saveTenantData(currentId, { ...tenant, phase: nextPhase }); 
-                    // 若任务不存在，则创建；存在则更新
-                    const taskId = task && task.id ? task.id : `task-${currentId}`;
-                    updateTaskData(taskId, {
-                        id: taskId,
-                        type: 'tenant_setup',
-                        tenantId: currentId,
-                        phase: nextPhase,
-                        details: 'Step 3/3: Upload the signed tenancy agreement.',
-                        status: 'in_progress',
-                        userId: currentUserId
+                    // 创建任务
+                    updateTaskData(`task-${currentId}`, { 
+                        id: `task-${currentId}`, 
+                        type: 'tenant_setup', 
+                        tenantId: currentId, 
+                        phase: nextPhase, 
+                        description: `Setup Tenancy for ${updateData.fullName || 'New Tenant'}`, 
+                        details: 'Step 2/3: Send and await signed tenancy agreement.', 
+                        status: 'in_progress', 
+                        userId: currentUserId 
                     });
                     renderForm(currentId, nextPhase, 'tenant');
+
+                } else if (currentPhase === '1') {
+                    // Step 2 -> 3
+                    saveTenantData(currentId, { ...tenant, phase: nextPhase }); 
+                    updateTaskData(task.id, { phase: nextPhase, details: 'Step 3/4: Upload the signed tenancy agreement.' });
+                    renderForm(currentId, nextPhase, 'tenant');
+
                 } else if (currentPhase === '2') {
+                    // Step 3 -> 4 (Upload -> Assign)
                     const agreementFile = document.getElementById('t-agreementFile').files[0];
-                    if (!agreementFile) { alertMessage('Please upload the signed Tenancy Agreement.', 'error'); return; }
-                    const fileName = agreementFile.name;
-                    // ⬇️ 关键修改 START：确保现有 tenant 数据被保留
-                    saveTenantData(currentId, { ...tenant, ...updateData, agreementFile: fileName, created: true, phase: nextPhase });
-                    // ⬆️ 关键修改 END
-                    tasks = tasks.filter(t => t.id !== task.id);
-                    saveData();
-                    alertMessage(`Tenant ${tenant.fullName || 'Tenant'} setup successfully!`, 'success');
-                    switchView('property'); 
-                    switchPropertyTab('tenant');
-                }
+                    const fileName = agreementFile ? agreementFile.name : (tenant.agreementFile || '');
+                    
+                    if (!fileName) { alertMessage('Please upload the signed Tenancy Agreement.', 'error'); return; }
+                    
+                    saveTenantData(currentId, { ...tenant, ...updateData, agreementFile: fileName, phase: 3 });
+                    updateTaskData(task.id, { phase: 3, details: 'Step 4/4: Assign tenant to a property.' });
+                    renderForm(currentId, 3, 'tenant');
+                    
+                } else if (currentPhase === '3') {
+                    // --- PHASE 3: Assign Property & Complete ---
+                    
+                    // 1. 定义最终完成的逻辑 (封装起来)
+                    const finalizeSetup = () => {
+                        const assignedPropId = document.getElementById('t-assignProperty').value;
+                        
+                        // 标记租客为 Phase 4 (Setup Complete)
+                        saveTenantData(currentId, { ...tenant, phase: 4 });
+                        
+                        if (assignedPropId) {
+                            const prop = getPropertyById(assignedPropId);
+                            if (prop) {
+                                updatePropertyData(assignedPropId, { 
+                                    ...prop, 
+                                    tenantId: currentId, 
+                                    status: 'Rented',
+                                    phase: 3 
+                                });
+                                // 创建收租任务
+                                if (window.app.createFirstRentTask) {
+                                    window.app.createFirstRentTask(assignedPropId, prop.name);
+                                } else {
+                                    createFirstRentTask(assignedPropId, prop.name);
+                                }
+                            }
+                        }
+
+                        if (task) { tasks = tasks.filter(t => t.id !== task.id); }
+                        saveData();
+                        alertMessage(`Tenant ${tenant.fullName || 'Tenant'} setup complete!`, 'success');
+                        switchView('property'); 
+                        switchPropertyTab('tenant');
+                    };
+					
+					showConfirmation(
+                        'Confirm Tenant Details', 
+                        'Confirm the tenants’ details are correct. Tenancy Agreement will be generated after this.', 
+                        (confirmed) => {
+                            // 只有点击了 Confirmed 才执行保存
+                            if (confirmed) finalizeSetup();
+                        },
+                        'Confirmed', 
+                        'btn-confirm btn-primary-modal' 
+                    );
+					
+				}
                 return;
             }
 
-            // Property Logic 
+            // --- 3. Property Logic ---
             const prop = getPropertyById(currentId);
             const task = getTaskByPropId(currentId);
             
             if (currentPhase === '0') {
                 const selectedOwnerId = document.getElementById('selectedOwnerId').value;
                 if (!selectedOwnerId) { alertMessage('Please select or create an Owner Profile first.', 'error'); return; }
+                
                 updatePropertyData(currentId, {...updateData, phase: 1, ownerId: selectedOwnerId});
-                // 仅在用户点击 Next（提交）时创建/更新任务
-                const taskId = task?.id || `task-${currentId}`;
-                updateTaskData(taskId, { id: taskId, type: 'property', propId: currentId, phase: 1, description: `Fill in details for New Property`, details: 'Step 2/2: Fill basic details.', status: 'in_progress', userId: currentUserId });
+                
+                // 创建任务 (Task Step 2/2)
+                updateTaskData(`task-${currentId}`, { 
+                     id: `task-${currentId}`, 
+                     type: 'property', 
+                     propId: currentId, 
+                     phase: 1, 
+                     description: 'Setup New Property', 
+                     details: 'Step 2/2: Basic Property Details.', 
+                     status: 'in_progress', 
+                     userId: currentUserId 
+                 });
+
                 renderForm(currentId, 1, 'property'); 
             } 
             else if (currentPhase === '1') {
-                // Requirement: finalize property here, default status Vacant
                 showLoading();
                 const propName = (updateData.name && updateData.name.trim() !== '') ? updateData.name : (prop && prop.name) ? prop.name : 'New Property';
+                // 默认状态为 Vacant，且 Phase 3 代表完成
                 updatePropertyData(currentId, { ...(prop || {}), ...updateData, phase: 3, status: 'Vacant' });
+                
                 if (task) { tasks = tasks.filter(t => t.id !== task.id); }
                 saveData();
                 alertMessage(`Property "${propName}" saved successfully!`, 'success');
@@ -1559,18 +1663,29 @@
                 hideLoading();
             }
             else if (currentPhase === '3') {
-                // Phase 3 Edit Mode (Point 3)
+                // Phase 3: Edit Mode
                 showLoading();
                 const oldTenantId = prop.tenantId;
                 const newTenantId = document.getElementById('p-tenantId')?.value || '';
                 
-                // Update Property data
-                updatePropertyData(currentId, {...updateData, phase: 3, status: updateData.status || 'Vacant', tenantId: newTenantId});
+                // 自动判断状态：有租客=Rented，无租客=Vacant
+                const autoStatus = newTenantId ? 'Rented' : 'Vacant';
+
+                updatePropertyData(currentId, {
+                    ...updateData, 
+                    phase: 3, 
+                    status: autoStatus, 
+                    tenantId: newTenantId
+                });
                 
-                // If a new tenant is assigned, create the recurring rent task
+                // 如果分配了新租客，创建收租任务
                 if (newTenantId && newTenantId !== oldTenantId) {
                      alertMessage('Tenant successfully assigned. Creating monthly rent reminder task.', 'info');
-                     createFirstRentTask(currentId, updateData.name || prop.name);
+                     if (window.app.createFirstRentTask) {
+                        window.app.createFirstRentTask(currentId, updateData.name || prop.name);
+                     } else {
+                        createFirstRentTask(currentId, updateData.name || prop.name);
+                     }
                 }
                 
                 saveData(); 
@@ -1584,6 +1699,8 @@
             const formTitle = document.getElementById('formTitle');
             const formFields = document.getElementById('formFields');
             const form = document.getElementById('dataEntryForm');
+			
+			form.onsubmit = window.app.handleFormSubmit;
             
             document.getElementById('currentFormType').value = type;
             document.getElementById('currentFormPhase').value = phase;
@@ -1601,7 +1718,7 @@
                     <div class="detail-card">
                         <div class="detail-group">
                             <div class="detail-item-full form-group">
-                                <label for="p-fullName">Full Name <span style="color:red">*</span></label>
+                                <label for="p-fullName">Full Name (as per NRIC/Passport) <span style="color:red">*</span></label>
                                 <input type="text" id="p-fullName" name="fullName" value="${existingData.fullName || ''}" required>
                             </div>
                             <div class="detail-item-aligned form-group">
@@ -1645,38 +1762,50 @@
                  let formTitleText = '';
                  let submitButtonText = '';
                  let fieldsHTML = '';
-                 const simpleEdit = window.app.simpleTenantEdit === true && existingData.created === true;
-                 form.dataset.simpleEdit = simpleEdit;
-                
-                if (phase === 0) {
+                 const simpleEdit = window.app.simpleTenantEdit === true;
+                 
+				 document.getElementById('dataEntryForm').dataset.simpleEdit = simpleEdit;
+				 
+                 if (phase === 0) {
                     formTitleText = simpleEdit ? 'Edit Tenant' : '1/3: Basic Tenant Information';
                     submitButtonText = simpleEdit ? 'Save Changes' : 'Save & Next';
                     fieldsHTML = `
                         <div class="detail-card">
-                            <p style="color: #666; margin-top: 0;">Fill in the tenant's key details.</p>
                             <div class="detail-group">
                                 <div class="detail-item-full form-group">
-                                    <label for="t-fullName">Full Name <span style="color:red">*</span></label>
+                                    <label for="t-fullName">Full Name (as per NRIC/Passport) <span style="color:red">*</span></label>
                                     <input type="text" id="t-fullName" name="fullName" value="${existingData.fullName || ''}" required>
                                 </div>
+                                
+                                <div class="detail-item-full form-group">
+                                    <label for="t-preferredName">Preferred Name</label>
+                                    <input type="text" id="t-preferredName" name="preferredName" value="${existingData.preferredName || ''}" >
+                                </div>
+
                                 <div class="detail-item-aligned form-group">
                                     <label for="t-phone">Phone Number <span style="color:red">*</span></label>
                                     <input type="tel" id="t-phone" name="phone" value="${existingData.phone || ''}" required>
                                 </div>
                                 <div class="detail-item-aligned form-group">
-                                    <label for="t-email">Email Address</label>
-                                    <input type="email" id="t-email" name="email" value="${existingData.email || ''}">
+                                    <label for="t-email">Email Address <span style="color:red">*</span></label>
+                                    <input type="email" id="t-email" name="email" value="${existingData.email || ''}" required>
                                 </div>
                                 <div class="detail-item-full form-group">
                                     <label for="t-icPassport">IC/Passport Number <span style="color:red">*</span></label>
                                     <input type="text" id="t-icPassport" name="icPassport" value="${existingData.icPassport || ''}" required>
                                 </div>
+
+                                <div class="detail-item-full form-group">
+                                    <label for="t-regAddress">Registered Address (as stated on NRIC/Passport) <span style="color:red">*</span></label>
+                                    <input type="text" id="t-regAddress" name="regAddress" value="${existingData.regAddress || ''}">
+                                </div>
+
                                 <div class="detail-item-aligned form-group">
-                                    <label for="t-leaseStart">Lease Start Date</label>
+                                    <label for="t-leaseStart">Tenancy Start Date</label>
                                     <input type="date" id="t-leaseStart" name="leaseStart" value="${existingData.leaseStart || ''}">
                                 </div>
                                 <div class="detail-item-aligned form-group">
-                                    <label for="t-leaseEnd">Lease End Date</label>
+                                    <label for="t-leaseEnd">Tenancy End Date</label>
                                     <input type="date" id="t-leaseEnd" name="leaseEnd" value="${existingData.leaseEnd || ''}">
                                 </div>
                             </div>
@@ -1684,31 +1813,32 @@
                     `;
                  } else if (phase === 1) {
                     formTitleText = '2/3: Send Tenancy Agreement';
-                    submitButtonText = 'Next';
+                    submitButtonText = 'Next: Upload Agreement';
                     fieldsHTML = `
                         <div class="detail-card">
-                            <p style="color:#666; margin: 0 0 10px; font-size: 14px;">Please confirm the recipient before sending the tenancy agreement.</p>
-                            <div class="detail-item-full" style="margin-bottom: 8px;">
-                                <p class="detail-label" style="margin-bottom: 2px;">Tenant</p>
-                                <p class="detail-value" style="font-size: 16px; color:#3A86FF;">${existingData.fullName || 'N/A'}</p>
+                            <p style="color: #666; margin-top: 0;">Tenancy Agreement needs to be sent to the tenant for signing.</p>
+                            <div class="detail-item-full form-group">
+                                <label>Tenant: ${existingData.fullName || 'N/A'}</label>
+                                <p style="font-size: 14px; color: #3A86FF;">
+                                    Contact: ${existingData.phone || 'N/A'}
+                                </p>
                             </div>
-                            <div class="detail-item-full" style="margin-bottom: 8px;">
-                                <p class="detail-label" style="margin-bottom: 2px;">Contact</p>
-                                <p class="detail-value" style="font-size: 16px;">${existingData.phone || 'N/A'}</p>
-                            </div>
-                            <a href="#" class="submit-btn" style="background-color: #25d366; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box;" onclick="window.app.alertMessage('Simulating WhatsApp message sent!', 'success'); return false;">
-                                <span class="material-icons-round" style="vertical-align: middle;">chat</span>
+                            
+                            <a href="#" class="submit-btn" style="background-color: #25d366; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; box-sizing: border-box;" onclick="window.app.alertMessage('Simulating WhatsApp message sent!', 'success'); return false;">
+                                <span class="material-icons-round" style="font-size: 20px;">chat</span> 
                                 Send via WhatsApp
                             </a>
-                            <a href="#" class="submit-btn" style="background-color: #f7931e; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 100%; box-sizing: border-box;" onclick="window.app.alertMessage('Simulating Email sent!', 'success'); return false;">
-                                <span class="material-icons-round" style="vertical-align: middle;">mail</span>
+                            
+                            <a href="#" class="submit-btn" style="background-color: #f7931e; display: flex; justify-content: center; align-items: center; gap: 8px; text-decoration: none; box-sizing: border-box;" onclick="window.app.alertMessage('Simulating Email sent!', 'success'); return false;">
+                                <span class="material-icons-round" style="font-size: 20px;">email</span> 
                                 Send via Email
                             </a>
                         </div>
                     `;
-                } else if (phase === 2) {
-                    formTitleText = '3/3: Upload Signed Agreement';
-                    submitButtonText = 'Complete Tenant Setup';
+                 } else if (phase === 2) {
+                    formTitleText = '3/4: Upload Signed Agreement';
+                    // 【修改】：按钮文字改为 Next
+                    submitButtonText = 'Next: Assign Property';
 
                     fieldsHTML = `
                         <div class="detail-card">
@@ -1716,7 +1846,7 @@
                             
                             <div class="detail-item-full form-group">
                                 <label for="t-agreementFile">Tenancy Agreement File <span style="color:red">*</span></label>
-                                <input type="file" id="t-agreementFile" name="agreementFile" required>
+                                <input type="file" id="t-agreementFile" name="agreementFile" ${existingData.agreementFile ? '' : 'required'}>
                             </div>
                             
                             ${existingData.agreementFile ? `
@@ -1726,6 +1856,40 @@
                                         <span class="material-icons-round">insert_drive_file</span> ${existingData.agreementFile}
                                     </a>
                                 </p>
+                            ` : ''}
+                        </div>
+                    `;
+                 } else if (phase === 3) {
+                    // --- PHASE 3: 界面渲染 ---
+                    formTitleText = '4/4: Assign Property';
+                    submitButtonText = 'Complete Tenant Setup';
+                    
+                    // 过滤出所有空置的房产 (没有 tenantId) 或者是当前已经分配给该租客的房产
+                    const availableProperties = properties.filter(p => !p.tenantId || p.tenantId === id);
+                    
+                    // 生成选项 HTML
+                    const propOptions = availableProperties.map(p => 
+                        `<option value="${p.id}" ${p.tenantId === id ? 'selected' : ''}>${p.name} (${p.status || 'Vacant'})</option>`
+                    ).join('');
+
+                    fieldsHTML = `
+                        <div class="detail-card">
+                            <p style="color: #666; margin-top: 0;">Select a property to assign this tenant to immediately.</p>
+                            
+                            <div class="detail-item-full form-group">
+                                <label for="t-assignProperty">Assign to Property</label>
+                                <select id="t-assignProperty" name="assignProperty" class="placeholder-text" onchange="window.app.checkSelectPlaceholder(this.id)">
+                                    <option value="" ${availableProperties.length === 0 ? 'selected' : ''}>-- Select a Property (Optional) --</option>
+                                    ${propOptions}
+                                </select>
+                            </div>
+                            
+                            ${availableProperties.length === 0 ? `
+                                <div class="detail-item-full form-group" style="margin-top: 10px;">
+                                    <p style="font-size: 13px; color: #e65100; background: #fff3cd; padding: 8px; border-radius: 6px;">
+                                        Note: No vacant properties available. You can complete setup now and assign later from the Property details.
+                                    </p>
+                                </div>
                             ` : ''}
                         </div>
                     `;
@@ -1755,7 +1919,7 @@
 
             // --- PHASE 0: OWNER SELECTION/CREATION ---
             if (phase === 0) {
-                formTitle.textContent = '0/2: Select Property Owner';
+                formTitle.textContent = '1/2: Select Property Owner';
                 if (!currentOwnerId) document.getElementById('selectedOwnerId').value = ''; 
 
                 fieldsHTML = `
@@ -1779,7 +1943,7 @@
             }
             // --- PHASE 1: BASIC PROPERTY DETAILS ---
             else if (phase === 1) {
-                formTitle.textContent = '1/2: Basic Property Details'; 
+                formTitle.textContent = '2/2: Basic Property Details'; 
                 // Requirement: Finalize on this step
                 submitButtonText = 'Save Property';
                 
@@ -1861,11 +2025,9 @@
             }
             
             // Inject submit button after fields for all phases
-            const isTenantPhase1 = (type === 'tenant' && String(phase) === '1');
-            const buttonTypeAttr = isTenantPhase1 ? 'button' : 'submit';
             fieldsHTML += `
 				<div class="form-footer">
-					<button type="${buttonTypeAttr}" class="submit-btn" id="formSubmitButton" form="dataEntryForm" 
+					<button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm" 
 						${phase === 0 && !currentOwnerId && !document.getElementById('selectedOwnerId').value ? 'disabled' : ''}>
 						${submitButtonText}
 					</button>
@@ -1873,72 +2035,11 @@
 			`;
             
             formFields.innerHTML = fieldsHTML;
-            
-            switchView('form'); 
+			
+			switchView('form'); 
             // ensure we clear any simple edit flag for non-tenant forms
             if (type !== 'tenant') {
                 document.getElementById('dataEntryForm').dataset.simpleEdit = 'false';
-            }
-            // For tenant forms, persist simple edit flag to dataset for submit handling
-            if (type === 'tenant') {
-                document.getElementById('dataEntryForm').dataset.simpleEdit = (window.app.simpleTenantEdit === true) ? 'true' : 'false';
-            }
-
-            // Bind submit handler to prevent reload and run SPA logic
-            if (form) {
-                form.onsubmit = window.app.handleFormSubmit;
-                // Prevent Enter key from submitting unexpectedly
-                form.addEventListener('keydown', function(ev) {
-                    if (ev.key === 'Enter') {
-                        ev.preventDefault();
-                    }
-                });
-                // Disable native validation popup to keep SPA flow
-                form.setAttribute('novalidate', 'novalidate');
-            }
-
-            // Extra safety: explicitly bind click on the Next/Save button to prevent default navigation
-            const submitBtn = document.getElementById('formSubmitButton');
-            if (submitBtn) {
-                submitBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // Fast-path: ensure tenant phase 1 advances even if submit event is intercepted elsewhere
-                    const currentType = document.getElementById('currentFormType').value;
-                    const currentPhaseVal = document.getElementById('currentFormPhase').value;
-                    const currentIdVal = document.getElementById('currentId').value;
-                    if (currentType === 'tenant' && String(currentPhaseVal) === '1') {
-                        const tenant = getTenantById(currentIdVal) || {};
-                        const nextPhase = 2;
-                        saveTenantData(currentIdVal, { ...tenant, phase: nextPhase });
-                        const existingTask = getTaskByTenantId(currentIdVal);
-                        const taskId = existingTask && existingTask.id ? existingTask.id : `task-${currentIdVal}`;
-                        updateTaskData(taskId, {
-                            id: taskId,
-                            type: 'tenant_setup',
-                            tenantId: currentIdVal,
-                            phase: nextPhase,
-                            details: 'Step 3/3: Upload the signed tenancy agreement.',
-                            status: 'in_progress',
-                            userId: currentUserId
-                        });
-                        renderForm(currentIdVal, nextPhase, 'tenant');
-                        return false;
-                    }
-                    window.app.handleFormSubmit(e);
-                    return false;
-                });
-            }
-
-            // Delegate: prevent default navigation for any placeholder links inside form view
-            const formViewContent = document.querySelector('.form-view-content');
-            if (formViewContent) {
-                formViewContent.addEventListener('click', function(ev) {
-                    const target = ev.target.closest('a');
-                    if (target && target.getAttribute('href') === '#') {
-                        ev.preventDefault();
-                    }
-                });
             }
 
             // CRITICAL: Handle Phase 0 owner selection styling/state
@@ -1963,7 +2064,7 @@
 			}
 
 			saveOwnerData(ownerId, data);
-			alertMessage(`Owner ${data.fullName || ''} saved successfully.`, 'success');
+			alertMessage(`Owner profile created successfully.`, 'success');
 
 			// Check if we came from the Property Phase 0 flow
 			const selectedOwnerIdField = document.getElementById('selectedOwnerId');
@@ -2013,6 +2114,7 @@
             viewTenantDetails: viewTenantDetails,
             renderForm: renderForm, 
             sendRentReminder: sendRentReminder, // (Point 3)
+			createFirstRentTask: createFirstRentTask,
             selectOwner: function(ownerId) { 
                 document.getElementById('selectedOwnerId').value = ownerId;
                 document.getElementById('formSubmitButton').disabled = false;
@@ -2106,11 +2208,6 @@
         };
 
         // Start the application on window load
-        document.addEventListener('submit', function(ev){ ev.preventDefault(); }, true);
-        document.addEventListener('click', function(ev){
-            const btn = ev.target.closest('button[type="submit"]');
-            if (btn) { ev.preventDefault(); window.app.handleFormSubmit(ev); }
-        }, true);
         window.onload = window.app.startApp;
     </script>
 </body>
