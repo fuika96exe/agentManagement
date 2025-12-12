@@ -32,7 +32,7 @@ body {
 
 /* Task Section */
 .task-section { 
-    padding: 16px;
+    padding: 5px 16px 16px 16px !important;
 }
 .task-section h2 { 
     font-size: 18px;
@@ -726,4 +726,620 @@ body {
     align-items: center;
     gap: 5px;
     margin-top: 5px;
+}
+
+/* 容器：垂直居中布局 */
+.empty-state-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    background-color: transparent;
+}
+
+/* 图片包装与样式 */
+.empty-state-img-wrapper {
+    width: 160px;  /* 根据需要调整插画大小 */
+    height: 160px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 如果你的图片没有背景，可以加一个淡淡的圆背景来模拟截图效果 */
+    background-color: #eef4ff; 
+    border-radius: 50%;
+}
+
+.empty-state-img-wrapper img {
+    width: 60%; /* 图片在圆圈内的大小 */
+    height: auto;
+    object-fit: contain;
+}
+
+/* 标题样式 */
+.empty-state-container h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+}
+
+/* 副标题文字样式 */
+.empty-state-container p {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+    max-width: 260px; /* 限制宽度让文字自动换行，更好看 */
+}
+
+/* 蓝色大按钮样式 */
+.empty-state-btn {
+    background-color: #3A86FF;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px; /* 稍微圆润一点 */
+    padding: 14px 0;
+    width: 100%;       /* 占满宽度 */
+    max-width: 280px;  /* 但不要太宽 */
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.empty-state-btn:active {
+    transform: scale(0.98);
+}
+.empty-state-btn:hover {
+    background-color: #2e6ad9;
+}
+
+.home-header {
+    padding: 20px 20px 10px;
+    background-color: #f0f2f5; /* 与背景融合，或者设为白色 */
+}
+.home-header h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 800;
+    color: #333;
+    letter-spacing: -0.5px;
+}
+.home-header p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #999;
+}
+
+/* ========== 扁平化操作卡片行 ========== */
+.action-card-row {
+    display: flex;
+    justify-content: space-between; /* 均匀分布 */
+    gap: 12px; /* 卡片之间的间距 */
+    padding: 10px 20px 5px; /* 底部留白多一点，与 Task 拉开距离 */
+    overflow-x: auto; /* 防止极小屏幕溢出 */
+}
+
+/* 卡片通用样式 */
+.flat-card {
+    flex: 1; /* 三个卡片等宽 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 16px 12px;
+    border-radius: 16px; /* 现代感大圆角 */
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    min-height: 100px; /* 保证卡片有一定高度 */
+    position: relative;
+    overflow: hidden;
+}
+
+/* 点击反馈 */
+.flat-card:active {
+    transform: scale(0.96);
+}
+
+/* 卡片内容排版 */
+.card-icon {
+    margin-bottom: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2); /* 半透明背景 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.card-icon .material-icons-round {
+    font-size: 22px;
+    color: white;
+}
+.card-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 2px;
+}
+.card-sub {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8); /* 略微透明的文字 */
+}
+
+/* ========== 颜色主题 (Flat Colors) ========== */
+
+/* 蓝色卡片 - Property */
+.card-blue {
+    background: linear-gradient(135deg, #3A86FF 0%, #2E6AD9 100%);
+    box-shadow: 0 8px 16px rgba(58, 134, 255, 0.25);
+}
+
+/* 紫色卡片 - Owner */
+.card-purple {
+    background: linear-gradient(135deg, #9B59B6 0%, #8E44AD 100%);
+    box-shadow: 0 8px 16px rgba(155, 89, 182, 0.25);
+}
+
+/* 绿色卡片 - Tenant */
+.card-green {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    box-shadow: 0 8px 16px rgba(46, 204, 113, 0.25);
+}
+
+/* ========== Task 区域微调 ========== */
+/* 为了配合上面的卡片，Task 区域上边距可以稍微调整 */
+.task-section h2 {
+    padding-top: 0; /* 去掉之前的 padding */
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+    padding-left: 5px;
+}
+
+.task-item.ready-to-complete {
+    background-color: #d4edda; /* 浅绿色背景 */
+    border-left: 5px solid #28a745; /* 绿色左边框 */
+}
+
+/* 完成按钮样式 */
+.btn-success {
+    background-color: #28a745 !important;
+    box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+}
+.btn-success:hover {
+    background-color: #218838 !important;
+}
+
+.vacant-cta {
+    border: 2px dashed #ccc;   /* 灰色虚线边框 */
+    background-color: #f8f9fa; /* 极淡的灰色背景 */
+    border-radius: 12px;
+    padding: 25px 15px;
+    text-align: center;
+    cursor: pointer;           /* 鼠标放上去变小手 */
+    transition: all 0.2s ease;
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ========== 详情页：顶部独立操作按钮 ========== */
+.primary-action-container {
+    margin-bottom: 16px; /* 与下方卡片拉开距离 */
+}
+
+.add-tenant-hero-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* 图标和文字的间距 */
+    background-color: #155724; /* 使用绿色，代表“入住/增加” */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(21, 87, 36, 0.2);
+    transition: transform 0.1s, background-color 0.2s;
+}
+
+.add-tenant-hero-btn:active {
+    transform: scale(0.98);
+}
+
+.add-tenant-hero-btn:hover {
+    background-color: #11451d;
+}
+
+.add-tenant-hero-btn .material-icons-round {
+    font-size: 22px;
+}
+
+.card-quick-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background-color: #e8f5e9; /* 浅绿色背景 */
+    color: #155724;            /* 深绿色文字 */
+    border: 1px solid #c3e6cb;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.card-quick-btn:hover {
+    background-color: #d4edda;
+}
+
+.card-quick-btn .material-icons-round {
+    font-size: 18px;
+}
+
+.card-quick-btn:active {
+    transform: scale(0.98);
+}
+
+/* ========== Quick Link Modal (Refined / 优化版) ========== */
+
+.quick-link-content {
+    background-color: #fff;
+    width: 85%;
+    max-width: 400px; /* 稍微宽一点，方便填表 */
+    
+    /* 关键修改：限制高度，超出的部分显示滚动条 */
+    max-height: 85vh; 
+    overflow-y: auto; 
+    
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; 
+    flex-direction: column;
+    position: relative;
+    
+    /* 隐藏滚动条但保留滚动功能 (Chrome/Safari) */
+    scrollbar-width: none; 
+}
+.quick-link-content::-webkit-scrollbar { 
+    display: none; 
+}
+
+/* 简单的表单分组标题样式 */
+.form-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #3A86FF;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 15px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 4px;
+}
+
+
+/* 2. 列表项样式优化 */
+.tenant-select-item {
+    display: flex;
+    align-items: center;
+    /* 1. 核心修改：上下内边距减小到 6px，大幅减少上下留白 */
+    padding: 10px 10px; 
+    
+    border: 1px solid #d0d0d0; 
+    border-radius: 8px;
+    margin-bottom: 8px; 
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tenant-select-item:hover {
+    border-color: #3A86FF;
+    background-color: #f0f7ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(58, 134, 255, 0.15);
+}
+
+.tenant-select-item:last-child {
+    border-bottom: 1px solid #d0d0d0; 
+    margin-bottom: 0;
+}
+
+.tenant-avatar-placeholder {
+    width: 32px; 
+    height: 32px;
+    font-size: 13px;
+    margin-right: 10px;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    color: #1976D2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* 2. 新增：强制控制文字区域布局 */
+.tenant-select-info {
+    display: flex;
+    flex-direction: column; /* 垂直排列 */
+    justify-content: center;
+    line-height: 1; /* 重置基础行高 */
+}
+
+/* 3. 名字样式调整 */
+.tenant-select-info h4 {
+    margin: 0;        /* 去除所有默认外边距 */
+    font-size: 15px;  /* 字体稍微调小一点点 */
+    color: #333;
+    line-height: 1.1; /* 紧凑行高 */
+    margin-bottom: 3px; /* 名字和 IC 之间只留 3px 的极小缝隙 (减少中间空隙) */
+}
+
+/* 4. IC 号码样式调整 */
+.tenant-select-info p {
+    margin: 0;        /* 去除所有默认外边距 */
+    font-size: 12px;
+    color: #888;      /* 稍微淡一点的灰色 */
+    line-height: 1.1; /* 紧凑行高 (减少下方空隙) */
+}
+
+/* ========== Owner Selection Phase Styles ========== */
+
+/* 1. 复用紧凑型卡片样式 (类似 Tenant) */
+.owner-select-card {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px; /*稍微圆一点*/
+    margin-bottom: 10px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.owner-select-card:hover {
+    border-color: #3A86FF;
+    background-color: #f5f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(58, 134, 255, 0.1);
+}
+
+/* 2. Owner 头像图标 */
+.owner-icon-placeholder {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%); /* 紫色系，区分于 Tenant 的蓝色 */
+    color: #8E44AD;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+/* 3. 文字区域 */
+.owner-card-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1;
+}
+
+.owner-card-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    color: #333;
+    font-weight: 600;
+}
+
+.owner-card-info p {
+    margin: 0;
+    font-size: 13px;
+    color: #666;
+}
+
+/* 4. 底部固定按钮容器 (Sticky Footer) */
+.sticky-footer-container {
+    position: fixed; /* 固定在视口 */
+    bottom: 0;
+    left: 0; 
+    width: 100%;
+    /* 配合你的容器最大宽度，确保在电脑上也居中 */
+    display: flex;
+    justify-content: center; 
+    padding: 0;
+    pointer-events: none; /* 容器本身不挡点击 */
+    z-index: 100;
+}
+
+.sticky-footer-content {
+    width: 100%;
+    max-width: 420px; /* 和你的 app container 宽度一致 */
+    background: linear-gradient(to top, #fff 80%, rgba(255,255,255,0)); /* 渐变背景 */
+    padding: 20px 20px 100px 20px; /* 底部留足空间 */
+    pointer-events: auto; /* 按钮恢复点击 */
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+}
+
+.create-owner-btn {
+    width: 100%;
+    background-color: #3A86FF;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(58, 134, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s;
+}
+
+.create-owner-btn:active {
+    transform: scale(0.98);
+}
+
+
+/* 4. 定义弹出动画 (Pop In) */
+@keyframes popIn {
+    from { 
+        transform: scale(0.9); 
+        opacity: 0; 
+    }
+    to { 
+        transform: scale(1); 
+        opacity: 1; 
+    }
+}
+
+.property-card-compact {
+    background-color: #fff;
+    padding: 12px 15px; /* 减小内边距 */
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 减小阴影，显得更平 */
+    border: 1px solid #f0f0f0; /* 更淡的边框 */
+    border-left: 4px solid #3A86FF; /* 保留左侧状态条 */
+    margin-bottom: 8px; /* 减小卡片间距 */
+    cursor: pointer;
+    transition: transform 0.1s;
+    position: relative;
+}
+
+.property-card-compact:active {
+    transform: scale(0.98);
+}
+
+/* 1. 第一行：名字 + 租金 (最重要信息) */
+.compact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline; /* 文字底部对齐 */
+    margin-bottom: 4px;
+}
+
+.compact-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 名字太长自动省略 */
+    max-width: 65%;
+}
+
+.compact-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #3A86FF;
+}
+
+/* 2. 第二行：地址 (辅助信息，灰色小字) */
+.compact-address {
+    font-size: 12px;
+    color: #999;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+}
+
+/* 3. 第三行：状态 + 租客/操作 (底部栏) */
+.compact-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed #f0f0f0; /* 虚线分割，更轻盈 */
+    padding-top: 6px;
+}
+
+/* 缩小版的状态标签 */
+.compact-status {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.status-rented { background-color: #e6ffed; color: #155724; }
+.status-vacant { background-color: #fff8e1; color: #b7791f; }
+
+/* 租客信息区 */
+.compact-tenant-info {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+}
+
+/* 极简版 "Link Tenant" 按钮 */
+.compact-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #e8f5e9;
+    color: #155724;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.empty-state-create-btn {
+    background-color: #3A86FF; /* 品牌蓝 */
+    color: white;
+    width: 80%; /* 不占满，稍微留白，显得精致 */
+    padding: 12px 20px;
+    border-radius: 50px; /* 胶囊型圆角，更现代 */
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* 图标和文字的间距 */
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3); /* 漂亮的投影 */
+    margin-top: 10px;
+}
+
+.empty-state-create-btn:hover {
+    background-color: #2e6ad9;
+    transform: translateY(-2px); /* 悬停微浮 */
+    box-shadow: 0 6px 16px rgba(58, 134, 255, 0.4);
+}
+
+.empty-state-create-btn:active {
+    transform: scale(0.96);
 }
