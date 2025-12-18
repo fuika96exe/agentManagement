@@ -159,90 +159,84 @@ body {
 
 /* Property View Styling */
 .property-header {
-    padding: 16px;
-    background-color: #fff;
-    border-bottom: 1px solid #eee;
+    background-color: #fff;  /* 与 Tab 融为一体 */
+    padding: 10px 16px;      /* 保持适当间距 */
+    border-bottom: none;     /* 🔥 关键：去掉了底部的线 */
+    /* 可选：如果你觉得分界太模糊，可以加一个极其微弱的阴影，不加也可以 */
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.02); */
 }
-.search-container {
+.header-row {
     display: flex;
-    gap: 10px;
     align-items: center;
-    position: relative; 
+    gap: 10px; /* 搜索框和按钮之间的间距 */
+    width: 100%;
 }
-.search-icon {
+
+/* 2. 搜索框包装器：占据剩余空间 */
+.search-wrapper {
+    position: relative;
+    flex-grow: 1; /* 关键：让搜索框自动填满左边空间 */
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 12px 15px 12px 42px; /* 左边留出图标位置 */
+    border: 1px solid #ddd;
+    border-radius: 25px; /* 胶囊形状 */
+    font-size: 15px;
+    outline: none;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.search-wrapper input:focus {
+    background-color: #fff;
+    border-color: #3A86FF;
+    box-shadow: 0 2px 8px rgba(58, 134, 255, 0.1);
+}
+
+.search-wrapper .search-icon {
     position: absolute;
-    left: 15px; 
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    color: #999; 
+    color: #999;
     font-size: 20px;
-    z-index: 2; 
+    pointer-events: none;
 }
-.search-container input {
-    flex-grow: 1;
-    padding: 10px 15px 10px 45px; 
-    border: 1px solid #ddd;
-    border-radius: 25px;
-    font-size: 16px;
-    outline: none;
-    transition: border-color 0.3s;
-}
-.search-container input:focus {
-    border-color: #3A86FF;
-}
-.add-btn {
-    width: 45px;
-    height: 45px;
-    background-color: #3A86FF;
-    color: white;
+
+/* 3. 右侧圆形添加按钮 */
+.header-add-btn {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
+    border: none;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(58, 134, 255, 0.4);
-    transition: transform 0.1s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0; /* 防止被挤压 */
+    transition: background-color 0.3s ease, transform 0.1s;
 }
-.add-btn:active {
-    transform: scale(0.95);
+
+.header-add-btn:active {
+    transform: scale(0.92);
 }
-.add-btn:hover {
-     background-color: #2e6ad9;
+
+.header-add-btn .material-icons-round {
+    font-size: 24px;
 }
-.add-menu {
-    position: absolute;
-    right: 0px; 
-    top: 60px; 
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    padding: 8px 0;
-    z-index: 10;
-    transform-origin: top right;
-    transition: opacity 0.2s, transform 0.2s;
-    opacity: 0;
-    transform: scale(0.9);
-    pointer-events: none;
-}
-.add-menu.visible {
-    opacity: 1;
-    transform: scale(1);
-    pointer-events: auto;
-}
-.add-menu a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    color: #333;
-    text-decoration: none;
-    font-size: 15px;
-}
-.add-menu a:hover {
-    background-color: #f0f2f5;
-}
+
+/* 按钮颜色主题 (JS 会自动切换这些类) */
+.btn-theme-blue { background-color: #3A86FF; }
+.btn-theme-purple { background-color: #9B59B6; }
+.btn-theme-green { background-color: #28a745; }
 .property-list {
     padding: 16px;
+	padding-top: 12px; /* 给列表顶部一点留白，不要紧贴着搜索框 */
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -385,7 +379,7 @@ body {
     font-weight: 500;
     opacity: 0;
     transition: opacity 0.3s, bottom 0.3s;
-    z-index: 2000;
+    z-index: 20000;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     white-space: nowrap;
 }
@@ -473,6 +467,17 @@ body {
     width: 40px; 
     height: 40px;
     margin-top: 10px;
+    
+    /* 👇 新增：强制设为圆形 */
+    border-radius: 50%;
+    
+    /* 👇 新增：确保内容居中、无边框（防止样式丢失） */
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
 }
 
 /* Detail View & Form Edit View Styles for Structure and Alignment */
@@ -688,25 +693,35 @@ body {
 
 /* New: Tab Bar Styling for Property View */
 .tab-bar {
-    display: flex;
-    background-color: #fff;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 16px; 
-    padding: 0 16px;
+    display: flex;           /* 启用 Flex 布局 */
+    width: 100%;             /* 宽度占满 */
+    padding: 0 !important;   /* 去掉内边距，紧贴边缘 */
+    margin: 0 !important;    /* 去掉外边距 */
+    background-color: #fff;  /* 纯白背景 */
+    border-bottom: 1px solid #f5f5f5; /* Tab 和 Search 之间留一条极淡的线区分 */
 }
+
 .tab-bar a {
-    flex-grow: 1;
+    flex: 1;                 /* 关键：三个 Tab 平分剩余空间 (1:1:1) */
+    width: 0;                /* 技巧：强制忽略文字长度，保证绝对等宽 */
     text-align: center;
-    padding: 10px 0;
+    padding: 16px 0;         /* 增加点击区域高度 */
+    font-size: 16px;
+    font-weight: 500;
     color: #999;
     text-decoration: none;
-    font-weight: 500;
     border-bottom: 2px solid transparent;
-    transition: color 0.2s, border-bottom-color 0.2s;
+    transition: all 0.2s;
+	
+	-webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* 移除点击时的灰色高亮背景块 */
 }
+
 .tab-bar a.active-tab {
     color: #3A86FF;
     border-bottom: 2px solid #3A86FF;
+    font-weight: 600;
 }
 
 /* FIX: Owner Email/Management Fee alignment */
@@ -1227,7 +1242,7 @@ body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* 减小阴影，显得更平 */
     border: 1px solid #f0f0f0; /* 更淡的边框 */
     border-left: 4px solid #3A86FF; /* 保留左侧状态条 */
-    margin-bottom: 8px; /* 减小卡片间距 */
+    margin-bottom: 0px; /* 减小卡片间距 */
     cursor: pointer;
     transition: transform 0.1s;
     position: relative;
@@ -1343,3 +1358,448 @@ body {
 .empty-state-create-btn:active {
     transform: scale(0.96);
 }
+
+.review-content {
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #eee;
+}
+
+.review-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* 防止长文字导致对齐难看 */
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.review-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.review-label {
+    font-size: 13px;
+    color: #666;
+    flex-shrink: 0; /* 标签不许压缩 */
+    width: 100px;
+}
+
+.review-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-align: right;
+    word-break: break-word; /* 防止长地址撑破布局 */
+}
+
+.review-warning {
+    font-size: 12px;
+    color: #d32f2f;
+    background-color: #ffebee;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.main-content {
+    overflow-x: hidden; 
+}
+
+/* 动画基础设置 */
+.tab-content {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1); /* iOS 风格的平滑曲线 */
+    animation-fill-mode: both;
+}
+
+/* 场景 A：从右边滑进来 (前进，例如 Property -> Owner) */
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translate3d(30%, 0, 0); /* 稍微移动 30% 就够了，全屏移动太晕 */
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* 场景 B：从左边滑进来 (后退，例如 Owner -> Property) */
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translate3d(-30%, 0, 0);
+    }
+    to {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* JS 调用的类名 */
+.anim-enter-right {
+    animation-name: slideInFromRight;
+}
+
+.anim-enter-left {
+    animation-name: slideInFromLeft;
+}
+
+.linked-property-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    border: 1px solid #eee; /* 淡边框 */
+    border-radius: 10px;    /* 圆角 */
+    margin-bottom: 0px;     /* 项之间的间距 */
+    width: 100%;            /* 强制占满一行 */
+    box-sizing: border-box;
+    background-color: #fff;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.linked-property-item:hover {
+    background-color: #f9f9f9;
+    border-color: #3A86FF;
+}
+
+.linked-property-item:last-child {
+    margin-bottom: 0;
+}
+
+.linked-icon {
+    width: 36px;
+    height: 36px;
+    background-color: #e3f2fd; /* 浅蓝背景 */
+    color: #3A86FF;            /* 蓝色图标 */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.linked-info {
+    flex-grow: 1;
+    overflow: hidden; /* 防止文字溢出 */
+}
+
+.linked-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.linked-sub {
+    font-size: 12px;
+    color: #888;
+}
+
+.linked-arrow {
+    color: #ccc;
+    font-size: 20px;
+}
+
+.asset-card {
+    background-color: #ffffff;
+    border-radius: 16px;       
+    padding: 0;                /* 内部 padding 由子元素控制，以便分割线贴边 */
+    margin: 20px 20px 25px 20px; /* margin-top 改为 20px，拉开与顶部的距离 */
+    
+    color: #333;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* 非常淡的阴影 */
+    border: 1px solid #f0f0f0;  /* 极淡的边框 */
+    
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 上半部分：收入 */
+.asset-card-top {
+    padding: 25px 20px 20px 20px;
+    text-align: center;
+}
+
+.asset-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;           /* 浅灰色标签 */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+.asset-value-big {
+    font-size: 32px;
+    font-weight: 800;
+    color: #333;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+/* 中间分割线 */
+.asset-divider {
+    height: 1px;
+    background-color: #f0f0f0; /* 极淡的分割线 */
+    width: 100%;
+}
+
+/* 下半部分：统计行 */
+.asset-card-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 0;
+}
+
+/* 每一列 (Properties / Tenants) */
+.asset-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    
+    /* 新增交互样式 */
+    cursor: pointer;          /* 鼠标变小手 */
+    transition: background-color 0.2s; /* 平滑过渡 */
+    border-radius: 8px;       /* 点击时的背景圆角 */
+    padding: 5px 0;           /* 稍微增加一点点击区域 */
+    margin: 0 10px;           /* 左右留一点空隙，防止点击背景连在一起 */
+}
+
+.asset-stat:hover {
+    background-color: #f9f9f9;
+}
+
+.asset-stat:active {
+    background-color: #f0f0f0;
+    transform: scale(0.98); /* 微缩反馈 */
+}
+
+/* 中间的竖线分割 (只给第一个元素加右边框) */
+.asset-stat:first-child {
+    border-right: 1px solid #f0f0f0; 
+}
+
+/* 图标和数字的包装器：让它们在同一行并居中 */
+.stat-content-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 图标和数字的间距 */
+    margin-bottom: 4px;
+    color: #555;
+}
+
+.asset-stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #333;
+}
+
+.asset-stat-label {
+    font-size: 12px;
+    color: #999;
+    font-weight: 500;
+}
+
+.stat-icon {
+    font-size: 20px;
+    color: #777;
+}
+
+.compact-delete-btn {
+    background: transparent;
+    border: none;
+    color: #bbb; /* 默认浅灰色，很低调 */
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* 圆形触摸区 */
+    transition: all 0.2s;
+    margin-right: 8px; /* 和右边的 Continue 拉开距离 */
+}
+
+.compact-delete-btn:hover, .compact-delete-btn:active {
+    color: #dc3545; /* 激活变红 */
+    background-color: #ffebee; /* 淡淡的红色背景 */
+}
+
+.compact-delete-btn .material-icons-round {
+    font-size: 20px; /* 图标大小适中 */
+}
+
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4); /* 75% 黑色透明度 */
+    z-index: 9000; /* 很高，但在 Modal 之下 */
+    display: none; /* 默认隐藏 */
+    backdrop-filter: blur(2px); /* 可选：加一点模糊更高级 */
+}
+
+/* 被高亮的元素 (提升层级) */
+.tutorial-highlight {
+    position: relative;
+    z-index: 9001 !important; /* 必须比遮罩高 */
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.9) !important; /* 强力发光效果 */
+    pointer-events: auto;
+    transition: all 0.3s ease;
+    /* 不要强制设置背景色，否则按钮原本的颜色会丢 */
+}
+
+/* 手指动画容器 */
+.tutorial-finger {
+    position: absolute;
+    z-index: 9002;
+    color: white;
+    font-size: 48px;
+    /* 放在按钮的右下方指着 */
+    top: 30px; 
+    right: -10px;
+    pointer-events: none; /* 手指本身不挡点击 */
+    animation: fingerTap 1.5s infinite ease-in-out;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+}
+
+/* 手指点击动画 (上下移动) */
+@keyframes fingerTap {
+    0% { transform: translate(0, 0) rotate(-30deg); }
+    50% { transform: translate(-10px, -10px) rotate(-30deg); } /* 往左上角顶一下 */
+    100% { transform: translate(0, 0) rotate(-30deg); }
+}
+
+.tutorial-parent-active {
+    position: relative !important;
+    z-index: 9002 !important; /* 比遮罩高一点 */
+    background-color: #fff !important; /* 确保背景不透明 */
+    /* 可选：给整个卡片也加一点微弱的光，让聚光灯效果更自然 */
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75) !important; 
+    /* 上面这一行是个视觉魔术：它会让卡片周围变黑，看起来像是卡片被照亮了 */
+}
+
+/* 确保遮罩层本身没有背景色，改由卡片的阴影来负责变暗？
+   或者保持原样。如果用了上面的 box-shadow 9999px，
+   你可以把 index.html 里的 <div id="tutorialOverlay"> 去掉，
+   或者把它的背景色设为透明。
+   
+   但为了稳妥，我们暂时只用 z-index 提升，保持原来的遮罩逻辑不变。
+*/
+.tutorial-parent-active {
+    position: relative !important;
+    z-index: 9002 !important; 
+}
+
+.success-icon-wrapper {
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.action-btn.btn-outline {
+    background-color: transparent;
+    transition: all 0.2s;
+}
+
+.action-btn.btn-outline:active {
+    background-color: #f5f5f5;
+    border-color: #bbb;
+}
+
+.modal-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* 按钮之间的距离 */
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* 通用弹窗按钮样式 */
+.modal-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 16px; /* 增加高度，更易点击 */
+    border-radius: 12px; /* 现代大圆角 */
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    gap: 8px; /* 图标和文字的间距 */
+    transition: transform 0.1s, box-shadow 0.2s, background-color 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 点击时的缩放反馈 */
+.modal-btn:active {
+    transform: scale(0.98);
+}
+
+/* 1. 主按钮 (Generate Agreement) - 蓝色+投影 */
+.modal-btn-primary {
+    background-color: #3A86FF;
+    color: white;
+    box-shadow: 0 4px 15px rgba(58, 134, 255, 0.4); /* 漂亮的蓝色光晕 */
+}
+.modal-btn-primary:hover {
+    background-color: #2e6ad9;
+}
+
+/* 2. 次按钮 (Upload) - 白底+灰边框 */
+.modal-btn-outline {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+.modal-btn-outline:hover {
+    background-color: #f8f9fa;
+    border-color: #d0d0d0;
+}
+
+/* 3. 弱按钮 (Skip) - 纯文字 */
+.modal-btn-ghost {
+    background-color: transparent;
+    color: #999;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px;
+    box-shadow: none;
+}
+.modal-btn-ghost:hover {
+    color: #666;
+    background-color: rgba(0,0,0,0.03);
+}
+
+/* 按钮内的图标微调 */
+.modal-btn .material-icons-round {
+    font-size: 20px;
+}
+
