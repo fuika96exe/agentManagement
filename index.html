@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Property Management App (Local Storage)</title>
+    <title>Property Management App (Fixed)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
     <link rel="stylesheet" href="css/app.css">
@@ -18,76 +18,47 @@
         <div class="main-content">
             <div id="dashboardView" class="view" style="display: none;">
     
-				<div class="home-header">
+                <div class="home-header" style="padding-bottom: 10px;">
 					<h1>Dashboard</h1>
 					<p>Welcome back, Landlord</p>
 				</div>
 
-				<div class="action-card-row">
-					
-					<div class="flat-card card-blue" onclick="window.app.navigateAndAdd('property');">
-						<div class="card-icon">
-							<span class="material-icons-round">add_business</span>
-						</div>
-						<span class="card-label">Property</span>
-						<span class="card-sub">Add New</span>
-					</div>
+                <div id="assetCardContainer">
+                    </div>
 
-					<div class="flat-card card-purple" onclick="window.app.navigateAndAdd('owner');">
-						<div class="card-icon">
-							<span class="material-icons-round">person_add</span>
-						</div>
-						<span class="card-label">Owner</span>
-						<span class="card-sub">Create Profile</span>
-					</div>
-
-					<div class="flat-card card-green" onclick="window.app.navigateAndAdd('tenant');">
-						<div class="card-icon">
-							<span class="material-icons-round">group_add</span>
-						</div>
-						<span class="card-label">Tenant</span>
-						<span class="card-sub">New Lease</span>
-					</div>
-
-				</div>
-				<div class="task-section">
-					<h2>Your Tasks</h2> <div id="taskList" class="task-list">
+                <div class="task-section">
+					<h2>Your Tasks</h2> 
+                    <div id="taskList" class="task-list">
 					</div>
 				</div>
 			</div>
 
             <div id="propertyView" class="view" style="display: none;">
-                <div class="property-header">
-                    <div class="search-container">
-                        <span class="material-icons-round search-icon">search</span>
-                        <input type="text" id="propertySearch" placeholder="Search properties, tenants, or owners...">
-
-                        <div id="addMenu" class="add-menu">
-                            <a href="#" onclick="window.app.handleNewEntry('property'); return false;">
-                                <span class="material-icons-round" style="font-size: 18px;">home</span> New Property
-                            </a>
-                            <a href="#" onclick="window.app.handleNewEntry('owner'); return false;">
-                                <span class="material-icons-round" style="font-size: 18px;">person</span> New Owner
-                            </a>
-                            <a href="#" onclick="window.app.handleNewEntry('tenant'); return false;">
-                                <span class="material-icons-round" style="font-size: 18px;">group</span> New Tenant
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
+                
                 <div class="tab-bar">
                     <a href="#" id="tabProperty" class="active-tab" onclick="window.app.switchPropertyTab('property'); return false;">Property</a>
                     <a href="#" id="tabOwner" onclick="window.app.switchPropertyTab('owner'); return false;">Owner</a>
                     <a href="#" id="tabTenant" onclick="window.app.switchPropertyTab('tenant'); return false;">Tenant</a>
                 </div>
-                
+
+                <div class="property-header">
+                    <div class="header-row">
+                        <div class="search-wrapper">
+                            <span class="material-icons-round search-icon">search</span>
+                            <input type="text" id="propertySearch" placeholder="Search Property..." oninput="window.app.filterProperties()">
+                        </div>
+
+                        <button id="dynamicAddBtn" class="header-add-btn btn-theme-blue" onclick="window.app.handleDynamicAdd()">
+                            <span class="material-icons-round">add</span>
+                        </button>
+                    </div>
+                </div>
                 <div id="tabContentProperty" class="tab-content property-list" style="display: flex;">
-                    </div>
+                </div>
                 <div id="tabContentOwner" class="tab-content property-list" style="display: none;">
-                    </div>
+                </div>
                 <div id="tabContentTenant" class="tab-content property-list" style="display: none;">
-                    </div>
+                </div>
             </div>
             
             <div id="formView" class="view" style="display: none;">
@@ -185,10 +156,10 @@
                 <span class="material-icons-round">home</span>
                 Home
             </a>
-            <a href="#" id="navProperty" onclick="window.app.switchView('property'); window.app.switchPropertyTab('property'); return false;">
-                <span class="material-icons-round">apartment</span>
-                Property
-            </a>
+            <a href="#" id="navProperty" onclick="window.app.switchView('property'); window.app.switchPropertyTab('property', true); return false;">
+				<span class="material-icons-round">apartment</span>
+				Property
+			</a>
             <a href="#" onclick="window.app.alertMessage('Navigating to Services page...', 'info'); return false;">
                 <span class="material-icons-round">apps</span>
                 Services
@@ -292,26 +263,139 @@
                     </div>
             </div>
 
-            <div id="quickLinkConfirmState" style="display: none; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 10px 0;">
-                <div style="width: 60px; height: 60px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-                    <span class="material-icons-round" style="font-size: 30px; color: #155724;">person_add</span>
-                </div>
-                <h3 style="margin: 0 0 8px 0; font-size: 18px;">Confirm Link</h3>
+            <div id="quickLinkConfirmState" style="display: none; flex-direction: column; padding: 10px 0; position: relative;">
                 
-                <p style="color: #666; margin-bottom: 25px; font-size: 15px; line-height: 1.6;">
-                    Link <b id="quickLinkTenantName" style="color: #333;">Tenant</b><br>
-                    to <b id="quickLinkPropName" style="color: #3A86FF;">Property Name</b>?
-                </p>
+                <span class="material-icons-round" 
+                      onclick="window.app.closeQuickLinkModal()" 
+                      style="position: absolute; right: 0; top: -5px; cursor: pointer; color: #ccc; padding: 5px; z-index: 10; font-size: 24px;">
+                      close
+                </span>
+
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <p style="color: #666; font-size: 14px; margin: 0;">
+                        Assigning <b id="quickLinkTenantName" style="color: #333;">Tenant</b><br>
+                        to <b id="quickLinkPropName" style="color: #3A86FF;">Property</b>
+                    </p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 12px; border: 1px solid #eee; margin-bottom: 20px;">
+                    
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label style="font-size: 12px; color: #666; font-weight: 500;">Monthly Rental (RM)</label>
+                        <div style="position: relative;">
+                            <input type="number" id="ql-rent" placeholder="Enter amount" 
+                                   style="width: 100%; padding: 10px 35px 10px 10px; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; color: #3A86FF; box-sizing: border-box;">
+                            <span class="material-icons-round" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #bbb; font-size: 16px; pointer-events: none;">edit</span>
+                        </div>
+                        <p style="font-size: 11px; color: #999; margin: 4px 0 0 0;">Pre-filled from property settings. Tap to edit.</p>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1; margin-bottom: 12px;">
+                            <label style="font-size: 12px; color: #666; font-weight: 500;">Start Date</label>
+                            <input type="date" id="ql-start" onchange="window.app.calcQuickLinkEnd()"
+                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="flex: 0.6; margin-bottom: 12px;">
+                            <label style="font-size: 12px; color: #666; font-weight: 500;">Term (Month)</label>
+                            <input type="number" id="ql-term" oninput="window.app.calcQuickLinkEnd()"
+                                   style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center;">
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 12px; color: #666; font-weight: 500;">End Date</label>
+                        <input type="date" id="ql-end" readonly 
+                               style="width: 100%; padding: 10px; border: 1px solid #eee; background: #eee; border-radius: 8px; color: #888;">
+                    </div>
+                </div>
                 
                 <div style="display: flex; gap: 10px; width: 100%;">
-                    <button class="submit-btn" style="background-color: #fff; border: 1px solid #ddd; color: #666; flex: 1;" onclick="window.app.switchQuickLinkState('list')">Cancel</button>
+                    <button class="submit-btn" style="background-color: #fff; border: 1px solid #ddd; color: #666; flex: 1;" onclick="window.app.switchQuickLinkState('list')">Back</button>
                     <button id="btnConfirmQuickLink" class="submit-btn" style="background-color: #28a745; flex: 1; border: 1px solid #28a745;">Confirm</button>
                 </div>
             </div>
-
+			
+		
         </div>
     </div>
+	
+	<div id="tenantReviewModal" class="modal-overlay" 
+		style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 99999;">
+		<div class="quick-link-content"> 
+		<div style="text-align: center; margin-bottom: 15px;">
+			<h3 style="margin: 0; font-size: 18px; font-weight: 700;">Confirm Details</h3>
+		</div>
 
+		<div class="review-warning">
+			<span class="material-icons-round" style="font-size: 16px;">warning</span>
+			<span>These details will be used for the <strong>Tenancy Agreement</strong>. Please verify accuracy.</span>
+		</div>
+
+		<div id="tenantReviewList" class="review-content">
+			</div>
+
+		<div style="display: flex; gap: 10px; margin-top: 10px;">
+			<button onclick="document.getElementById('tenantReviewModal').style.display='none'; return false;" 
+				style="flex: 1; padding: 12px; border: 1px solid #ddd; background: #fff; color: #666; border-radius: 10px; font-weight: 600; cursor: pointer;">
+					Edit
+			</button>
+						
+			<button onclick="window.app.submitVerifiedTenant(); return false;" 
+				style="flex: 1; padding: 12px; border: none; background: #3A86FF; color: white; border-radius: 10px; font-weight: 600; cursor: pointer;">
+					Confirm
+			</button>
+		</div>
+
+		</div>
+	</div>
+	
+	<div id="linkSuccessModal" class="modal-overlay" 
+     style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 10001;">
+        
+        <div class="modal-content" style="text-align: center; padding: 30px 20px; position: relative;">
+            
+            <span class="material-icons-round" 
+                  onclick="window.app.handleLinkAction('skip')" 
+                  style="position: absolute; right: 15px; top: 15px; cursor: pointer; color: #ccc; font-size: 24px; padding: 5px; z-index: 10; transition: color 0.2s;"
+                  onmouseover="this.style.color='#666'" 
+                  onmouseout="this.style.color='#ccc'">
+                close
+            </span>
+            <div class="success-icon-wrapper" style="margin-bottom: 20px;">
+                <span class="material-icons-round" style="font-size: 64px; color: #28a745;">check_circle</span>
+            </div>
+            
+            <h2 style="margin: 0 0 10px 0; color: #333;">Linked Successfully!</h2>
+            <p style="color: #666; font-size: 14px; margin-bottom: 30px; line-height: 1.5;">
+                <strong>How would you like to handle the agreement?</strong>
+            </p>
+
+            <div class="modal-btn-group">
+                
+                <button class="modal-btn modal-btn-primary" onclick="window.app.handleLinkAction('generate')">
+                    <span class="material-icons-round">description</span>
+                    Generate Agreement
+                </button>
+
+                <input type="file" id="agreementUploadInput" style="display: none;" accept="application/pdf,image/*" onchange="window.app.handleLinkUpload(this)">
+                
+                <button class="modal-btn modal-btn-outline" onclick="document.getElementById('agreementUploadInput').click()">
+                    <span class="material-icons-round" style="color: #666;">upload_file</span>
+                    Upload Signed Copy
+                </button>
+
+                <button class="modal-btn modal-btn-ghost" onclick="window.app.handleLinkAction('skip')">
+                    Skip for now
+                </button>
+            </div>
+        </div>
+    </div>
+	
+	
+	
+
+	<div id="tutorialOverlay" class="tutorial-overlay" onclick="window.app.endTutorial()"></div>
 
 	<style>
         /* 蓝色确认按钮样式，用于非删除类的确认操作 */
@@ -324,8 +408,56 @@
         }
     </style>
 
+	<script src="template.js"></script>
+
     <script>
         
+		window.app = window.app || {};
+		
+		window.app.generateAgreement = function(tenantId) {
+            console.log("Generate Agreement button clicked for:", tenantId); // 添加这行用于调试
+
+            // 检查模板文件是否加载
+            if (typeof window.app.generateTenancyAgreementHTML !== 'function') {
+                alert('Template file (templates.js) not loaded properly!');
+                return;
+            }
+
+            // 获取数据
+            const tenant = tenants.find(t => t.id === tenantId);
+            if (!tenant) { alert('Tenant not found'); return; }
+
+            const property = properties.find(p => p.id === tenant.propertyId);
+            if (!property) { alert('Property not found'); return; }
+
+            const owner = owners.find(o => o.id === property.ownerId);
+            if (!owner) { alert('Owner not found'); return; }
+
+            // 准备数据
+            const agreementData = {
+                date: new Date().toISOString(),
+                tenant: tenant,
+                property: property,
+                owner: owner
+            };
+
+            // 生成 HTML
+            const htmlContent = window.app.generateTenancyAgreementHTML(agreementData);
+
+            // 打印
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                printWindow.onload = function() {
+                    printWindow.focus();
+                    setTimeout(() => { printWindow.print(); }, 500);
+                };
+            } else {
+                alert('Pop-up blocked! Please allow pop-ups.');
+            }
+        };
+		
         let properties = [];
         let tasks = [];
         let owners = []; 
@@ -382,7 +514,6 @@
             localStorage.setItem('tasks', JSON.stringify(tasks));
             localStorage.setItem('owners', JSON.stringify(owners));
             localStorage.setItem('tenants', JSON.stringify(tenants));
-            console.log("Data saved to localStorage.");
             
             // Re-render based on current active tab
             if (currentView === 'property') {
@@ -391,6 +522,7 @@
                 renderTenants();
             } else if (currentView === 'dashboard') {
                 renderTasks();
+				renderDashboardStats();
             }
         }
         
@@ -477,10 +609,12 @@
 
             document.querySelectorAll('.navbar a').forEach(link => link.classList.remove('active'));
             if (viewName === 'dashboard') {
-                document.getElementById('navDashboard').classList.add('active');
-                // Ensure tasks are rendered when navigating to dashboard
-                try { renderTasks(); } catch (e) { console.warn('renderTasks error:', e); }
-            } else if (['property', 'form', 'detail', 'ownerDetail', 'tenantDetail'].includes(viewName)) { 
+				document.getElementById('navDashboard').classList.add('active');
+				try { 
+					renderTasks(); 
+					renderDashboardStats(); // <--- 新增这行
+				} catch (e) { console.warn('renderTasks error:', e); }
+			} else if (['property', 'form', 'detail', 'ownerDetail', 'tenantDetail'].includes(viewName)) { 
                 document.getElementById('navProperty').classList.add('active');
                 toggleAddMenu(false); 
                 // When switching to property-level views, refresh the lists
@@ -494,20 +628,111 @@
             } 
         }
 
-        function switchPropertyTab(tabName) {
-            currentPropertyTab = tabName;
+        let currentTabIndex = 0; 
+
+        // 1. 增加第二个参数 isFromNavBar，默认为 false
+        function switchPropertyTab(tabName, isFromNavBar = false) {
+            const tabIndexMap = {
+                'property': 0,
+                'owner': 1,
+                'tenant': 2
+            };
+            
+            const newIndex = tabIndexMap[tabName];
+            const oldIndex = currentTabIndex;
+            
+            currentPropertyTab = tabName; 
+            currentTabIndex = newIndex;
+
+            // --- 样式处理 ---
             document.querySelectorAll('.tab-bar a').forEach(link => link.classList.remove('active-tab'));
-            document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.add('active-tab');
+            const activeTabBtn = document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+            if(activeTabBtn) activeTabBtn.classList.add('active-tab');
 
-            document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
-            document.getElementById(`tabContent${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).style.display = 'flex';
+            // --- 2. 动画方向逻辑修改 ---
+            let animClass = '';
 
-            // Ensure the correct data is rendered when switching tabs
+            // 如果是从底部菜单进来的，强制清空动画类
+            if (isFromNavBar) {
+                animClass = ''; 
+            } else {
+                // 否则才执行左右滑动逻辑
+                if (newIndex > oldIndex) {
+                    animClass = 'anim-enter-right'; 
+                } else if (newIndex < oldIndex) {
+                    animClass = 'anim-enter-left';  
+                } else {
+                    animClass = 'anim-enter-right'; 
+                }
+            }
+
+            // 切换内容显示
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+                content.classList.remove('anim-enter-right', 'anim-enter-left');
+            });
+
+            const targetId = `tabContent${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`;
+            const targetContent = document.getElementById(targetId);
+            
+            if (targetContent) {
+                targetContent.style.display = 'flex';
+                void targetContent.offsetWidth; // 触发重绘
+                
+                // 只有当有动画类时才添加
+                if (animClass) {
+                    targetContent.classList.add(animClass);
+                }
+            }
+
+            // 数据刷新
             if (tabName === 'property') renderProperties();
             if (tabName === 'owner') renderOwners();
             if (tabName === 'tenant') renderTenants();
+            
+            const btn = document.getElementById('dynamicAddBtn');
+            const searchInput = document.getElementById('propertySearch');
+            
+            if (btn && searchInput) {
+                // 1. 重置所有颜色类
+                btn.classList.remove('btn-theme-blue', 'btn-theme-purple', 'btn-theme-green');
+                
+                // 2. 根据 Tab 添加新颜色类 & 更新搜索框 Placeholder
+                if (tabName === 'property') {
+                    btn.classList.add('btn-theme-blue');
+                    searchInput.placeholder = 'Search Property...';
+                } else if (tabName === 'owner') {
+                    btn.classList.add('btn-theme-purple');
+                    searchInput.placeholder = 'Search Owner...';
+                } else if (tabName === 'tenant') {
+                    btn.classList.add('btn-theme-green');
+                    searchInput.placeholder = 'Search Tenant...';
+                }
+            }
+            
+            // 重置搜索框内容，避免切 Tab 后搜不到东西
+            if (searchInput) {
+                searchInput.value = '';
+                // 触发一次空的过滤，以重置列表显示
+                if (tabName === 'property') filterProperties();
+                if (tabName === 'owner') window.app.filterOwners(''); // 注意：你需要确保 filterOwners 逻辑能处理空字符串显示所有
+                // Tenant 的过滤逻辑类似，如果需要也可以加
+            }
+            
+            filterProperties(); // 你原本代码里有这句，保留
         }
 
+
+		function handleDynamicAdd() {
+            // currentPropertyTab 是之前定义的全局变量，记录当前在哪个 Tab
+            if (currentPropertyTab === 'property') {
+                window.app.handleNewEntry('property');
+            } else if (currentPropertyTab === 'owner') {
+                window.app.handleNewEntry('owner');
+            } else if (currentPropertyTab === 'tenant') {
+                window.app.handleNewEntry('tenant');
+            }
+        }
         /**
          * Toggles the visibility of a detail card and rotates the icon (Point 2)
          */
@@ -542,38 +767,29 @@
 					return;
 				}
 
-				// 新逻辑：检查这个 Owner 是否已存在于数据库
-				// 如果不存在 (undefined)，说明是正在“新建”，点击 Back 应该回 Dashboard
 				if (!getOwnerById(currentId)) {
 					switchView('dashboard');
 					return;
 				}
 
-				// 如果存在，说明是“编辑”，Back 回列表
 				switchView('property');
 				switchPropertyTab('owner');
 				return;
 			}
 			
-			// ========== 修改 2: Tenant 返回逻辑 ==========
 			if (currentFormType === 'tenant') {
 				const tenant = getTenantById(currentId);
 				
-				// 新逻辑：如果是“新建” (数据库里还没这个人)，或者处于 Phase 0 (刚开始填资料)，Back 回 Dashboard
-				// 注意：Tenant 是分步保存的，如果是 Phase 1/2/3 点击 Back，通常还是回列表比较安全，
-				// 但如果只是刚点进来 Phase 0 还没保存，绝对应该回 Dashboard。
 				if (!tenant) {
 					switchView('dashboard');
 					return;
 				}
 
-				// 原有逻辑：如果是已完成设置的租客，返回详情页
 				if (tenant && tenant.phase >= 4) {
 					viewTenantDetails(currentId);
 					return;
 				}
 				
-				// 其他情况 (比如编辑进行中的租客)，返回列表
 				switchView('property');
 				switchPropertyTab('tenant');
 				return;
@@ -610,6 +826,10 @@
         
         function toggleAddMenu(force) {
             const menu = document.getElementById('addMenu');
+            
+            // ✅ 新增：如果菜单不存在（已经被我们删了），直接退出，不要报错
+            if (!menu) return;
+
             const isVisible = menu.classList.contains('visible');
             
             let shouldBeVisible = (typeof force === 'boolean') ? force : !isVisible;
@@ -622,42 +842,39 @@
         }
         
         // --- Added for Tenant/Owner Handling ---
-        function handleNewEntry(type) {
-             toggleAddMenu(false);
-			 let newId;
-			 if (type === 'property') { // <-- 确保 type 匹配 'property'
-				 newId = `prop-${Date.now()}`;
-				 // Start with Phase 0 for Owner selection
-				 renderForm(newId, 0, 'property'); // <-- 必须调用 renderForm
-				 // Create initial property task
-				 
-			 } else if (type === 'owner') {
-                 newId = `owner-${Date.now()}`;
-                 renderForm(newId, 0, 'owner'); 
-             } else if (type === 'tenant') {
-                  newId = `tenant-${Date.now()}`;
-                  // Tenant creation starts at phase 0
-                  renderForm(newId, 0, 'tenant');
-             }
-         }
+        function handleNewEntry(type, linkedContextId = null) {
+			toggleAddMenu(false);
+			
+			let newId;
+
+			if (type === 'property') { 
+				newId = `prop-${Date.now()}`;
+				renderForm(newId, 0, 'property'); 
+			} else if (type === 'owner') {
+				newId = `owner-${Date.now()}`;
+				// 关键点：
+				const contextField = document.getElementById('selectedOwnerId');
+				if (linkedContextId) {
+					contextField.value = linkedContextId; 
+				} else {
+					contextField.value = ''; 
+				}
+				renderForm(newId, 0, 'owner'); 
+			} else if (type === 'tenant') {
+				newId = `tenant-${Date.now()}`;
+				renderForm(newId, 0, 'tenant');
+			}
+		}
          
          function continueFormTask(id, isEditMode, type) {
-			// ⬇️ MODIFICATION START: Add Debug Log for Entry Point
 			console.log(`DEBUG: Entering continueFormTask. ID: ${id}, isEditMode: ${isEditMode}, Type: ${type}`);
-			// ⬆️ MODIFICATION END
 			
 			let currentPhase;
 			if (type === 'property') {
 			   const prop = getPropertyById(id);
 			   currentPhase = prop ? (prop.phase || 0) : 0;
 			   
-			   // ⬇️ MODIFICATION START: Add Debug Log for Phase Check
-			   console.log(`DEBUG: Property Phase Check. Current Phase: ${currentPhase}`);
-			   // ⬆️ MODIFICATION END
-			   
-			   // If it's a full detail edit (phase 3), force to phase 3 form (Point 1)
-			   // 【关键修改】我们强制让 'isEditMode' 忽略 Phase 检查，直接进入 Phase 3 全面编辑表单
-			   if(isEditMode) { // <-- 简化判断条件，只要是编辑模式就进入 Phase 3
+			   if(isEditMode) { 
 				   console.log("DEBUG: Forcing transition to Phase 3 Full Edit Form.");
 				   renderForm(id, 3, 'property');
 				   return;
@@ -665,18 +882,15 @@
              } else if (type === 'tenant') {
                  const tenant = getTenantById(id);
                  currentPhase = tenant ? (tenant.phase || 0) : 0;
-                 // If editing a completed tenant, enable simple edit on phase 0 only
                  if (isEditMode && tenant && tenant.phase >= 3) {
                      window.app.simpleTenantEdit = true;
                      renderForm(id, 0, 'tenant');
                      return;
                  }
-                 // If the tenant is incomplete, continue multi-step flow
                  if (currentPhase >= 3) currentPhase = 0;
                  const task = getTaskByTenantId(id);
                  if (task) currentPhase = task.phase;
              } else if (type === 'owner') {
-                 // Owners do not have phases, always edit (Point 4)
                  renderForm(id, 0, 'owner');
                  return;
              }
@@ -696,25 +910,15 @@
 			document.getElementById('currentId').value = propId;
 			renderPropertyDetailsContent(prop, owner, tenant); 
 			
-			// ⬇️ MODIFICATION START: Use getElementById once and add a console log for debugging
-			const editBtn = document.getElementById('detailEditBtn'); // Get the button element
+			const editBtn = document.getElementById('detailEditBtn'); 
 			
 			if (editBtn) {
-				// Log to confirm the code execution
-				console.log(`DEBUG: Binding Edit Button for Property ID: ${prop.id}`); 
-				
-				// Bind the handler explicitly
 				editBtn.onclick = function(event) { 
-					event.preventDefault(); // Prevent any default action just in case
-					console.log("DEBUG: Edit Button Clicked. Executing continueFormTask.");
+					event.preventDefault(); 
 					window.app.continueFormTask(prop.id, true, 'property'); 
 					return false; 
 				};
-			} else {
-				console.error("ERROR: Detail Edit Button element not found!");
 			}
-			// ⬆️ MODIFICATION END
-			
 			switchView('detail');
 		}
 
@@ -774,7 +978,7 @@
                             alertMessage(`${displayName} deleted successfully.`, 'success');
                         } else if (type === 'tenant') {
                              tenants = tenants.filter(t => t.id !== id);
-                             tasks = tasks.filter(t => t.tenantId !== id); // Remove associated tasks
+                             tasks = tasks.filter(t => t.tenantId !== id); 
                              saveData();
                              switchView('property');
                              switchPropertyTab('tenant');
@@ -929,120 +1133,211 @@
         // Rendering Functions (Tabs)
         // ===================================
         
+		function renderDashboardStats() {
+            const container = document.getElementById('assetCardContainer');
+            if (!container) return;
+
+            // 1. 计算预估月收入 (保持不变)
+            const revenue = properties.reduce((sum, p) => {
+                if (p.status === 'Rented' && p.monthlyRent) {
+                    return sum + parseFloat(p.monthlyRent);
+                }
+                return sum;
+            }, 0);
+
+            // 2. 计算房产总数 (保持不变：只要创建了就算，看着爽)
+            const propCount = properties.length;
+
+            // 3. 计算活跃租客数 (修改：只计算 "成功链接" 的租客)
+            // 逻辑：遍历所有房产，提取 tenantId，过滤掉空的，然后去重。
+            // 这样只有住在房子里的租客才会被统计。
+            const activeTenantIds = properties
+                .map(p => p.tenantId)      // 取出所有房产的 tenantId
+                .filter(id => id);         // 过滤掉 null/undefined/空字符串 (即 Vacant 的房产)
+            
+            // 使用 Set 去重 (如果同一个租客租了两套房，这里算 1 个 Active Tenant。如果你希望算 2 次，去掉 new Set 即可)
+            const tenantCount = new Set(activeTenantIds).size;
+
+            // 4. 渲染 HTML (带跳转功能) (保持不变)
+            container.innerHTML = `
+                <div class="asset-card">
+                    <div class="asset-card-top">
+                        <div class="asset-label">Est. Monthly Revenue</div>
+                        <div class="asset-value-big">RM ${revenue.toLocaleString()}</div>
+                    </div>
+                    
+                    <div class="asset-divider"></div>
+                    
+                    <div class="asset-card-row">
+                        <div class="asset-stat" onclick="window.app.switchView('property'); window.app.switchPropertyTab('property', true);">
+                            <div class="stat-content-wrapper">
+                                <span class="material-icons-round stat-icon">apartment</span>
+                                <div class="asset-stat-val">${propCount}</div>
+                            </div>
+                            <div class="asset-stat-label">Properties</div>
+                        </div>
+
+                        <div class="asset-stat" onclick="window.app.switchView('property'); window.app.switchPropertyTab('tenant', true);">
+                            <div class="stat-content-wrapper">
+                                <span class="material-icons-round stat-icon">people</span>
+                                <div class="asset-stat-val">${tenantCount}</div>
+                            </div>
+                            <div class="asset-stat-label">Active Tenants</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+		
+		
         function renderTasks() {
-			const taskList = document.getElementById('taskList');
-			taskList.innerHTML = ''; // 清空列表
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = ''; // 清空列表
+            
+            const hasProperty = properties.length > 0;
+            const hasOwner = owners.length > 0;
+            const hasTenant = tenants.length > 0;
+
+            const propDone = localStorage.getItem('setup_property_done') === 'true';
+            const ownerDone = localStorage.getItem('setup_owner_done') === 'true';
+            const tenantDone = localStorage.getItem('setup_tenant_done') === 'true';
+
+            function createOnboardingHTML(type, title, desc, hasData, isDoneFlag) {
+                if (isDoneFlag) return ''; 
+
+                if (hasData) {
+                    return `
+                        <div class="task-item ready-to-complete" onclick="window.app.completeOnboardingTask('${type}')">
+                            <span class="material-icons-round icon" style="color: #28a745;">check_circle</span>
+                            <div class="task-info">
+                                <h3 style="color: #155724; text-decoration: line-through;">${title}</h3>
+                                <p style="color: #28a745; font-weight: 600;">Ready to complete! Tap to finish.</p>
+                            </div>
+                            <button class="action-btn btn-success" onclick="window.app.completeOnboardingTask('${type}'); event.stopPropagation();">
+                                Finish
+                            </button>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="task-item incomplete" onclick="window.app.navigateAndAdd('${type}')">
+                        <span class="material-icons-round icon" style="color: #3A86FF;">radio_button_unchecked</span>
+                        <div class="task-info">
+                            <h3>${title}</h3>
+                            <p>${desc}</p>
+                        </div>
+                        <button class="action-btn" onclick="window.app.navigateAndAdd('${type}'); event.stopPropagation();">
+                            Start
+                        </button>
+                    </div>
+                `;
+            }
+
+            let onboardingHTML = '';
+            onboardingHTML += createOnboardingHTML('property', 'Add 1st Property!', 'Create a property to track expenses.', hasProperty, propDone);
+            onboardingHTML += createOnboardingHTML('owner', 'Add 1st Owner!', 'Set up who owns the property.', hasOwner, ownerDone);
+            onboardingHTML += createOnboardingHTML('tenant', 'Add 1st Tenant!', 'Register a tenant to track leases.', hasTenant, tenantDone);
+
+            // --- 修复开始：将 Link Tenant HTML 存入变量，而不是直接 += innerHTML ---
+            let linkActionHTML = ''; 
+			let addButtonTaskHTML = '';
+            const linkDone = localStorage.getItem('setup_link_done') === 'true';
+			const addButtonTutorialDone = localStorage.getItem('tutorial_add_btn_done') === 'true';
+            
+			if (propDone && ownerDone && tenantDone && !addButtonTutorialDone) {
+                addButtonTaskHTML = `
+                    <div class="task-item incomplete" style="border-left: 4px solid #3A86FF; background-color: #eef4ff;" 
+                         onclick="window.app.startAddButtonTutorial()">
+                        <span class="material-icons-round icon" style="color: #3A86FF;">touch_app</span>
+                        <div class="task-info">
+                            <h3 style="color: #333;">Master the App</h3>
+                            <p style="color: #666;">Learn where to create new items.</p>
+                        </div>
+                        <button class="action-btn" style="background-color: #3A86FF;" 
+                            onclick="window.app.startAddButtonTutorial(); event.stopPropagation();">
+                            Show Me
+                        </button>
+                    </div>
+                `;
+            }
 			
-			// 1. 获取当前数据状态
-			const hasProperty = properties.length > 0;
-			const hasOwner = owners.length > 0;
-			const hasTenant = tenants.length > 0;
+            if (propDone && ownerDone && tenantDone && !linkDone) {
+                // 智能检测：是否有空房 (Phase 3) 和 闲置租客 (Phase 4)
+                const hasVacantProp = properties.some(p => !p.tenantId && p.phase >= 3);
+                const assignedTenantIds = properties.map(p => p.tenantId).filter(id => id);
+                // 租客必须是 Setup Complete (Phase 4) 且未被分配
+                const hasActiveTenant = tenants.some(t => t.phase >= 4 && !assignedTenantIds.includes(t.id));
 
-			// 2. 获取用户是否已经手动点过“完成” (从 localStorage 读取)
-			const propDone = localStorage.getItem('setup_property_done') === 'true';
-			const ownerDone = localStorage.getItem('setup_owner_done') === 'true';
-			const tenantDone = localStorage.getItem('setup_tenant_done') === 'true';
+                if (hasVacantProp && hasActiveTenant) {
+                    const firstVacantPropId = properties.find(p => !p.tenantId && p.phase >= 3).id;
+                    
+                    linkActionHTML = `
+                        <div class="task-item incomplete" style="border-left: 4px solid #9B59B6; background-color: #fcf4ff;" 
+                             onclick="window.app.startLinkTutorial('${firstVacantPropId}')">
+                            <span class="material-icons-round icon" style="color: #9B59B6;">link</span>
+                            <div class="task-info">
+                                <h3 style="color: #6a1b9a;">Action Required: Link Tenant</h3>
+                                <p style="color: #9B59B6;">Link tenant to property to generate revenue!</p>
+                            </div>
+                            <button class="action-btn" style="background-color: #9B59B6;" 
+                                onclick="window.app.startLinkTutorial('${firstVacantPropId}'); event.stopPropagation();">
+                                Link Now
+                            </button>
+                        </div>
+                    `;
+                }
+            }
 
-			// 3. 定义一个生成新手任务 HTML 的辅助函数
-			function createOnboardingHTML(type, title, desc, hasData, isDoneFlag) {
-				// 如果已经点过完成了，就不生成 HTML
-				if (isDoneFlag) return ''; 
+            // 先把这两部分渲染进去
+            taskList.innerHTML = onboardingHTML + addButtonTaskHTML + linkActionHTML;
 
-				// 状态 A: 用户已经加了数据，但还没点完成 -> 显示“求表扬”状态
-				if (hasData) {
-					return `
-						<div class="task-item ready-to-complete" onclick="window.app.completeOnboardingTask('${type}')">
-							<span class="material-icons-round icon" style="color: #28a745;">check_circle</span>
-							<div class="task-info">
-								<h3 style="color: #155724; text-decoration: line-through;">${title}</h3>
-								<p style="color: #28a745; font-weight: 600;">Ready to complete! Tap to finish.</p>
-							</div>
-							<button class="action-btn btn-success" onclick="window.app.completeOnboardingTask('${type}'); event.stopPropagation();">
-								Finish
-							</button>
-						</div>
-					`;
-				}
+            const now = new Date();
+            const todayDate = now.toISOString().split('T')[0];
+            
+            const pendingTasks = tasks.filter(t => 
+                t.status === 'in_progress' && (t.type !== 'rent_reminder' || t.sendDate <= todayDate)
+            ).sort((a, b) => {
+                 if (a.isRent && !b.isRent) return -1;
+                 if (!a.isRent && b.isRent) return 1;
+                 return 0;
+            });
 
-				// 状态 B: 用户还没加数据 -> 显示“去开始”状态
-				return `
-					<div class="task-item incomplete" onclick="window.app.navigateAndAdd('${type}')">
-						<span class="material-icons-round icon" style="color: #3A86FF;">radio_button_unchecked</span>
-						<div class="task-info">
-							<h3>${title}</h3>
-							<p>${desc}</p>
-						</div>
-						<button class="action-btn" onclick="window.app.navigateAndAdd('${type}'); event.stopPropagation();">
-							Start
-						</button>
-					</div>
-				`;
-			}
+            // --- 修复关键点：判断逻辑加上 linkActionHTML 是否为空 ---
+            if (onboardingHTML === '' && linkActionHTML === '' && addButtonTaskHTML === '' && pendingTasks.length === 0) {
+                taskList.innerHTML = `
+                    <div class="task-item">
+                        <span class="material-icons-round icon" style="color: #6c757d;">check_circle_outline</span>
+                        <div class="task-info">
+                            <h3>No Tasks</h3>
+                            <p>All outstanding tasks are complete!</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            // --- 修复结束 ---
 
-			// 4. 生成三个任务的 HTML
-			let onboardingHTML = '';
-			onboardingHTML += createOnboardingHTML('property', 'Add 1st Property!', 'Create a property to track expenses.', hasProperty, propDone);
-			onboardingHTML += createOnboardingHTML('owner', 'Add 1st Owner!', 'Set up who owns the property.', hasOwner, ownerDone);
-			onboardingHTML += createOnboardingHTML('tenant', 'Add 1st Tenant!', 'Register a tenant to track leases.', hasTenant, tenantDone);
+            pendingTasks.forEach(task => {
+                let taskDescription = task.description;
+                let buttonAction = '';
+                if (task.type === 'property') buttonAction = `window.app.continueFormTask('${task.propId}', false, 'property')`;
+                else if (task.type === 'tenant_setup') buttonAction = `window.app.continueFormTask('${task.tenantId}', false, 'tenant')`;
+                else if (task.type === 'rent_reminder') buttonAction = `window.app.sendRentReminder('${task.id}', '${task.propId}')`;
 
-			// 5. 将新手任务插入列表
-			taskList.innerHTML += onboardingHTML;
-
-			// --- 下面是原本的普通任务渲染逻辑 ---
-			
-			const now = new Date();
-			const todayDate = now.toISOString().split('T')[0];
-			
-			// 筛选普通任务
-			const pendingTasks = tasks.filter(t => 
-				t.status === 'in_progress' && (t.type !== 'rent_reminder' || t.sendDate <= todayDate)
-			).sort((a, b) => {
-				 if (a.isRent && !b.isRent) return -1;
-				 if (!a.isRent && b.isRent) return 1;
-				 return 0;
-			});
-
-			// 如果既没有新手任务，也没有普通任务，显示 "All Clear"
-			if (onboardingHTML === '' && pendingTasks.length === 0) {
-				taskList.innerHTML = `
-					<div class="task-item">
-						<span class="material-icons-round icon" style="color: #6c757d;">check_circle_outline</span>
-						<div class="task-info">
-							<h3>No Tasks</h3>
-							<p>All outstanding tasks are complete!</p>
-						</div>
-					</div>
-				`;
-				return;
-			}
-
-			// 渲染普通任务
-			pendingTasks.forEach(task => {
-				// ... (把你原本 renderTasks 里的 forEach 代码复制到这里) ...
-				// ... 注意：如果你之前有改动过 button 逻辑，请保持你的最新版本 ...
-				
-				let taskDescription = task.description;
-				// ... (省略重复代码，保持你现有的逻辑即可) ...
-				let buttonAction = '';
-				// 简写示例：
-				if (task.type === 'property') buttonAction = `window.app.continueFormTask('${task.propId}', false, 'property')`;
-				else if (task.type === 'tenant_setup') buttonAction = `window.app.continueFormTask('${task.tenantId}', false, 'tenant')`;
-				else if (task.type === 'rent_reminder') buttonAction = `window.app.sendRentReminder('${task.id}', '${task.propId}')`;
-
-				taskList.innerHTML += `
-					<div class="task-item incomplete" onclick="${buttonAction}">
-						<span class="material-icons-round icon">edit_note</span>
-						<div class="task-info">
-							<h3>${taskDescription}</h3>
-							<p>${task.details || ''}</p>
-						</div>
-						<a href="#" class="action-btn">Action</a>
-					</div>
-				`;
-			});
-		}
+                taskList.innerHTML += `
+                    <div class="task-item incomplete" onclick="${buttonAction}">
+                        <span class="material-icons-round icon">edit_note</span>
+                        <div class="task-info">
+                            <h3>${taskDescription}</h3>
+                            <p>${task.details || ''}</p>
+                        </div>
+                        <a href="#" class="action-btn">Action</a>
+                    </div>
+                `;
+            });
+        }
         
-        // Caches property list when running filter
         let currentProperties = [];
 
         function filterProperties() {
@@ -1068,13 +1363,142 @@
             renderPropertiesList(currentProperties);
         }
 
+		function startAddButtonTutorial() {
+            // 1. 跳转到 Property 界面
+            switchView('property');
+            switchPropertyTab('property');
+
+            // 2. 延迟等待渲染
+            setTimeout(() => {
+                const targetBtn = document.getElementById('dynamicAddBtn');
+                const overlay = document.getElementById('tutorialOverlay');
+
+                if (targetBtn && overlay) {
+                    // 显示遮罩
+                    overlay.style.display = 'block';
+
+                    // --- 关键：解决 Header 的层级问题 ---
+                    // 找到按钮所在的 Header 容器
+                    const headerContainer = targetBtn.closest('.property-header');
+                    if (headerContainer) {
+                        headerContainer.classList.add('tutorial-parent-active'); // 复用之前定义的 CSS 类
+                    }
+
+                    // 滚动到顶部 (防止用户滚下去了看不到 Header)
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                    // 高亮按钮
+                    targetBtn.classList.add('tutorial-highlight');
+
+                    // 添加手指 (这次手指稍微往左一点，防止出屏幕)
+                    let existingFinger = targetBtn.querySelector('#activeTutorialFinger');
+                    if (!existingFinger) {
+                        const finger = document.createElement('div');
+                        finger.id = 'activeTutorialFinger';
+                        finger.className = 'tutorial-finger';
+                        // 手指样式微调：放在按钮左下侧指着它
+                        finger.style.right = '-20px'; 
+                        finger.style.top = '40px';
+                        finger.innerHTML = '<span class="material-icons-round" style="font-size: 48px;">touch_app</span>'; 
+                        targetBtn.appendChild(finger);
+                    }
+                    
+                    // --- 绑定一次性点击事件 ---
+                    // 当用户点击了这个按钮，任务就算完成了
+                    targetBtn.addEventListener('click', finishAddButtonTutorial, { once: true });
+                }
+            }, 300);
+        }
+
+        function finishAddButtonTutorial() {
+            // 1. 标记任务完成
+            localStorage.setItem('tutorial_add_btn_done', 'true');
+            
+            // 2. 结束引导视觉效果 (移除高亮、遮罩等)
+            endTutorial(); // 复用之前的 cleanup 函数
+            
+            // 3. 这里的逻辑是：用户点击了按钮 -> 触发了原本的 handleDynamicAdd (弹出菜单/表单) -> 同时触发了这个 finish 函数
+            // 所以我们不需要额外写跳转代码，只需要处理“身后事”即可。
+            
+            // 4. 可选：给个小提示
+            // alertMessage('You found it! Use this button to add anything.', 'success');
+        }
+
+		function startLinkTutorial(propId) {
+            // 1. 强制跳转到 Property 页面
+            switchView('property');
+            switchPropertyTab('property');
+
+            // 2. 延迟 300ms 等待页面切换和列表渲染
+            setTimeout(() => {
+                const targetBtn = document.getElementById(`btn-link-${propId}`);
+                
+                if (targetBtn) {
+                    // --- 关键修复 1：移除列表容器的动画/Transform ---
+                    // (防止父容器限制子元素的 z-index)
+                    const tabContent = document.getElementById('tabContentProperty');
+                    if (tabContent) {
+                        tabContent.style.transform = 'none';
+                        tabContent.style.animation = 'none';
+                    }
+
+                    // --- 关键修复 2：提升“父级卡片”的层级 ---
+                    // 找到按钮所在的卡片容器 (.property-card-compact)
+                    const parentCard = targetBtn.closest('.property-card-compact');
+                    if (parentCard) {
+                        // 给卡片加一个临时的 class，让它浮在遮罩层上面
+                        parentCard.classList.add('tutorial-parent-active');
+                    }
+
+                    // 3. 滚动屏幕
+                    targetBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    // 4. 显示遮罩
+                    const overlay = document.getElementById('tutorialOverlay');
+                    if(overlay) overlay.style.display = 'block';
+
+                    // 5. 给按钮加高亮 (发光效果)
+                    targetBtn.classList.add('tutorial-highlight');
+
+                    // 6. 添加手指
+                    let existingFinger = targetBtn.querySelector('#activeTutorialFinger');
+                    if (!existingFinger) {
+                        const finger = document.createElement('div');
+                        finger.id = 'activeTutorialFinger';
+                        finger.className = 'tutorial-finger';
+                        finger.innerHTML = '<span class="material-icons-round" style="font-size: 48px;">touch_app</span>'; 
+                        targetBtn.appendChild(finger);
+                    }
+                }
+            }, 300); 
+        }
+
+        // --- 新增函数：结束教学引导 ---
+        function endTutorial() {
+            // 1. 隐藏遮罩
+            const overlay = document.getElementById('tutorialOverlay');
+            if(overlay) overlay.style.display = 'none';
+            
+            // 2. 移除按钮的高亮和手指
+            document.querySelectorAll('.tutorial-highlight').forEach(el => {
+                el.classList.remove('tutorial-highlight');
+                const finger = el.querySelector('#activeTutorialFinger');
+                if (finger) finger.remove();
+            });
+
+            // 3. --- 新增：移除父级卡片的层级提升 ---
+            document.querySelectorAll('.tutorial-parent-active').forEach(el => {
+                el.classList.remove('tutorial-parent-active');
+            });
+        }
+
+
         function renderPropertiesList(list) {
             const listContainer = document.getElementById('tabContentProperty');
             listContainer.innerHTML = '';
             
             const searchTerm = document.getElementById('propertySearch')?.value.trim();
 
-            // 空状态处理 (保持不变)
             if (list.length === 0) {
                  if (searchTerm) {
                      listContainer.innerHTML = `
@@ -1083,9 +1507,8 @@
                             <p style="color: #666; margin-top: 10px;">No results found</p>
                         </div>`;
                  } else {
-                     // 注意：这里我们移除了按钮，因为现在按钮在 Sticky Footer 也有了，
-                     // 但保留一个友好的空状态图也是好的。
                      const imageUrl = "https://cdn-icons-png.flaticon.com/512/609/609803.png"; 
+                     
                      listContainer.innerHTML = `
                         <div class="empty-state-container">
                             <div class="empty-state-img-wrapper">
@@ -1093,13 +1516,16 @@
                             </div>
                             <h3>No properties yet.</h3>
                             <p>Your property portfolio starts here.</p>
+                            
+                            <button class="empty-state-btn" onclick="window.app.handleNewEntry('property')">
+                                Create First Property
+                            </button>
                         </div>
                      `;
                  }
                  return;
             }
 
-            // 排序逻辑 (保持不变)
             list.sort((a, b) => {
                 const aComplete = a.phase && a.phase > 2;
                 const bComplete = b.phase && b.phase > 2;
@@ -1111,34 +1537,39 @@
                 return 0; 
             });
             
-            // 渲染列表
             list.forEach(p => {
                 const isComplete = p.phase && p.phase > 2;
                 const statusText = p.status || 'Vacant';
                 
-                // 状态颜色逻辑
                 const statusClass = (p.status === 'Rented') ? 'status-rented' : 
                                     (isComplete ? 'status-vacant' : 'status-incomplete');
                 
-                // 获取数据
                 const tenant = getTenantById(p.tenantId);
-                const tenantName = tenant ? tenant.fullName.split(' ')[0] : 'None'; // 只取名字的第一部分，节省空间
+                const tenantName = tenant ? tenant.fullName.split(' ')[0] : 'None'; 
                 const propName = p.name || 'Unnamed Property';
                 const propAddress = p.address || 'No Address';
                 const propRent = p.monthlyRent ? `RM ${p.monthlyRent.toLocaleString()}` : '-';
                 
-                // 核心改动：使用新的 Compact HTML 结构
+                let cardAction;
+                if (isComplete) {
+                    cardAction = `onclick="window.app.viewPropertyDetails('${p.id}');"`;
+                } else {
+                    cardAction = `onclick="window.app.renderForm('${p.id}', ${p.phase || 1}, 'property');"`;
+                }
                 
-                // 1. 定义点击整个卡片的行为 (进入详情)
-                const cardAction = `onclick="window.app.viewPropertyDetails('${p.id}');"`;
-                
-                // 2. 定义底部右侧的内容 (是显示租客名，还是显示 Link 按钮)
                 let footerRightHTML = '';
-                
                 if (!isComplete) {
-                    footerRightHTML = `<span style="color: #e65100; font-size: 11px;">Incomplete Setup</span>`;
+                    // 未完成设置：显示删除按钮 + Continue
+                    footerRightHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <button class="compact-delete-btn" onclick="event.stopPropagation(); window.app.deletePropertyHandler('${p.id}', '${p.name}');" title="Delete Draft">
+                                <span class="material-icons-round">delete_outline</span>
+                            </button>
+                            <span style="color: #e65100; font-size: 11px; font-weight:600;">⚠️ Continue Setup</span>
+                        </div>
+                    `;
                 } else if (p.status === 'Rented') {
-                    // 已出租状态 (保持不变)
+                    // 已出租：显示租客名字
                     footerRightHTML = `
                         <div class="compact-tenant-info">
                             <span class="material-icons-round" style="font-size: 14px; margin-right: 4px; color: #ccc;">person</span>
@@ -1146,11 +1577,12 @@
                         </div>
                     `;
                 } else {
-                    // Vacant 状态：【修改了这里】
-                    // 1. Icon 改为 'person_add' (代表添加/关联人)
-                    // 2. 文字改为 'Link Tenant'
+                    // 空置状态：显示 Link Tenant 按钮 (这里是修改的重点)
+                    // 1. 添加了 id="btn-link-${p.id}" 供教学引导定位
+                    // 2. onclick 添加了 window.app.endTutorial() 关闭引导
                     footerRightHTML = `
-                        <button class="compact-link-btn" onclick="window.app.openQuickLinkModal('${p.id}'); event.stopPropagation();">
+                        <button id="btn-link-${p.id}" class="compact-link-btn" 
+                                onclick="window.app.endTutorial(); window.app.openQuickLinkModal('${p.id}'); event.stopPropagation();">
                             <span class="material-icons-round" style="font-size: 16px;">person_add</span> Link Tenant
                         </button>
                     `;
@@ -1158,29 +1590,22 @@
 
                 listContainer.innerHTML += `
                     <div class="property-card-compact" ${cardAction} style="${!isComplete ? 'border-left-color: #FF9800;' : ''}">
-                        
                         <div class="compact-header">
                             <div class="compact-title">${propName}</div>
                             <div class="compact-price">${propRent}</div>
                         </div>
-                        
                         <div class="compact-address">${propAddress}</div>
-                        
                         <div class="compact-footer">
                             <span class="compact-status ${statusClass}">${statusText}</span>
                             ${footerRightHTML}
                         </div>
-
                     </div>
                 `;
             });
-            
-            // 增加底部留白，防止最后一个卡片被 Sticky Button 挡住
             listContainer.innerHTML += `<div style="height: 80px;"></div>`;
         }
         
         function renderProperties() {
-            // Check if there is a search term and use the filter logic
             filterProperties(); 
         }
 
@@ -1189,127 +1614,193 @@
             listContainer.innerHTML = '';
 
             if (owners.length === 0) {
-				// 使用一个代表“用户/个人”的图标
-				const imageUrl = "https://cdn-icons-png.flaticon.com/512/747/747376.png"; 
-				
-				listContainer.innerHTML = `
-				<div class="empty-state-container">
-					<div class="empty-state-img-wrapper" style="background-color: #f3e5f5;">
-						<img src="${imageUrl}" alt="No Owners">
-					</div>
-					<h3>No owner profiles yet.</h3>
-					<p>Create owner profiles to track details and link with properties.</p>
-					<button class="empty-state-btn" onclick="window.app.handleNewEntry('owner')" style="background-color: #9B59B6;">
-						Add New Owner
-					</button>
-				</div>
-				`;
-				return;
-			}
+                const imageUrl = "https://cdn-icons-png.flaticon.com/512/747/747376.png"; 
+                
+                listContainer.innerHTML = `
+                <div class="empty-state-container">
+                    <div class="empty-state-img-wrapper" style="background-color: #f3e5f5;">
+                        <img src="${imageUrl}" alt="No Owners">
+                    </div>
+                    <h3>No owner profiles yet.</h3>
+                    <p>Create owner profiles to track details and link with properties.</p>
+                    <button class="empty-state-btn" onclick="window.app.handleNewEntry('owner')" style="background-color: #9B59B6;">
+                        Create First Owner
+                    </button>
+                </div>
+                `;
+                return;
+            }
 
             owners.forEach(o => {
-                const associatedCount = properties.filter(p => p.ownerId === o.id).length;
-                const statusText = associatedCount > 0 ? `${associatedCount} Properties` : 'No Properties';
+                // 计算该业主拥有的房产数量
+                const count = properties.filter(p => p.ownerId === o.id).length;
+                const propertyCountText = count === 1 ? '1 Property' : `${count} Properties`;
                 
+                // 名字和电话
+                const displayName = o.fullName || 'Owner Name';
+                const phoneDisplay = o.phone || 'No Phone';
+
                 listContainer.innerHTML += `
-                    <div class="property-card" onclick="window.app.viewOwnerDetails('${o.id}');">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <h4>${o.fullName || 'Owner Name N/A'}</h4>
-                            <span class="status-tag-prop status-vacant" style="background-color: #eef4ff; color: #3A86FF;">${statusText}</span>
+                    <div class="property-card-compact" onclick="window.app.viewOwnerDetails('${o.id}');" style="border-left-color: #9B59B6;">
+                        
+                        <div class="compact-header">
+                            <div class="compact-title">${displayName}</div>
+                            <div class="compact-price" style="font-size: 14px;">${phoneDisplay}</div>
                         </div>
-                        <div class="property-details-section">
-                            <div class="detail-line address">
-                                <p class="detail-item"><strong>Contact:</strong> ${o.phone || o.email || 'N/A'}</p>
-                            </div>
+                        
+                        <div class="compact-footer" style="margin-top: 8px;">
+                            <span class="compact-status" style="background-color: #f3e5f5; color: #8E44AD;">OWNER</span>
+                            <span style="font-size: 11px; color: #555; font-weight: 500;">${propertyCountText}</span>
                         </div>
                     </div>
                 `;
             });
+            
+            // 底部留白
+            listContainer.innerHTML += `<div style="height: 80px;"></div>`;
         }
 
         function renderTenants() {
-             const listContainer = document.getElementById('tabContentTenant');
+            const listContainer = document.getElementById('tabContentTenant');
             listContainer.innerHTML = '';
             
             if (tenants.length === 0) {
-				// 使用一个代表“群组/家庭”的图标
-				const imageUrl = "https://cdn-icons-png.flaticon.com/512/681/681494.png"; 
-				
-				listContainer.innerHTML = `
-				<div class="empty-state-container">
-					<div class="empty-state-img-wrapper" style="background-color: #e8f5e9;">
-						<img src="${imageUrl}" alt="No Tenants">
-					</div>
-					<h3>No tenant profiles yet.</h3>
-					<p>Add tenants to manage leases and track occupancy.</p>
-					<button class="empty-state-btn" onclick="window.app.handleNewEntry('tenant')" style="background-color: #28a745;">
-						Add New Tenant
-					</button>
-				</div>
-				`;
-				return;
-			}
+                const imageUrl = "https://cdn-icons-png.flaticon.com/512/1256/1256650.png"; 
+                
+                listContainer.innerHTML = `
+                <div class="empty-state-container">
+                    <div class="empty-state-img-wrapper" style="background-color: #e8f5e9;">
+                        <img src="${imageUrl}" alt="No Tenants">
+                    </div>
+                    <h3>No tenants yet.</h3>
+                    <p>Add tenants to generate agreements and track leases.</p>
+                    <button class="empty-state-btn" onclick="window.app.navigateAndAdd('tenant')" style="background-color: #28a745;">
+                        Create First Tenant
+                    </button>
+                </div>
+                `;
+                return;
+            }
+
+            // 排序：未完成的在前，已完成的在后
+            tenants.sort((a, b) => {
+                const aComplete = a.phase && a.phase >= 4;
+                const bComplete = b.phase && b.phase >= 4;
+                
+                // 优先级 1: 未完成 vs 已完成
+                if (aComplete !== bComplete) {
+                    return aComplete ? 1 : -1; // 未完成的 (-1) 排在最前面
+                }
+
+                // 优先级 2: (如果是已完成的) Active vs Rented
+                if (aComplete && bComplete) {
+                    // 检查是否关联了房产
+                    const aLinked = properties.some(p => p.tenantId === a.id);
+                    const bLinked = properties.some(p => p.tenantId === b.id);
+                    
+                    if (aLinked !== bLinked) {
+                        return aLinked ? 1 : -1; // 已关联 (Rented) 往后排(1)，未关联 (Active) 往前排(-1)
+                    }
+                }
+                
+                return 0; 
+            });
 
             tenants.forEach(t => {
                 const associatedProperty = properties.find(p => p.tenantId === t.id);
-                // 【修改】：将 >= 3 改为 >= 4
                 const isComplete = t.phase && t.phase >= 4; 
+                
+                const displayName = t.fullName || 'New Tenant';
+                const phoneDisplay = t.phone || 'No Phone';
+                
+                let subTitleText = '';
+                if (associatedProperty) {
+                    subTitleText = associatedProperty.name; 
+                } else if (!isComplete) {
+                    subTitleText = `Setup in progress (Step ${t.phase || 0}/4)`;
+                } else {
+                    subTitleText = 'Not assigned to any property';
+                }
 
-                let statusText;
-                let statusClass;
-                let action;
-                // 【修改】：显示的进度分母改为 4
-                let phaseDisplay = t.phase < 4 ? `${t.phase}/4 complete` : 'Setup Complete';
-
+                let statusText, statusClass, borderColorStyle, action;
+                let footerRightHTML = '';
 
                 if (associatedProperty) {
-                    statusText = `Renting: ${associatedProperty.name}`;
-                    statusClass = 'status-rented';
+                    // 情况 A: 正在出租
+                    statusText = 'RENTING';
+                    statusClass = 'status-rented'; 
+                    borderColorStyle = 'border-left-color: #28a745;'; 
                     action = `onclick="window.app.viewTenantDetails('${t.id}');"`;
+                    
+                    const endDate = t.leaseEnd || '-';
+                    footerRightHTML = `<span style="font-size: 11px; color: #555; font-weight: 500;">Ends: ${endDate}</span>`;
+
                 } else if (!isComplete) {
-                    statusText = `Setup: ${phaseDisplay}`;
+                    // 情况 B: 未完成设置
+                    statusText = `SETUP: ${t.phase || 0}/4`;
                     statusClass = 'status-incomplete';
-                    action = `onclick="window.app.continueFormTask('${t.id}', false, 'tenant');"`; 
+                    borderColorStyle = 'border-left-color: #FF9800; background-color: #fff8e1;'; 
+                    action = `onclick="window.app.continueFormTask('${t.id}', false, 'tenant');"`;
+                    
+                    // --- 修改：增加删除按钮 ---
+                    footerRightHTML = `
+                        <div style="display: flex; align-items: center;">
+                            <button class="compact-delete-btn" onclick="event.stopPropagation(); window.app.deleteProfileHandler('${t.id}', 'tenant', '${t.fullName}');" title="Delete Draft">
+                                <span class="material-icons-round">delete_outline</span>
+                            </button>
+                            <span style="color: #e65100; font-size: 11px; font-weight: 700;">⚠️ Continue</span>
+                        </div>
+                    `;
+
                 } else {
-                    statusText = 'Unassigned (Setup Complete)';
-                    statusClass = 'status-vacant';
+                    // 情况 C: 已完成但未关联 (这里我们要加 Link Property 按钮)
+                    statusText = 'ACTIVE';
+                    statusClass = 'status-vacant'; // 这里的 "Vacant" 其实指租客是空闲的
+                    borderColorStyle = ''; 
                     action = `onclick="window.app.viewTenantDetails('${t.id}');"`;
+                    
+                    // 🔥 核心修改：这里添加 Link Property 按钮
+                    // 注意：这里调用了一个新函数 openQuickLinkPropertyModal
+                    footerRightHTML = `
+                        <button class="compact-link-btn" onclick="window.app.openQuickLinkPropertyModal('${t.id}'); event.stopPropagation();">
+                            <span class="material-icons-round" style="font-size: 16px;">add_business</span> Link Property
+                        </button>
+                    `;
                 }
-                
-                const displayName = t.preferredName 
-                    ? `${t.fullName} (${t.preferredName})` 
-                    : (t.fullName || 'Tenant Name N/A');
 
                 listContainer.innerHTML += `
-                    <div class="property-card ${statusClass === 'status-incomplete' ? 'incomplete-details' : ''}" ${action}>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <h4>${displayName}</h4>
-                            <span class="status-tag-prop ${statusClass}">${statusText}</span>
+                    <div class="property-card-compact" ${action} style="${borderColorStyle}">
+                        <div class="compact-header">
+                            <div class="compact-title">${displayName}</div>
+                            <div class="compact-price" style="font-size: 14px;">${phoneDisplay}</div>
                         </div>
-                        <div class="property-details-section">
-                            <div class="detail-line address">
-                                <p class="detail-item"><strong>Contact:</strong> ${t.phone || 'N/A'}</p>
-                            </div>
+                        
+                        <div class="compact-address">
+                            ${associatedProperty ? '<span class="material-icons-round" style="font-size: 12px; vertical-align: -1px; margin-right: 2px;">home</span>' : ''}
+                            ${subTitleText}
+                        </div>
+                        
+                        <div class="compact-footer">
+                            <span class="compact-status ${statusClass}">${statusText}</span>
+                            ${footerRightHTML}
                         </div>
                     </div>
                 `;
             });
+            listContainer.innerHTML += `<div style="height: 80px;"></div>`;
         }
 
         // ===================================
         // Detail View Rendering Functions
         // ===================================
         
-        /**
-         * Renders the Property Detail Content with collapsible cards (Point 2)
-         */
         function renderPropertyDetailsContent(prop, owner, tenant) {
             document.getElementById('detailPropertyName').textContent = prop.name || 'Property Profile';
             
             const content = document.getElementById('detailContent');
 			
+			// 顶部快捷操作按钮：如果没有租客，显示 "Link Tenant Now"
 			let quickActionHtml = '';
-    
 			if (!tenant) {
 				quickActionHtml = `
 					<div class="primary-action-container">
@@ -1321,13 +1812,11 @@
 				`;
 			}
 
-			// 2. 渲染内容 (注意：把 quickActionHtml 加在最前面)
-			content.innerHTML = quickActionHtml + `
-				<div class="detail-card rental-info">
-					<h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF;">RENTAL INFORMATION</h3>
-					`;
-			
-            content.innerHTML = `
+			// --- 1. RENTAL INFORMATION (增加 Referral) ---
+            // 检查是否有中介信息
+            const hasReferral = prop.referralName || prop.referralContact;
+
+            const rentalInfoHtml = `
                 <div class="detail-card rental-info">
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF;">RENTAL INFORMATION</h3>
                     <div class="detail-group">
@@ -1344,12 +1833,31 @@
                             </p>
                         </div>
                         <div class="detail-item-aligned">
-                            <p class="detail-label">Monthly Rent (RM)</p>
+                            <p class="detail-label">Listing Rent (RM)</p>
                             <p class="detail-value">${prop.monthlyRent ? prop.monthlyRent.toLocaleString() : '-'}</p>
                         </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">House Type</p>
+                            <p class="detail-value">${prop.houseType || '-'}</p>
+                        </div>
+
+                        ${hasReferral ? `
+                            <div style="width: 100%; height: 1px; background: #d0e0ff; margin: 10px 0;"></div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Referral Name</p>
+                                <p class="detail-value">${prop.referralName || '-'}</p>
+                            </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">Referral Contact</p>
+                                <p class="detail-value">${prop.referralContact || '-'}</p>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
+            `;
 
+            // --- 2. BASIC & SPECS (保持不变) ---
+            const basicInfoHtml = `
                 <div class="detail-card">
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">BASIC INFORMATION</h3>
                     <div class="detail-group">
@@ -1380,20 +1888,12 @@
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">SPECIFICATIONS</h3>
                     <div class="detail-group">
                         <div class="detail-item-aligned">
-                            <p class="detail-label">House Type</p>
-                            <p class="detail-value">${prop.houseType || '-'}</p>
-                        </div>
-                        <div class="detail-item-aligned">
                             <p class="detail-label">Size (Sqft)</p>
                             <p class="detail-value">${prop.sizeSqft ? prop.sizeSqft.toLocaleString() : '-'}</p>
                         </div>
                         <div class="detail-item-aligned">
-                            <p class="detail-label">Rooms</p>
-                            <p class="detail-value">${prop.rooms || '-'}</p>
-                        </div>
-                        <div class="detail-item-aligned">
-                            <p class="detail-label">Bathrooms</p>
-                            <p class="detail-value">${prop.bathrooms || '-'}</p>
+                            <p class="detail-label">Layout</p>
+                            <p class="detail-value">${prop.rooms || '-'} Rooms, ${prop.bathrooms || '-'} Baths</p>
                         </div>
                         <div class="detail-item-aligned">
                             <p class="detail-label">Carpark</p>
@@ -1401,7 +1901,10 @@
                         </div>
                     </div>
                 </div>
+            `;
 
+            // --- 3. OWNER DETAILS (增加 Bank Details) ---
+            const ownerInfoHtml = `
                 <div class="detail-card owner-info collapse-card">
                     <div class="collapse-header" onclick="window.app.toggleCollapse('ownerDetailContentBody')">
                         <h3 style="font-size: 16px; font-weight: 700; color: #9B59B6;">
@@ -1424,40 +1927,55 @@
                                 <p class="detail-label">Phone Number</p>
                                 <p class="detail-value">${owner.phone || '-'}</p>
                             </div>
-                            <div class="detail-item-full"> 
-                                <p class="detail-label">Email Address</p>
-                                <p class="detail-value">${owner.email || '-'}</p>
+                            <div class="detail-item-full">
+                                <p class="detail-label">Bank Details</p>
+                                <p class="detail-value" style="font-family: monospace; background: rgba(155, 89, 182, 0.1); padding: 4px 8px; border-radius: 4px; display: inline-block; color: #6a1b9a;">
+                                    ${owner.bankDetails || '-'}
+                                </p>
                             </div>
                             <div class="detail-item-aligned">
-                                <p class="detail-label">Management Fee</p>
-                                <p class="detail-value">${owner.managementFee ? owner.managementFee + '%' : '-'}</p>
+                                <p class="detail-label">Mgmt Fee</p>
+                                <p class="detail-value">${owner.managementFee ? 'RM ' + owner.managementFee : '-'}</p>
                             </div>
                         ` : '<p class="detail-value" style="color: #999;">No owner is currently assigned.</p>'}
                     </div>
                 </div>
+            `;
 
+            // --- 4. TENANT DETAILS (增加 IC, Term, Agreement) ---
+            const tenantInfoHtml = `
                 <div class="detail-card tenant-info collapse-card">
                      <div class="collapse-header" onclick="window.app.toggleCollapse('tenantDetailContentBody')">
                         <h3 style="font-size: 16px; font-weight: 700; color: #155724;">
-                            TENANT DETAILS ${tenant ? `(${tenant.fullName || 'N/A'})` : '(Vacant)'}
+                            TENANT DETAILS ${tenant ? `(${tenant.fullName.split(' ')[0]})` : '(Vacant)'}
                         </h3>
                         <span class="material-icons-round collapse-icon" id="tenantDetailContentBodyIcon">expand_more</span>
                     </div>
                     <div id="tenantDetailContentBody" class="detail-group" style="display: none;">
                         ${tenant ? `
-                             <div class="detail-item-full" style="margin-bottom: 5px;">
+                             <div class="detail-item-full" style="margin-bottom: 8px;">
                                 <a href="#" onclick="window.app.viewTenantDetails('${tenant.id}'); return false;" style="font-size: 13px; color: #3A86FF; font-weight: 600;">
                                     <span class="material-icons-round" style="font-size: 18px; vertical-align: middle;">person</span> View Tenant Profile
                                 </a>
                             </div>
-                            <div class="detail-item-aligned">
+                            <div class="detail-item-full">
                                 <p class="detail-label">Full Name</p>
-                                <p class="detail-value">${tenant.fullName || '-'}</p>
+                                <p class="detail-value">
+                                    ${tenant.fullName || '-'}
+                                    ${tenant.preferredName ? `<span style="font-size:13px; color:#666; font-weight:400;">(Known as: ${tenant.preferredName})</span>` : ''}
+                                </p>
                             </div>
                             <div class="detail-item-aligned">
                                 <p class="detail-label">Phone Number</p>
                                 <p class="detail-value">${tenant.phone || '-'}</p>
                             </div>
+                            <div class="detail-item-aligned">
+                                <p class="detail-label">IC / Passport</p>
+                                <p class="detail-value">${tenant.icPassport || '-'}</p>
+                            </div>
+                            
+                            <div style="width: 100%; height: 1px; background: #b7e3c3; margin: 10px 0;"></div>
+
                             <div class="detail-item-aligned">
                                 <p class="detail-label">Tenancy Start</p>
                                 <p class="detail-value">${tenant.leaseStart || '-'}</p>
@@ -1466,31 +1984,74 @@
                                 <p class="detail-label">Tenancy End</p>
                                 <p class="detail-value">${tenant.leaseEnd || '-'}</p>
                             </div>
+                             <div class="detail-item-aligned">
+                                <p class="detail-label">Lease Term</p>
+                                <p class="detail-value">${tenant.leaseTerm ? tenant.leaseTerm + ' Months' : '-'}</p>
+                            </div>
+                             <div class="detail-item-aligned">
+                                <p class="detail-label">Signed Rent</p>
+                                <p class="detail-value" style="color: #155724;">${tenant.monthlyRent ? 'RM ' + tenant.monthlyRent.toLocaleString() : '-'}</p>
+                            </div>
+                            
+                            <div class="detail-item-full" style="margin-top: 10px;">
+                                <p class="detail-label">Agreement</p>
+                                ${tenant.agreementFile ? `
+                                    <button onclick="window.app.viewDummyFile('${tenant.agreementFile}');" class="card-quick-btn" style="width: auto; padding: 6px 12px; margin-top: 4px;">
+                                        <span class="material-icons-round">description</span> View Signed PDF
+                                    </button>
+                                ` : '<span style="font-size: 13px; color: #999;">No agreement uploaded</span>'}
+                            </div>
+
                         ` : '<p class="detail-value" style="color: #999;">No tenant is currently assigned to this property.</p>'}
                     </div>
                 </div>
             `;
+
+            content.innerHTML = quickActionHtml + rentalInfoHtml + basicInfoHtml + ownerInfoHtml + tenantInfoHtml;
         }
 
-        function renderOwnerDetailView(owner) {
+		function renderOwnerDetailView(owner) {
+            // 1. 设置标题
             document.getElementById('detailOwnerName').textContent = owner.fullName || 'Owner Profile';
-            document.getElementById('ownerEditBtn').setAttribute('onclick', `window.app.continueFormTask('${owner.id}', true, 'owner'); return false;`); // Changed to continueFormTask (Point 4)
             
-            const associatedProperties = properties.filter(p => p.ownerId === owner.id);
-            const propList = associatedProperties.map(p => 
-                `<p class="detail-value" style="font-size: 15px; margin-bottom: 5px;">
-                    <a href="#" onclick="window.app.viewPropertyDetails('${p.id}'); return false;">
-                        ${p.name} (${p.status})
-                    </a>
-                 </p>`
-            ).join('');
+            // 2. 配置编辑按钮
+            const editBtn = document.getElementById('ownerEditBtn');
+            if (editBtn) {
+                editBtn.onclick = function() {
+                    // 跳转到 owner 表单
+                    window.app.renderForm(owner.id, 0, 'owner');
+                };
+            }
 
+            // 3. 查找该业主名下的房产
+            const ownedProperties = properties.filter(p => p.ownerId === owner.id);
+            
+            // 4. 生成房产列表 HTML
+            let propertyListHtml = '';
+            if (ownedProperties.length > 0) {
+                propertyListHtml = ownedProperties.map(p => `
+                    <div class="linked-property-item" onclick="window.app.viewPropertyDetails('${p.id}');">
+                        <div class="linked-icon">
+                            <span class="material-icons-round">apartment</span>
+                        </div>
+                        <div class="linked-info">
+                            <div class="linked-title">${p.name}</div>
+                            <div class="linked-sub">${p.address || 'No Address'}</div>
+                        </div>
+                        <span class="material-icons-round linked-arrow">chevron_right</span>
+                    </div>
+                `).join('');
+            } else {
+                propertyListHtml = '<p class="detail-value" style="color: #999; font-style: italic;">No properties currently assigned.</p>';
+            }
+
+            // 5. 渲染页面内容
             const content = document.getElementById('ownerDetailContent');
             content.innerHTML = `
                 <div class="detail-card owner-info">
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #9B59B6;">OWNER DETAILS</h3>
-                    <div id="ownerDetails" class="detail-group">
-                        <div class="detail-item-aligned">
+                    <div class="detail-group">
+                        <div class="detail-item-full">
                             <p class="detail-label">Full Name</p>
                             <p class="detail-value">${owner.fullName || '-'}</p>
                         </div>
@@ -1498,53 +2059,131 @@
                             <p class="detail-label">Phone Number</p>
                             <p class="detail-value">${owner.phone || '-'}</p>
                         </div>
-                        <div class="detail-item-full"> 
+                        <div class="detail-item-aligned">
                             <p class="detail-label">Email Address</p>
                             <p class="detail-value">${owner.email || '-'}</p>
                         </div>
-                        <div class="detail-item-aligned">
-                            <p class="detail-label">Management Fee</p>
-                            <p class="detail-value">${owner.managementFee ? owner.managementFee + '%' : '-'}</p>
-                        </div>
-                        <div class="detail-item-aligned">
-                            <p class="detail-label">Bank Account Details</p>
-                            <p class="detail-value">${owner.bankDetails || '-'}</p>
-                        </div>
-                        <div class="detail-item-full">
+                        <div class="detail-item-full" style="margin-top: 5px;">
                             <p class="detail-label">Mailing Address</p>
                             <p class="detail-value">${owner.address || '-'}</p>
+                        </div>
+                        
+                        <div style="width: 100%; height: 1px; background: #e8d5f2; margin: 10px 0;"></div>
+                        
+                        <div class="detail-item-full">
+                            <p class="detail-label">Bank Details</p>
+                            <p class="detail-value" style="font-family: monospace; color: #6a1b9a; background: rgba(155, 89, 182, 0.1); padding: 5px; border-radius: 4px; display: inline-block;">
+                                ${owner.bankDetails || '-'}
+                            </p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Mgmt Fee</p>
+                            <p class="detail-value">${owner.managementFee ? 'RM ' + owner.managementFee : '-'}</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="detail-card">
-                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">ASSOCIATED PROPERTIES (${associatedProperties.length})</h3>
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">OWNED PROPERTIES (${ownedProperties.length})</h3>
                     <div class="detail-group">
-                        ${associatedProperties.length > 0 ? propList : '<p class="detail-value" style="color: #999;">No properties currently linked.</p>'}
+                        ${propertyListHtml}
                     </div>
                 </div>
             `;
         }
-        
+
+		window.app.generateAgreement = function(tenantId) {
+            // 1. 获取数据
+            const tenant = tenants.find(t => t.id === tenantId);
+            if (!tenant) { alert('Tenant not found'); return; }
+
+            // 查找关联的房产
+            const property = properties.find(p => p.tenantId === tenant.id);
+            
+            // 查找房产对应的业主
+            // 注意：如果没有 property，代码会报错，所以要加检查
+            if (!property) {
+                alert('This tenant is not linked to any property.');
+                return;
+            }
+
+            const owner = owners.find(o => o.id === property.ownerId);
+            if (!owner) {
+                alert('The property has no owner assigned.');
+                return;
+            }
+
+            // 2. 准备打包数据
+            const agreementData = {
+                date: new Date().toISOString(), // 使用今天的日期
+                tenant: tenant,
+                property: property,
+                owner: owner
+            };
+
+            // 3. 调用 js/templates.js 里的模板生成 HTML
+            // (前提是你已经完成了第一步的引入)
+            if (typeof window.app.generateTenancyAgreementHTML !== 'function') {
+                alert('Template file not loaded. Please check js/templates.js');
+                return;
+            }
+
+            const htmlContent = window.app.generateTenancyAgreementHTML(agreementData);
+
+            // 4. 打开新窗口并打印
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(htmlContent);
+                printWindow.document.close(); // 必须关闭流，浏览器才停止加载
+                
+                // 等待加载完成后自动打印
+                printWindow.onload = function() {
+                    printWindow.focus();
+                    setTimeout(() => { // 稍微延迟一下确保渲染完成
+                        printWindow.print();
+                    }, 500);
+                };
+            } else {
+                alert('Pop-up blocked! Please allow pop-ups for this site to print the agreement.');
+            }
+        };
+	
+
+
+
+
         function renderTenantDetailView(tenant) {
+            // 1. 设置头部名称和编辑按钮逻辑
             document.getElementById('detailTenantName').textContent = tenant.fullName || 'Tenant Profile';
-            const action = tenant.phase >= 3 ? `window.app.continueFormTask('${tenant.id}', true, 'tenant'); return false;` : `window.app.continueFormTask('${tenant.id}', false, 'tenant'); return false;`; // Changed to continueFormTask (Point 4)
+            
+            // 根据 phase 决定是继续表单还是只是编辑
+            const action = tenant.phase >= 3 
+                ? `window.app.continueFormTask('${tenant.id}', true, 'tenant'); return false;` 
+                : `window.app.continueFormTask('${tenant.id}', false, 'tenant'); return false;`; 
             document.getElementById('tenantEditBtn').setAttribute('onclick', action);
             
+            // 2. 查找关联房产
             const associatedProperty = properties.find(p => p.tenantId === tenant.id);
             
+            // 3. 渲染内容
             const content = document.getElementById('tenantDetailContent');
+            
+            // 构建 HTML
             content.innerHTML = `
                 <div class="detail-card tenant-info">
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #155724;">TENANT DETAILS</h3>
                     <div class="detail-group">
-                        <div class="detail-item-aligned">
+                        <div class="detail-item-full">
                             <p class="detail-label">Full Name</p>
                             <p class="detail-value">${tenant.fullName || '-'}</p>
                         </div>
                         <div class="detail-item-aligned">
                             <p class="detail-label">Preferred Name</p>
                             <p class="detail-value">${tenant.preferredName || '-'}</p>
+                        </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">IC / Passport</p>
+                            <p class="detail-value">${tenant.icPassport || '-'}</p>
                         </div>
                         <div class="detail-item-aligned">
                             <p class="detail-label">Phone Number</p>
@@ -1554,15 +2193,13 @@
                             <p class="detail-label">Email Address</p>
                             <p class="detail-value">${tenant.email || '-'}</p>
                         </div>
-                        <div class="detail-item-aligned">
-                            <p class="detail-label">IC/Passport</p>
-                            <p class="detail-value">${tenant.icPassport || '-'}</p>
-                        </div>
                         
                         <div class="detail-item-full" style="margin-top: 5px;">
                             <p class="detail-label">Registered Address</p>
                             <p class="detail-value">${tenant.regAddress || '-'}</p>
                         </div>
+                        
+                        <div style="width: 100%; height: 1px; background: #b7e3c3; margin: 10px 0;"></div>
 
                         <div class="detail-item-aligned">
                             <p class="detail-label">Tenancy Start</p>
@@ -1572,12 +2209,16 @@
                             <p class="detail-label">Tenancy End</p>
                             <p class="detail-value">${tenant.leaseEnd || '-'}</p>
                         </div>
+                        <div class="detail-item-aligned">
+                            <p class="detail-label">Lease Term</p>
+                            <p class="detail-value">${tenant.leaseTerm ? tenant.leaseTerm + ' Months' : '-'}</p>
+                        </div>
                         <div class="detail-item-full">
                             <p class="detail-label">Tenancy Agreement</p>
                             <p class="detail-value">
                                 ${tenant.agreementFile ? `
                                     <a href="#" onclick="window.app.viewDummyFile('${tenant.agreementFile}'); return false;" class="file-link">
-                                        <span class="material-icons-round">description</span> View Signed Agreement
+                                        <span class="material-icons-round">description</span> View Signed Agreement (${tenant.agreementFile})
                                     </a>
                                 ` : 'N/A (Agreement Missing)'}
                             </p>
@@ -1589,16 +2230,38 @@
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">ASSOCIATED PROPERTY</h3>
                     <div class="detail-group">
                         ${associatedProperty ? `
-                            <p class="detail-value" style="font-size: 15px;">
-                                <a href="#" onclick="window.app.viewPropertyDetails('${associatedProperty.id}'); return false;">
-                                    ${associatedProperty.name} (${associatedProperty.address})
-                                </a>
-                            </p>
-                        ` : '<p class="detail-value" style="color: #999;">Not currently linked to a property.</p>'}
+                            <div onclick="window.app.viewPropertyDetails('${associatedProperty.id}');" style="cursor: pointer; padding: 10px; background: #f8f9fa; border-radius: 8px; border: 1px solid #eee;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+                                    <span class="material-icons-round" style="color: #3A86FF;">apartment</span>
+                                    <span style="font-weight: 600; color: #333;">${associatedProperty.name}</span>
+                                </div>
+                                <div style="font-size: 13px; color: #666; margin-left: 34px;">
+                                    ${associatedProperty.address}
+                                </div>
+                            </div>
+                        ` : '<p class="detail-value" style="color: #999; font-style: italic;">Not currently linked to a property.</p>'}
+                    </div>
+                </div>
+
+                <div class="detail-card">
+                    <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">LEASE AGREEMENT</h3>
+                    
+                    <button class="modal-btn modal-btn-primary" style="margin-bottom: 15px;" 
+                        onclick="window.app.generateAgreement('${tenant.id}')">
+                        <span class="material-icons-round">description</span>
+                        Generate Agreement (PDF)
+                    </button>
+
+                    <div style="background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 12px; color: #666; line-height: 1.4;">
+                        <span style="font-weight:bold; color:#333;">Note:</span> 
+                        Clicking this will open a new window with the formatted contract. 
+                        Select <strong>"Save as PDF"</strong> in the print destination options.
                     </div>
                 </div>
             `;
         }
+        
+        
 
         // ===================================
         // Form Logic
@@ -1616,7 +2279,6 @@
                 `<option value="${state}" ${existingData.state === state ? 'selected' : ''}>${state}</option>`
             ).join('');
 
-            // Basic Info (Part of Point 2 from previous request)
             let basicHtml = `
                 <div class="detail-card">
                     <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">BASIC INFORMATION</h3>
@@ -1659,41 +2321,51 @@
                 </div>
             `;
             
-            // Rental Info
             let rentalHtml = `
                 <div class="detail-card rental-info">
                      <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #3A86FF;">RENTAL INFORMATION</h3>
                     <div class="detail-group">
+                        
                         <div class="detail-item-full form-group" style="margin-bottom: 10px;">
                             <label for="p-rentalType">Rental Type <span style="color:red">*</span></label>
-                            <select id="p-rentalType" name="rentalType" required 
-                                onchange="window.app.updateRentLabel(this.value); window.app.checkSelectPlaceholder(this.id);">
+                            <select id="p-rentalType" name="rentalType" required onchange="window.app.updateRentLabel(this.value); window.app.checkSelectPlaceholder(this.id);">
                                 <option value="" disabled ${!existingData.rentalType ? 'selected' : ''}>Select Rental Type</option>
                                 ${rentalTypeOptions}
                             </select>
                         </div>
-                        
+
                         <div class="rental-detail-item form-group">
-                            <label for="p-type">House Type <span style="color:red">*</span></label>
+                            <label for="p-type" style="min-height: 36px; display: flex; align-items: flex-end;">House Type <span style="color:red">*</span></label>
                             <select id="p-type" name="houseType" required onchange="window.app.checkSelectPlaceholder(this.id)">
                                 <option value="" disabled ${!existingData.houseType ? 'selected' : ''}>Select Type</option>
                                 ${houseTypeOptions}
                             </select>
                         </div>
-                        <div class="rental-detail-item form-group">
-                            <label id="rentLabel" for="p-rent" class="detail-label">Monthly Rental (RM) <span style="color:red">*</span></label>
-                            <input type="number" id="p-rent" name="monthlyRent" 
-							   value="${existingData.monthlyRent || ''}" required
-							   inputmode="numeric" 
-							   oninput="window.app.validateNumber(this)">
-                        </div>
-                        
 
-                    </div>
+                        <div class="rental-detail-item form-group">
+                            <label id="rentLabel" for="p-rent" class="detail-label" style="min-height: 36px; display: flex; align-items: flex-end;">Monthly Rental (RM) <span style="color:red">*</span></label>
+                            <input type="number" id="p-rent" name="monthlyRent" value="${existingData.monthlyRent || ''}" required inputmode="numeric" oninput="window.app.validateNumber(this)">
+                        </div>
+
+                        <div style="width: 100%; height: 1px; background: #f0f0f0; margin: 4px 0 4px 0;"></div>
+                        
+                        <div style="width: 100%; margin-bottom: 8px;">
+                             <span style="font-size: 12px; font-weight: 700; color: #aaa; letter-spacing: 0.5px;">REFERRAL / AGENT (OPTIONAL)</span>
+                        </div>
+
+                        <div class="rental-detail-item form-group">
+                            <label for="p-refName">Referral Name</label>
+                            <input type="text" id="p-refName" name="referralName" value="${existingData.referralName || ''}">
+                        </div>
+
+                        <div class="rental-detail-item form-group">
+                            <label for="p-refContact">Referral Contact</label>
+                            <input type="tel" id="p-refContact" name="referralContact" value="${existingData.referralContact || ''}">
+                        </div>
+                        </div>
                 </div>
             `;
 
-            // Specification
             let specHtml = `
                 <div class="detail-card">
                      <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #333;">SPECIFICATIONS</h3>
@@ -1731,14 +2403,9 @@
                 </div>
             `;
             
-            // Order required: Rental, Basic, Specification (Point 2)
             return rentalHtml + basicHtml + specHtml;
         }
 
-
-        /**
-         * Dynamic update Monthly Rent label based on rentalType selection.
-         */
         function updateRentLabel(rentalType) {
             const labelElement = document.getElementById('rentLabel');
             if (!labelElement) return;
@@ -1752,13 +2419,9 @@
             }
         }
 
-        /**
-         * Helper to visually adjust select color based on value.
-         */
         function checkSelectPlaceholder(id) {
             const select = document.getElementById(id);
             if (select) {
-                // Use a proper class/check to ensure selected options are dark
                 if (select.value === "" || select.value === null || select.selectedIndex === 0) {
                     select.style.color = '#999'; 
                 } else {
@@ -1772,208 +2435,274 @@
              if (select) {
                  select.value = tenantId;
              }
-             // checkSelectPlaceholder will handle the color change automatically
         }
 
 
         function handleFormSubmit(e) {
             e.preventDefault();
+            console.log("handleFormSubmit triggered!"); 
+			console.log("index.html:1769 Intercepting Tenant Submit for Review...");
             
-            const currentId = document.getElementById('currentId').value;
-            const currentPhase = document.getElementById('currentFormPhase').value;
-            const currentFormType = document.getElementById('currentFormType').value;
-            const formEl = document.getElementById('dataEntryForm');
-            // 获取我们在 renderForm 中绑定的简单编辑状态
-            const isSimpleTenantEdit = formEl && formEl.dataset && formEl.dataset.simpleEdit === 'true';
-            
-            const formData = new FormData(e.target);
-            
-            const updateData = {};
-            for (let [key, value] of formData.entries()) {
-                if (key === 'phase' || key === 'type' || key === 'id' || key === 'ownerId' || key === 'tenantId') continue; 
+            try {
+                const currentId = document.getElementById('currentId').value;
+                const currentPhase = document.getElementById('currentFormPhase').value;
+                const currentFormType = document.getElementById('currentFormType').value;
+                const formEl = document.getElementById('dataEntryForm');
                 
-                if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms', 'carpark', 'managementFee'].includes(key)) {
-                    updateData[key] = parseFloat(value) || 0; 
-                } else {
-                    updateData[key] = value;
+                const isSimpleTenantEdit = formEl && formEl.dataset && formEl.dataset.simpleEdit === 'true';
+                
+                const formData = new FormData(e.target);
+				console.log("正在准备数据:", Object.fromEntries(formData));
+                
+                const updateData = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key === 'phase' || key === 'type' || key === 'id' || key === 'ownerId' || key === 'tenantId') continue; 
+                    
+                    if (['monthlyRent', 'sizeSqft', 'rooms', 'bathrooms', 'carpark', 'managementFee', 'leaseTerm'].includes(key)) {
+                        updateData[key] = parseFloat(value) || 0; 
+                    } else {
+                        updateData[key] = value;
+                    }
                 }
-            }
-            
-            // --- 1. Owner Logic ---
-            if (currentFormType === 'owner') {
-                createOwnerHandler(formData); 
-                return;
-            }
-
-            // --- 2. Tenant Logic ---
-            if (currentFormType === 'tenant') {
-                 const tenant = getTenantById(currentId);
-                 const task = getTaskByTenantId(currentId);
-                 
-                 // 情况 A: 简单编辑 (Edit Profile) -> 保存并返回列表
-                 if (isSimpleTenantEdit) {
-                    saveTenantData(currentId, { ...(tenant || {}), ...updateData, phase: tenant && tenant.phase ? tenant.phase : 4 });
-                    saveData();
-                    alertMessage('Tenant updated.', 'success');
-                    switchView('property');
-                    switchPropertyTab('tenant');
+                
+                if (currentFormType === 'owner') {
+                    createOwnerHandler(formData); 
                     return;
-                 }
+                }
 
-                 // 情况 B: 创建流程 (Multi-step Setup)
-                 const nextPhase = parseInt(currentPhase) + 1;
-                 
-                 if (currentPhase === '0') {
-                    // Step 1 -> 2
-                    saveTenantData(currentId, {...updateData, phase: nextPhase});
-                    // 创建任务
+                if (currentFormType === 'tenant') {
+                     const tenant = getTenantById(currentId);
+                     const task = getTaskByTenantId(currentId);
+
+                     if (isSimpleTenantEdit || currentPhase === '0') {
+                         console.log("Intercepting Tenant Submit for Review..."); 
+                         
+                         const mergedData = { ...(tenant || {}), ...updateData };
+
+                         window.app.pendingTenantContext = {
+                             data: mergedData,
+                             context: {
+                                 currentId: currentId,
+                                 isSimpleTenantEdit: isSimpleTenantEdit,
+                                 currentPhase: currentPhase,
+                                 tenant: tenant,
+                                 task: task,
+                                 updateData: updateData 
+                             }
+                         };
+						 
+                         try {
+							window.app.openTenantReviewModal(mergedData);
+							console.log("✅ 弹窗函数执行成功！"); // 如果看到这个，说明函数没问题
+						} catch (error) {
+							console.error("❌ 弹窗函数执行崩溃了！原因：", error); // 这里会打印出具体的错误原因
+						}
+						console.log("调试 Phase:", currentPhase);
+                        
+                     }
+                     
+                     const nextPhase = parseInt(currentPhase) + 1;
+
+                     if (currentPhase === '1') {
+                        saveTenantData(currentId, { ...tenant, phase: nextPhase }); 
+                        updateTaskData(task.id, { phase: nextPhase, details: 'Step 3/4: Upload the signed tenancy agreement.' });
+                        renderForm(currentId, nextPhase, 'tenant');
+						console.log("进入了 Phase 1 逻辑");
+
+                    } else if (currentPhase === '2') {
+                        const agreementFile = document.getElementById('t-agreementFile').files[0];
+                        const fileName = agreementFile ? agreementFile.name : (tenant.agreementFile || '');
+                        
+                        if (!fileName) { alertMessage('Please upload the signed Tenancy Agreement.', 'error'); return; }
+                        
+                        saveTenantData(currentId, { ...tenant, ...updateData, agreementFile: fileName, phase: 3 });
+                        updateTaskData(task.id, { phase: 3, details: 'Step 4/4: Assign tenant to a property.' });
+                        renderForm(currentId, 3, 'tenant');
+                        
+                    } else if (currentPhase === '3') {
+						showLoading();
+						const oldTenantId = prop.tenantId;
+						const newTenantId = document.getElementById('p-tenantId')?.value || '';
+						
+						const autoStatus = newTenantId ? 'Rented' : 'Vacant';
+
+						// 1. 更新房产数据
+						updatePropertyData(currentId, {
+							...updateData, 
+							phase: 3, 
+							status: autoStatus, 
+							tenantId: newTenantId
+						});
+
+						// === 👇 修复开始：如果租客变了 (Unlink 或 换人)，清理旧租客的未完成任务 ===
+						if (oldTenantId !== newTenantId) {
+							console.log(`Cleaning up tasks for Property: ${currentId}`);
+							
+							tasks = tasks.filter(t => {
+								// 只检查属于当前房产的任务
+								if (t.propId === currentId) {
+									
+									// 1. "上传合同" 任务 -> 只要租客状态变了，旧合同任务肯定废了，删！
+									// (这里不检查 tenantId，只认房产和任务类型，更彻底)
+									if (t.type === 'upload_agreement' && t.status !== 'completed') {
+                                        console.log("Deleted stale upload_agreement task");
+										return false; 
+									}
+
+									// 2. "收租提醒" 任务 -> 换人或变空，旧提醒作废，删！
+									if (t.type === 'rent_reminder' && t.status !== 'completed') {
+                                        console.log("Deleted stale rent_reminder task");
+										return false;
+									}
+
+									// 3. 只有当 oldTenantId 确实存在时，才精确匹配 ID 删除其他任务
+									if (oldTenantId && t.tenantId === oldTenantId && t.status !== 'completed') {
+                                        console.log("Deleted task by Tenant ID match");
+										return false;
+									}
+								}
+								// 其他任务保留
+								return true; 
+							});
+						}
+						// === 🔺 修复结束 ===
+						
+						// 2. 如果是新租客 (Link New)，创建新任务
+						if (newTenantId && newTenantId !== oldTenantId) {
+							 alertMessage('Tenant successfully assigned. Creating monthly rent reminder task.', 'info');
+							 if (window.app.createFirstRentTask) {
+								window.app.createFirstRentTask(currentId, updateData.name || prop.name);
+							 } else {
+								createFirstRentTask(currentId, updateData.name || prop.name);
+							 }
+						}
+						
+						saveData(); 
+						alertMessage(`Property "${updateData.name || prop.name}" updated successfully.`, 'success');
+						viewPropertyDetails(currentId);
+						hideLoading(); 
+					}
+					return; // 结束函数执行
+                }
+
+                const prop = getPropertyById(currentId);
+                const task = getTaskByPropId(currentId);
+                
+                if (currentPhase === '0') {
+                    const selectedOwnerId = document.getElementById('selectedOwnerId').value;
+                    if (!selectedOwnerId) { alertMessage('Please select or create an Owner Profile first.', 'error'); return; }
+                    
+                    updatePropertyData(currentId, {...updateData, phase: 1, ownerId: selectedOwnerId});
+                    
                     updateTaskData(`task-${currentId}`, { 
-                        id: `task-${currentId}`, 
-                        type: 'tenant_setup', 
-                        tenantId: currentId, 
-                        phase: nextPhase, 
-                        description: `Setup Tenancy for ${updateData.fullName || 'New Tenant'}`, 
-                        details: 'Step 2/3: Send and await signed tenancy agreement.', 
-                        status: 'in_progress', 
-                        userId: currentUserId 
-                    });
-                    renderForm(currentId, nextPhase, 'tenant');
+                         id: `task-${currentId}`, 
+                         type: 'property', 
+                         propId: currentId, 
+                         phase: 1, 
+                         description: 'Setup New Property', 
+                         details: 'Step 2/2: Basic Property Details.', 
+                         status: 'in_progress', 
+                         userId: currentUserId 
+                     });
 
-                } else if (currentPhase === '1') {
-                    // Step 2 -> 3
-                    saveTenantData(currentId, { ...tenant, phase: nextPhase }); 
-                    updateTaskData(task.id, { phase: nextPhase, details: 'Step 3/4: Upload the signed tenancy agreement.' });
-                    renderForm(currentId, nextPhase, 'tenant');
+                    renderForm(currentId, 1, 'property'); 
+                } 
+                else if (currentPhase === '1') {
+                    showLoading();
+                    const propName = (updateData.name && updateData.name.trim() !== '') ? updateData.name : (prop && prop.name) ? prop.name : 'New Property';
+                    updatePropertyData(currentId, { ...(prop || {}), ...updateData, phase: 3, status: 'Vacant' });
+                    
+                    if (task) { tasks = tasks.filter(t => t.id !== task.id); }
+                    saveData();
+                    alertMessage(`Property "${propName}" saved successfully!`, 'success');
+                    document.getElementById('dataEntryForm').reset();
+                    switchView('dashboard');
+                    hideLoading();
+                }
+                else if (currentPhase === '3') {
+                    showLoading();
+                    
+                    // 1. 获取新旧 ID，并强制转换为字符串，防止 undefined 导致对比失败
+                    // (如果是 null/undefined，就会变成空字符串 '')
+                    const rawOldId = prop.tenantId;
+                    const oldTenantId = (rawOldId || '').toString().trim();
+                    const newTenantId = (document.getElementById('p-tenantId')?.value || '').toString().trim();
+                    
+                    // 2. 🔍 关键调试日志：让我们看看这一刻 ID 到底是什么
+                    console.log(`[DEBUG] Comparing Tenant IDs: Old=[${oldTenantId}] vs New=[${newTenantId}]`);
+                    console.log(`[DEBUG] Raw Old ID was:`, rawOldId);
 
-                } else if (currentPhase === '2') {
-                    // Step 3 -> 4 (Upload -> Assign)
-                    const agreementFile = document.getElementById('t-agreementFile').files[0];
-                    const fileName = agreementFile ? agreementFile.name : (tenant.agreementFile || '');
-                    
-                    if (!fileName) { alertMessage('Please upload the signed Tenancy Agreement.', 'error'); return; }
-                    
-                    saveTenantData(currentId, { ...tenant, ...updateData, agreementFile: fileName, phase: 3 });
-                    updateTaskData(task.id, { phase: 3, details: 'Step 4/4: Assign tenant to a property.' });
-                    renderForm(currentId, 3, 'tenant');
-                    
-                } else if (currentPhase === '3') {
-                    // --- PHASE 3: Assign Property & Complete ---
-                    
-                    // 1. 定义最终完成的逻辑 (封装起来)
-                    const finalizeSetup = () => {
-                        const assignedPropId = document.getElementById('t-assignProperty').value;
+                    const autoStatus = newTenantId ? 'Rented' : 'Vacant';
+
+                    // === 👇 修复开始：强力清理逻辑 (放在更新数据之前) ===
+                    // 只要 ID 字符串不相等，就触发清理检查
+                    if (oldTenantId !== newTenantId) {
+                        console.log(`⚡ Change detected! Starting cleanup for Property: ${currentId}`);
                         
-                        // 标记租客为 Phase 4 (Setup Complete)
-                        saveTenantData(currentId, { ...tenant, phase: 4 });
-                        
-                        if (assignedPropId) {
-                            const prop = getPropertyById(assignedPropId);
-                            if (prop) {
-                                updatePropertyData(assignedPropId, { 
-                                    ...prop, 
-                                    tenantId: currentId, 
-                                    status: 'Rented',
-                                    phase: 3 
-                                });
-                                // 创建收租任务
-                                if (window.app.createFirstRentTask) {
-                                    window.app.createFirstRentTask(assignedPropId, prop.name);
-                                } else {
-                                    createFirstRentTask(assignedPropId, prop.name);
+                        // 过滤任务列表
+                        const originalCount = tasks.length;
+                        tasks = tasks.filter(t => {
+                            // 只检查属于当前房产的任务
+                            if (t.propId === currentId) {
+                                
+                                // A. "上传合同" 任务 -> 只要租客变了，旧任务直接删
+                                if (t.type === 'upload_agreement' && t.status !== 'completed') {
+                                    console.log(`   - Deleted 'upload_agreement' task (ID: ${t.id})`);
+                                    return false; 
+                                }
+
+                                // B. "收租提醒" 任务 -> 租客变了，旧提醒作废
+                                if (t.type === 'rent_reminder' && t.status !== 'completed') {
+                                    console.log(`   - Deleted 'rent_reminder' task (ID: ${t.id})`);
+                                    return false;
+                                }
+
+                                // C. 精确匹配旧租客 ID 的任务
+                                // (注意：这里我们要对比 oldTenantId，如果 oldTenantId 存在的话)
+                                if (oldTenantId && t.tenantId === oldTenantId && t.status !== 'completed') {
+                                    console.log(`   - Deleted task linked to Old Tenant (ID: ${t.id})`);
+                                    return false;
                                 }
                             }
-                        }
+                            return true; // 其他任务保留
+                        });
+                        
+                        const deletedCount = originalCount - tasks.length;
+                        console.log(`✅ Cleanup finished. Removed ${deletedCount} tasks.`);
+                    } else {
+                        console.log("No tenant change detected, skipping cleanup.");
+                    }
+                    // === 🔺 修复结束 ===
 
-                        if (task) { tasks = tasks.filter(t => t.id !== task.id); }
-                        saveData();
-                        alertMessage(`Tenant ${tenant.fullName || 'Tenant'} setup complete!`, 'success');
-                        switchView('property'); 
-                        switchPropertyTab('tenant');
-                    };
-					
-					showConfirmation(
-                        'Confirm Tenant Details', 
-                        'Confirm the tenants’ details are correct. Tenancy Agreement will be generated after this.', 
-                        (confirmed) => {
-                            // 只有点击了 Confirmed 才执行保存
-                            if (confirmed) finalizeSetup();
-                        },
-                        'Confirmed', 
-                        'btn-confirm btn-primary-modal' 
-                    );
-					
-				}
-                return;
-            }
+                    // 3. 更新房产数据 (清理完任务后再更新)
+                    updatePropertyData(currentId, {
+                        ...updateData, 
+                        phase: 3, 
+                        status: autoStatus, 
+                        tenantId: newTenantId
+                    });
 
-            // --- 3. Property Logic ---
-            const prop = getPropertyById(currentId);
-            const task = getTaskByPropId(currentId);
-            
-            if (currentPhase === '0') {
-                const selectedOwnerId = document.getElementById('selectedOwnerId').value;
-                if (!selectedOwnerId) { alertMessage('Please select or create an Owner Profile first.', 'error'); return; }
-                
-                updatePropertyData(currentId, {...updateData, phase: 1, ownerId: selectedOwnerId});
-                
-                // 创建任务 (Task Step 2/2)
-                updateTaskData(`task-${currentId}`, { 
-                     id: `task-${currentId}`, 
-                     type: 'property', 
-                     propId: currentId, 
-                     phase: 1, 
-                     description: 'Setup New Property', 
-                     details: 'Step 2/2: Basic Property Details.', 
-                     status: 'in_progress', 
-                     userId: currentUserId 
-                 });
-
-                renderForm(currentId, 1, 'property'); 
-            } 
-            else if (currentPhase === '1') {
-                showLoading();
-                const propName = (updateData.name && updateData.name.trim() !== '') ? updateData.name : (prop && prop.name) ? prop.name : 'New Property';
-                // 默认状态为 Vacant，且 Phase 3 代表完成
-                updatePropertyData(currentId, { ...(prop || {}), ...updateData, phase: 3, status: 'Vacant' });
-                
-                if (task) { tasks = tasks.filter(t => t.id !== task.id); }
-                saveData();
-                alertMessage(`Property "${propName}" saved successfully!`, 'success');
-                document.getElementById('dataEntryForm').reset();
-                switchView('dashboard');
-                hideLoading();
-            }
-            else if (currentPhase === '3') {
-                // Phase 3: Edit Mode
-                showLoading();
-                const oldTenantId = prop.tenantId;
-                const newTenantId = document.getElementById('p-tenantId')?.value || '';
-                
-                // 自动判断状态：有租客=Rented，无租客=Vacant
-                const autoStatus = newTenantId ? 'Rented' : 'Vacant';
-
-                updatePropertyData(currentId, {
-                    ...updateData, 
-                    phase: 3, 
-                    status: autoStatus, 
-                    tenantId: newTenantId
-                });
-                
-                // 如果分配了新租客，创建收租任务
-                if (newTenantId && newTenantId !== oldTenantId) {
-                     alertMessage('Tenant successfully assigned. Creating monthly rent reminder task.', 'info');
-                     if (window.app.createFirstRentTask) {
-                        window.app.createFirstRentTask(currentId, updateData.name || prop.name);
-                     } else {
-                        createFirstRentTask(currentId, updateData.name || prop.name);
-                     }
+                    // 4. 如果是新租客 (Link New)，创建新任务
+                    if (newTenantId && newTenantId !== oldTenantId) {
+                         alertMessage('Tenant successfully assigned. Creating monthly rent reminder task.', 'info');
+                         if (window.app.createFirstRentTask) {
+                            window.app.createFirstRentTask(currentId, updateData.name || prop.name);
+                         } else {
+                            createFirstRentTask(currentId, updateData.name || prop.name);
+                         }
+                    }
+                    
+                    saveData(); 
+                    alertMessage(`Property "${updateData.name || prop.name}" updated successfully.`, 'success');
+                    viewPropertyDetails(currentId);
+                    hideLoading(); 
                 }
-                
-                saveData(); 
-                alertMessage(`Property "${updateData.name || prop.name}" updated successfully.`, 'success');
-                viewPropertyDetails(currentId);
-                hideLoading(); 
+            } catch (err) {
+                console.error("Error in handleFormSubmit:", err);
+                alert("An error occurred during submission. Please check console.");
             }
+			
+			
         }
 
 		function selectOwnerAndProceed(ownerId) {
@@ -1982,13 +2711,11 @@
             
             if (!owner || !currentPropId) return;
 
-            // 1. 保存关联
             updatePropertyData(currentPropId, { 
-                phase: 1, // 自动进入 Phase 1
+                phase: 1, 
                 ownerId: ownerId 
             });
 
-            // 2. 更新/创建任务状态
             updateTaskData(`task-${currentPropId}`, { 
                 id: `task-${currentPropId}`, 
                 type: 'property', 
@@ -2000,8 +2727,6 @@
                 userId: currentUserId 
             });
 
-            // 3. 视觉反馈 + 跳转
-            // window.app.alertMessage(`Selected ${owner.fullName}`, 'success'); // 可选：提示一下
             renderForm(currentPropId, 1, 'property');
         }
 
@@ -2015,16 +2740,27 @@
             document.getElementById('currentFormType').value = type;
             document.getElementById('currentFormPhase').value = phase;
             document.getElementById('currentId').value = id;
-            document.getElementById('selectedOwnerId').value = id.startsWith('prop-') ? document.getElementById('selectedOwnerId').value : ''; 
+            const currentLinkVal = document.getElementById('selectedOwnerId').value;
+			// 逻辑：如果当前渲染的不是 Property，且不是从 Property 页面跳转过来新建 Owner 的（即值不以 prop- 开头），才清空。
+			if (!id.startsWith('prop-') && !(type === 'owner' && currentLinkVal.startsWith('prop-'))) {
+				document.getElementById('selectedOwnerId').value = '';
+			}
 
             if (type === 'owner') { 
-                // Owner Form Logic (Point 4)
                 const ownerToEdit = getOwnerById(id);
                 document.getElementById('formTitle').textContent = ownerToEdit ? 'Edit Owner Profile' : 'Create New Owner Profile';
                 document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> Cancel`;
                 
+                // 检查入口：是否是从 Property 表单跳过来的？
+                // 如果 selectedOwnerId 里面存的是 property ID (prop-...)，说明是被动创建
+                const pendingPropId = document.getElementById('selectedOwnerId').value;
+                const isLinkedFlow = pendingPropId && pendingPropId.startsWith('prop-');
+
                 let existingData = ownerToEdit || {};
-                 let fieldsHTML = `
+                
+                let fieldsHTML = `
+                    <input type="hidden" id="ownerNextAction" name="nextAction" value="save">
+
                     <div class="detail-card">
                         <div class="detail-group">
                             <div class="detail-item-full form-group">
@@ -2054,19 +2790,51 @@
                         </div>
                     </div>
                 `;
-                fieldsHTML += `
-                    <div class="form-footer">
+
+                // === 按钮逻辑 ===
+                let footerButtons = '';
+
+                if (isLinkedFlow) {
+                    // 场景 B: 从 Property 过来 -> 只有一个按钮
+                    footerButtons = `
                         <button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm">
-                            ${ownerToEdit ? 'Save Changes' : 'Create Owner'}
+                            Create & Select
                         </button>
+                    `;
+                } else if (ownerToEdit) {
+                    // 🔥 新增场景: 编辑现有 Owner -> 只有一个 Save 按钮
+                    footerButtons = `
+                        <button type="submit" class="submit-btn" style="background-color: #3A86FF;" 
+                            onclick="document.getElementById('ownerNextAction').value='save'">
+                            Save Changes
+                        </button>
+                    `;
+                } else {
+                    // 场景 A: 新建 Owner (Standalone) -> 双按钮 (用户可以选择是否接着建房产)
+                    footerButtons = `
+                        <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
+                            <button type="submit" class="submit-btn" style="background-color: #3A86FF;" 
+                                onclick="document.getElementById('ownerNextAction').value='add_property'">
+                                Create & Add Property
+                            </button>
+                            
+                            <button type="submit" class="submit-btn" style="background-color: transparent; color: #666; border: 1px solid #ddd;" 
+                                onclick="document.getElementById('ownerNextAction').value='save'">
+                                Create Only
+                            </button>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('formFields').innerHTML = fieldsHTML + `
+                    <div class="form-footer">
+                        ${footerButtons}
                     </div>
                 `;
-                document.getElementById('formFields').innerHTML = fieldsHTML;
                 switchView('form');
                 return;
             }
              if (type === 'tenant') { 
-                // Tenant Form Logic (Point 4)
                  const tenant = getTenantById(id);
                  let existingData = tenant || {};
                  let formTitleText = '';
@@ -2074,11 +2842,13 @@
                  let fieldsHTML = '';
                  const simpleEdit = window.app.simpleTenantEdit === true;
                  
-				 document.getElementById('dataEntryForm').dataset.simpleEdit = simpleEdit;
-				 
+                 document.getElementById('dataEntryForm').dataset.simpleEdit = simpleEdit;
+                 
                  if (phase === 0) {
-                    formTitleText = simpleEdit ? 'Edit Tenant' : '1/3: Basic Tenant Information';
-                    submitButtonText = simpleEdit ? 'Save Changes' : 'Save & Next';
+                    formTitleText = simpleEdit ? 'Edit Tenant' : 'New Tenant Profile';
+                    // 👇 修改这里：如果是新建，按钮显示 "Save & Finish"
+                    submitButtonText = simpleEdit ? 'Save Changes' : 'Save';
+                    
                     fieldsHTML = `
                         <div class="detail-card">
                             <div class="detail-group">
@@ -2109,28 +2879,6 @@
                                     <label for="t-regAddress">Registered Address </label>
                                     <input type="text" id="t-regAddress" name="regAddress" value="${existingData.regAddress || ''}">
                                 </div>
-
-                                <div class="detail-item-aligned form-group">
-									<label for="t-leaseStart">Tenancy Start Date</label>
-									<input type="date" id="t-leaseStart" name="leaseStart" 
-										   value="${existingData.leaseStart || ''}"
-										   onchange="window.app.calculateEndDate()">
-								</div>
-
-								<div class="detail-item-aligned form-group">
-									<label for="t-leaseTerm">Tenancy Term (Months)</label>
-									<input type="number" id="t-leaseTerm" name="leaseTerm" 
-										   value="${existingData.leaseTerm || ''}" 
-										   inputmode="numeric"
-										   onkeydown="if(['e', 'E', '+', '-'].includes(event.key)) event.preventDefault()"
-										   oninput="window.app.validateNumber(this); window.app.calculateEndDate()">
-								</div>
-
-								<div class="detail-item-full form-group">
-									<label for="t-leaseEnd">Tenancy End Date </label>
-									<input type="date" id="t-leaseEnd" name="leaseEnd" 
-										   value="${existingData.leaseEnd || ''}">
-								</div>
                             </div>
                         </div>
                     `;
@@ -2160,7 +2908,6 @@
                     `;
                  } else if (phase === 2) {
                     formTitleText = '3/4: Upload Signed Agreement';
-                    // 【修改】：按钮文字改为 Next
                     submitButtonText = 'Next: Assign Property';
 
                     fieldsHTML = `
@@ -2183,14 +2930,11 @@
                         </div>
                     `;
                  } else if (phase === 3) {
-                    // --- PHASE 3: 界面渲染 ---
                     formTitleText = '4/4: Assign Property';
                     submitButtonText = 'Complete Tenant Setup';
                     
-                    // 过滤出所有空置的房产 (没有 tenantId) 或者是当前已经分配给该租客的房产
                     const availableProperties = properties.filter(p => !p.tenantId || p.tenantId === id);
                     
-                    // 生成选项 HTML
                     const propOptions = availableProperties.map(p => 
                         `<option value="${p.id}" ${p.tenantId === id ? 'selected' : ''}>${p.name} (${p.status || 'Vacant'})</option>`
                     ).join('');
@@ -2225,7 +2969,7 @@
 						</button>
 					</div>
 				`;
-				switchView('form'); // <-- 确保这一行存在且能执行
+				switchView('form'); 
 				return;
             }
 
@@ -2235,86 +2979,75 @@
             let submitButtonText = '';
             let fieldsHTML = '';
 
-            // Adjust back button text based on mode
             document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> ${phase === 3 ? 'Details' : 'Back'}`;
             
             form.onsubmit = window.app.handleFormSubmit;
 
-            // --- PHASE 0: OWNER SELECTION/CREATION ---
             if (phase === 0) {
                 formTitle.textContent = 'Select Owner';
                 
-                // 1. 定义空状态 HTML (当没有任何 Owner 数据时)
                 const emptyStateHTML = `
-                    <div class="empty-state-container" style="padding-top: 40px;">
-                        <div class="empty-state-img-wrapper" style="background-color: #f3e5f5; margin-bottom: 20px;">
-                            <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" alt="No Owners" style="width: 60%;">
-                        </div>
-                        <h3 style="color: #333;">Who owns this property?</h3>
-                        <p style="color: #666; max-width: 280px;">Create an owner profile to start tracking rental income and expenses.</p>
+					<div class="empty-state-container" style="padding-top: 40px;">
+						<div class="empty-state-img-wrapper" style="background-color: #f3e5f5; margin-bottom: 20px;">
+							<img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" alt="No Owners" style="width: 60%;">
+						</div>
+						<h3 style="color: #333;">Who owns this property?</h3>
+						<p style="color: #666; max-width: 280px;">Create an owner profile to start tracking rental income and expenses.</p>
+						
+						<div style="margin-top: 30px; width: 100%;">
+							<button class="create-owner-btn" onclick="window.app.handleNewEntry('owner', '${id}'); return false;">
+								Create First Owner
+							</button>
+						</div>
+					</div>
+				`;
+
+				const listStateHTML = `
+                    <div class="detail-card" style="padding: 0; display: flex; flex-direction: column; height: 55vh; overflow: hidden; position: relative;">
                         
-                        <div style="margin-top: 30px; width: 100%;">
-                            <button class="create-owner-btn" onclick="window.app.handleNewEntry('owner'); document.getElementById('selectedOwnerId').value = '${id}'; return false;">
-                                <span class="material-icons-round">person_add</span> Create First Owner
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                // 2. 定义列表状态 HTML (当有 Owner 数据时)
-                const listStateHTML = `
-                    <div class="detail-card" style="border: none; shadow: none; padding: 0; background: transparent;">
-                        <div style="position: relative; margin-bottom: 15px;">
-                            <span class="material-icons-round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 20px;">search</span>
-                            <input type="text" id="ownerSearch" placeholder="Search owner name..." 
-                                   oninput="window.app.filterOwners(this.value)"
-                                   style="width: 100%; padding: 12px 12px 12px 40px; border: 1px solid #ddd; border-radius: 12px; font-size: 15px; outline: none; background: #fff;">
-                        </div>
-
-                        <p style="font-size: 13px; color: #666; margin-bottom: 10px; padding-left: 5px;">Existing Owners</p>
-
-                        <div id="ownerListContainer" style="padding-bottom: 80px;"> 
+                        <div style="padding: 15px; border-bottom: 1px solid #eee; background: #fff; z-index: 2;">
+                            <div style="position: relative;">
+                                <span class="material-icons-round" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 20px;">search</span>
+                                <input type="text" id="ownerSearch" placeholder="Search name or phone..." 
+                                       oninput="window.app.filterOwners(this.value)"
+                                       style="width: 100%; padding: 10px 10px 10px 38px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; background: #f8f9fa;">
                             </div>
+                        </div>
+
+                        <div id="ownerListContainer" style="flex: 1; overflow-y: auto; padding: 10px 15px; background: #fff;"> 
+                            </div>
+                        
+                        <div style="height: 20px; background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0)); position: absolute; bottom: 0; left: 0; width: 100%; pointer-events: none;"></div>
                     </div>
 
                     <div class="sticky-footer-container">
                         <div class="sticky-footer-content">
-                            <button class="create-owner-btn" onclick="window.app.handleNewEntry('owner'); document.getElementById('selectedOwnerId').value = '${id}'; return false;">
+                            <button class="create-owner-btn" onclick="window.app.handleNewEntry('owner', '${id}'); return false;">
                                 <span class="material-icons-round">add</span> Create New Owner
                             </button>
                         </div>
                     </div>
                 `;
 
-                // 3. 根据数据决定显示哪种状态
                 if (owners.length === 0) {
                     fieldsHTML = emptyStateHTML;
                 } else {
                     fieldsHTML = listStateHTML;
-                    // 这里很重要：为了让初始列表显示出来，我们需要在 HTML 插入后调用一次 filter
                     setTimeout(() => { window.app.filterOwners(''); }, 0);
                 }
-
-                // 4. 重要：清空 Submit 按钮
-                // 因为 Phase 0 现在是“点击即跳转”，不需要底部的 Next 按钮，
-                // 我们在后面统一注入 footer 之前，可以通过一个特殊的 flag 告诉后面不要加按钮，或者直接在这里 return
                 
                 document.getElementById('formTitle').textContent = 'Select Owner';
                 document.getElementById('formFields').innerHTML = fieldsHTML;
                 
-                // 特殊处理：Phase 0 不需要通用的 form-footer，因为有专门的逻辑
                 switchView('form');
                 
-                // 如果是列表状态，手动触发一次渲染
                 if (owners.length > 0) {
                      window.app.filterOwners('');
                 }
-                return; // 直接返回，不执行后面通用的 submit button 注入
+                return; 
             }
-            // --- PHASE 1: BASIC PROPERTY DETAILS ---
             else if (phase === 1) {
                 formTitle.textContent = '2/2: Basic Property Details'; 
-                // Requirement: Finalize on this step
                 submitButtonText = 'Save Property';
                 
                 fieldsHTML = renderPropertyFields(prop, false);
@@ -2323,7 +3056,6 @@
                 window.app.checkSelectPlaceholder('p-rentalType');
                 window.app.checkSelectPlaceholder('p-type');
             } 
-            // --- PHASE 2 is no longer used for creation flow ---
             else if (phase === 2) {
                 formTitle.textContent = 'Specifications & Rental (legacy)';
                 submitButtonText = 'Save Property';
@@ -2333,13 +3065,11 @@
                 window.app.checkSelectPlaceholder('p-status');
                 if (existingData.rentalType) { updateRentLabel(existingData.rentalType); }
             }
-            // --- PHASE 3: FULL EDIT MODE (Point 1) ---
             else if (phase === 3) {
                 formTitle.textContent = `Editing: ${prop.name || 'Property'}`;
                 submitButtonText = 'Save Changes';
                 document.getElementById('formBackBtn').innerHTML = `<span class="material-icons-round">arrow_back_ios</span> Details`;
                 
-                // Get tenants not associated with any *other* property
                 const assignedTenantIds = properties.filter(p => p.id !== id && p.tenantId).map(p => p.tenantId);
                 const vacantTenants = tenants.filter(t => t.phase >= 3 && !assignedTenantIds.includes(t.id)); 
                 const currentTenant = existingData.tenantId ? getTenantById(existingData.tenantId) : null;
@@ -2352,10 +3082,8 @@
                     `<option value="${t.id}" ${existingData.tenantId === t.id && !currentTenant ? 'selected' : ''}>${t.fullName || 'Tenant N/A'} (${t.phone || 'Contact N/A'})</option>`
                 ).join('');
 
-                // Render Basic, Rental, Specification
                 fieldsHTML = renderPropertyFields(prop, true);
                 
-                // Manually inject the corrected Tenant Assignment Card
                 fieldsHTML += `
                     <div class="detail-card tenant-info">
                         <h3 style="margin: 0 0 15px; font-size: 16px; font-weight: 700; color: #155724;">
@@ -2379,7 +3107,6 @@
                     </div>
                 `;
                 
-                // Manually apply select color checks after fields are added
                 window.app.checkSelectPlaceholder('p-state');
                 window.app.checkSelectPlaceholder('p-rentalType');
                 window.app.checkSelectPlaceholder('p-type');
@@ -2394,7 +3121,6 @@
                 return; 
             }
             
-            // Inject submit button after fields for all phases
             fieldsHTML += `
 				<div class="form-footer">
 					<button type="submit" class="submit-btn" id="formSubmitButton" form="dataEntryForm" 
@@ -2407,12 +3133,10 @@
             formFields.innerHTML = fieldsHTML;
 			
 			switchView('form'); 
-            // ensure we clear any simple edit flag for non-tenant forms
             if (type !== 'tenant') {
                 document.getElementById('dataEntryForm').dataset.simpleEdit = 'false';
             }
 
-            // CRITICAL: Handle Phase 0 owner selection styling/state
             if (phase === 0) {
                 if (currentOwnerId) {
                     window.app.selectOwner(currentOwnerId);
@@ -2425,73 +3149,201 @@
         }
         
         function createOwnerHandler(formData) {
-			const ownerId = document.getElementById('currentId').value;
-			const data = {};
-			for (let [key, value] of formData.entries()) {
-				if (!['phase', 'type', 'id', 'ownerId', 'tenantId'].includes(key)) {
-					data[key] = value;
-				}
-			}
+            const ownerId = document.getElementById('currentId').value;
+            const nextAction = document.getElementById('ownerNextAction').value; // 获取用户的选择
+            
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                if (!['phase', 'type', 'id', 'ownerId', 'tenantId', 'nextAction'].includes(key)) {
+                    data[key] = value;
+                }
+            }
 
-			saveOwnerData(ownerId, data);
-			alertMessage(`Owner profile created successfully.`, 'success');
-
-			// Check if we came from the Property Phase 0 flow
-			const selectedOwnerIdField = document.getElementById('selectedOwnerId');
+            saveOwnerData(ownerId, data);
+            
+            // 1. 如果是从 Property 表单跳过来的 (Scenario B)
+            const selectedOwnerIdField = document.getElementById('selectedOwnerId');
 			if (selectedOwnerIdField.value && selectedOwnerIdField.value.startsWith('prop-')) {
 				const propId = selectedOwnerIdField.value;
-				selectedOwnerIdField.value = ownerId; // Set the newly created owner as selected
-				renderForm(propId, 0, 'property');
-				window.app.selectOwner(ownerId);
-			} else {
-				 // Stand-alone owner creation, go back to owner list.
-				// ⬇️ 关键修改 START
-				switchView('property'); 
-				switchPropertyTab('owner');
-				// ⬆️ 关键修改 END
+				selectedOwnerIdField.value = ownerId; 
+				alertMessage(`Owner created and selected!`, 'success');
+				
+				// --- 删除下面这两行报错的代码 ---
+				// renderForm(propId, 0, 'property');
+				// window.app.selectOwner(ownerId);
+				
+				// --- 替换为下面这两行 (直接进入下一步) ---
+				document.getElementById('currentId').value = propId; // 关键：先把当前 ID 切换回 Property ID
+				window.app.selectOwnerAndProceed(ownerId); // 直接调用“选中并继续”的逻辑
+				
+				return;
 			}
-		}
+
+            // 2. 如果是 Scenario A (Standalone)
+            if (nextAction === 'add_property') {
+                // 用户选择了 "Save & Add Property"
+                alertMessage(`Owner saved! Now create a property for them.`, 'success');
+                
+                // 马上跳转到 Create Property，并自动锁定这个 Owner
+                // 这里我们要用一个小技巧：把 selectedOwnerId 设为刚创建的 ownerId，再调 renderForm
+                // 这样 renderForm 会自动选中它
+                
+                const newPropId = `prop-${Date.now()}`;
+                
+                // 先切换视图，再渲染，确保 DOM 状态正确
+                switchView('property');
+                switchPropertyTab('property');
+                
+                // 渲染表单前，预设 selectedOwnerId
+                // 注意：我们需要在 renderForm 执行完后，手动把 selectedOwnerId 塞进去，或者利用 selectOwnerAndProceed 逻辑
+                
+                // 最简单的方法：直接调用 selectOwnerAndProceed (复用现有逻辑)
+                // 只要我们临时把 currentId 设为新房产ID即可
+                document.getElementById('currentId').value = newPropId;
+                window.app.selectOwnerAndProceed(ownerId);
+                
+            } else {
+                // 用户选择了 "Save Only"
+                alertMessage(`Owner profile saved.`, 'success');
+                // 跳转到该业主的详情页 (而不是列表)，体验更好
+                switchView('property'); 
+                switchPropertyTab('owner');
+                viewOwnerDetails(ownerId);
+            }
+        }
 
 		function navigateAndAdd(type) {
-			// 1. 切换到 Property 视图
 			switchView('property');
-			
-			// 2. 切换到正确的 Tab (Property/Owner/Tenant)
 			switchPropertyTab(type);
-			
 			window.app.handleNewEntry(type);
 		}
 	
-		// ===================================
-        // Quick Link Tenant Logic
-        // ===================================
         let quickLinkPropId = null;
         let quickLinkSelectedTenant = null;
         let availableTenantsCache = [];
+		let availablePropertiesCache = [];
+
+
+		function openQuickLinkPropertyModal(tenantId) {
+            quickLinkSelectedTenantId = tenantId;
+            const tenant = getTenantById(tenantId);
+            if (!tenant) return;
+
+            // 过滤出所有空置房产 (没有 tenantId 或者 tenantId 为空的房产)
+            // 并且必须是 phase >= 3 (已完成设置) 的房产
+            availablePropertiesCache = properties.filter(p => 
+                (p.phase && p.phase >= 3) && (!p.tenantId || p.tenantId === '')
+            );
+
+            // 复用现有的 Modal DOM，但我们需要修改一下标题和搜索逻辑
+            // 为了简单起见，我们重用 quickLinkModal 的结构，但需要清理一下状态
+            
+            // 将 Modal 标题改为 "Link Property"
+            const modalTitle = document.querySelector('#quickLinkListState h3');
+            if(modalTitle) modalTitle.textContent = "Link Property";
+            
+            document.getElementById('quickLinkSearch').placeholder = "Search property...";
+            document.getElementById('quickLinkSearch').value = '';
+            
+            // 这里我们需要修改搜索框的 oninput 事件，让它调用新的 property 过滤函数
+            // 注意：这是一种临时覆盖，关闭 modal 时最好还原，但在这个简单 app 里覆盖也没关系
+            document.getElementById('quickLinkSearch').oninput = function() {
+                window.app.filterQuickLinkProperties(this.value);
+            };
+
+            window.app.switchQuickLinkState('list');
+            renderQuickLinkPropertiesList(availablePropertiesCache);
+            document.getElementById('quickLinkModal').style.display = 'flex';
+        }
+
+        // 2. 渲染空房列表
+        function renderQuickLinkPropertiesList(list) {
+            const container = document.getElementById('quickLinkListContainer');
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 30px 20px;">
+                        <span class="material-icons-round" style="font-size: 36px; color: #ccc;">apartment</span>
+                        <h4 style="margin: 10px 0 6px 0; color: #333; font-size: 16px;">No vacant properties</h4>
+                        <p style="color: #999; font-size: 13px;">All your properties are currently rented out.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'tenant-select-item'; // 复用这个 CSS 类，样式一样
+                // 点击选择房产
+                div.onclick = () => window.app.selectQuickLinkProperty(p.id);
+                
+                div.innerHTML = `
+                    <div class="tenant-avatar-placeholder" style="background: #e3f2fd; color: #3A86FF;">
+                        <span class="material-icons-round" style="font-size: 18px;">home</span>
+                    </div>
+                    <div class="tenant-select-info">
+                        <h4>${p.name}</h4>
+                        <p>${p.monthlyRent ? 'RM ' + p.monthlyRent : 'Rent unset'}</p>
+                    </div>
+                    <span class="material-icons-round" style="color: #ccc; margin-left: auto;">chevron_right</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 3. 搜索过滤房产
+        function filterQuickLinkProperties(text) {
+            const term = text.toLowerCase();
+            const filtered = availablePropertiesCache.filter(p => 
+                (p.name && p.name.toLowerCase().includes(term)) ||
+                (p.address && p.address.toLowerCase().includes(term))
+            );
+            renderQuickLinkPropertiesList(filtered);
+        }
+
+		function selectQuickLinkProperty(propId) {
+            const prop = getPropertyById(propId);
+            const tenant = getTenantById(quickLinkSelectedTenantId);
+            
+            // 复用之前的全局变量，方便 confirmLinkTenant 使用
+            quickLinkPropId = propId; 
+            quickLinkSelectedTenant = tenant;
+
+            // 设置界面文字
+            document.getElementById('quickLinkTenantName').textContent = tenant.fullName;
+            document.getElementById('quickLinkPropName').textContent = prop.name; 
+
+            // 预填数据
+            const rentInput = document.getElementById('ql-rent');
+            rentInput.value = prop.monthlyRent || '';
+            document.getElementById('ql-start').value = '';
+            document.getElementById('ql-term').value = '';
+            document.getElementById('ql-end').value = '';
+
+            // 绑定确认按钮 (复用同一个确认函数，因为它只需要 quickLinkPropId 和 quickLinkSelectedTenant 存在即可)
+            document.getElementById('btnConfirmQuickLink').onclick = window.app.confirmLinkTenant;
+
+            window.app.switchQuickLinkState('confirm');
+        }
 
         function openQuickLinkModal(propId) {
             quickLinkPropId = propId;
             const prop = getPropertyById(propId);
             if (!prop) return;
 
-            // 1. 筛选可用的租客 (已完成设置 且 当前未绑定其他房产)
-            // 注意：tenants array 是全局变量
-            // 获取所有已被分配的 tenantId
             const assignedTenantIds = properties.filter(p => p.tenantId && p.id !== propId).map(p => p.tenantId);
             
             availableTenantsCache = tenants.filter(t => 
-                t.phase >= 4 && // 必须是 Setup Complete
-                !assignedTenantIds.includes(t.id) // 未被其他房产占用
+                t.phase >= 4 && 
+                !assignedTenantIds.includes(t.id) 
             );
 
-            // 2. 重置 UI
             document.getElementById('quickLinkSearch').value = '';
             window.app.switchQuickLinkState('list');
             
-            // 3. 渲染列表
             renderQuickLinkList(availableTenantsCache);
 
-            // 4. 显示弹窗
             document.getElementById('quickLinkModal').style.display = 'flex';
         }
 
@@ -2532,7 +3384,6 @@
                 div.className = 'tenant-select-item';
                 div.onclick = () => window.app.selectQuickLinkTenant(t.id);
                 
-                // ========== 修改了下面这一段 HTML ==========
                 div.innerHTML = `
                     <div class="tenant-avatar-placeholder">${initial}</div>
                     <div class="tenant-select-info">
@@ -2541,7 +3392,6 @@
                     </div>
                     <span class="material-icons-round" style="color: #ccc; margin-left: auto;">chevron_right</span>
                 `;
-                // =========================================
                 
                 container.appendChild(div);
             });
@@ -2551,87 +3401,246 @@
             const term = text.toLowerCase();
             const filtered = availableTenantsCache.filter(t => 
                 (t.fullName && t.fullName.toLowerCase().includes(term)) ||
-                // 新增：允许搜索 IC 号码
                 (t.icPassport && t.icPassport.toLowerCase().includes(term)) 
             );
             renderQuickLinkList(filtered);
         }
 
         function switchQuickLinkState(state) {
+            const listDiv = document.getElementById('quickLinkListState');
+            const confirmDiv = document.getElementById('quickLinkConfirmState');
+            
+            if (!listDiv || !confirmDiv) return;
+
             if (state === 'list') {
-                document.getElementById('quickLinkListState').style.display = 'flex';
-                document.getElementById('quickLinkConfirmState').style.display = 'none';
+                listDiv.style.display = 'flex';
+                confirmDiv.style.display = 'none';
             } else {
-                document.getElementById('quickLinkListState').style.display = 'none';
-                document.getElementById('quickLinkConfirmState').style.display = 'flex';
+                listDiv.style.display = 'none';
+                confirmDiv.style.display = 'flex';
             }
         }
 
         function selectQuickLinkTenant(tenantId) {
+            console.log("Selecting tenant:", tenantId); // 调试信息
+
             quickLinkSelectedTenant = getTenantById(tenantId);
-            const prop = getPropertyById(quickLinkPropId); // 获取当前房产信息
+            const prop = getPropertyById(quickLinkPropId); 
 
-            if (!quickLinkSelectedTenant || !prop) return;
+            if (!quickLinkSelectedTenant || !prop) {
+                console.error("Missing tenant or property data");
+                return;
+            }
 
-            // 1. 更新确认页面的：租客名字
+            // 1. 设置文字
             document.getElementById('quickLinkTenantName').textContent = quickLinkSelectedTenant.fullName;
-            
-            // 2. 更新确认页面的：房产名字 (新增)
             document.getElementById('quickLinkPropName').textContent = prop.name; 
             
-            // 3. 绑定确认按钮事件
+            // 2. 尝试获取输入框元素
+            const rentInput = document.getElementById('ql-rent');
+            const startInput = document.getElementById('ql-start');
+            const endInput = document.getElementById('ql-end');
+            const termInput = document.getElementById('ql-term');
+
+            // 3. 安全检查：如果元素不存在，提示错误（防止“没反应”）
+            if (!rentInput || !startInput || !termInput) {
+                alert("Error: Input fields missing in HTML. Please check code.");
+                return;
+            }
+
+            // 4. 设置值
+            rentInput.value = prop.monthlyRent || '';
+            startInput.value = '';
+            endInput.value = '';
+            termInput.value = ''; // 确保为空
+
+            // 5. 绑定确认按钮事件
             document.getElementById('btnConfirmQuickLink').onclick = confirmLinkTenant;
 
-            // 4. 切换视图
+            // 6. 切换视图
             switchQuickLinkState('confirm');
         }
 
         function confirmLinkTenant() {
             if (!quickLinkPropId || !quickLinkSelectedTenant) return;
+            
+            // 获取输入值
+            const rent = document.getElementById('ql-rent').value;
+            const start = document.getElementById('ql-start').value;
+            const end = document.getElementById('ql-end').value;
+            const term = document.getElementById('ql-term').value;
+
+            // 简单验证
+            if (!rent || !start || !term) {
+                window.app.alertMessage('Please enter Rental Amount and Start Date.', 'error');
+                return;
+            }
 
             const prop = getPropertyById(quickLinkPropId);
             
-            // 1. 更新房产数据
+            // 1. 更新房产状态
             updatePropertyData(quickLinkPropId, {
                 ...prop,
                 tenantId: quickLinkSelectedTenant.id,
                 status: 'Rented'
             });
 
-            // 2. 创建收租提醒任务 (复用现有逻辑)
+            // 2. 更新 Tenant 数据
+            saveTenantData(quickLinkSelectedTenant.id, {
+                ...quickLinkSelectedTenant,
+                currentLease: {
+                    propId: quickLinkPropId,
+                    propName: prop.name,
+                    rentalAmount: rent,
+                    startDate: start,
+                    endDate: end,
+                    term: term
+                },
+                leaseStart: start,
+                leaseEnd: end,
+                leaseTerm: term,
+                monthlyRent: rent,
+                phase: 4 
+            });
+
             if (window.app.createFirstRentTask) {
                 window.app.createFirstRentTask(quickLinkPropId, prop.name);
+            }
+            
+            localStorage.setItem('setup_link_done', 'true');
+            
+            // === 👇 关键修改：不再 Alert，而是弹出合同引导页 ===
+            
+            // 1. 先保存数据上下文 (在变量被清空前！)
+            window.app.successContext = { 
+                propId: quickLinkPropId, 
+                tenantId: quickLinkSelectedTenant.id, 
+                tenantName: quickLinkSelectedTenant.fullName 
+            };
+
+            // 2. 关闭当前的 Quick Link 弹窗 (现在安全了，可以清空变量)
+            closeQuickLinkModal();
+            
+            // 3. 打开 Success Modal
+            const successModal = document.getElementById('linkSuccessModal');
+            if (successModal) {
+                successModal.style.display = 'flex'; // 推荐直接用 flex 配合 css 居中
             } else {
-                createFirstRentTask(quickLinkPropId, prop.name);
+                console.error("Link Success Modal not found!");
+                renderProperties(); // 后备方案
+            }
+            // === 🔺 修改结束 ===
+        }
+		
+		function handleLinkAction(action) {
+            const context = window.app.successContext;
+            const modal = document.getElementById('linkSuccessModal');
+            
+            if (action === 'generate') {
+                alert('Generate Agreement feature coming soon! (Phase 2)');
+                return; 
             }
 
-            // 3. 提示成功并关闭
-            alertMessage(`${quickLinkSelectedTenant.fullName} linked to ${prop.name} successfully!`, 'success');
-            closeQuickLinkModal();
+            if (action === 'skip') {
+                // 创建后台任务
+                const newTask = {
+                    id: 'task-agreement-' + Date.now(),
+                    type: 'upload_agreement',
+                    propId: context.propId,
+                    tenantId: context.tenantId,
+                    status: 'in_progress',
+                    description: `Upload Agreement for ${context.tenantName}`,
+                    details: 'Tenancy agreement is pending. Upload signed copy.',
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                // 将新任务加入数组
+                // 注意：你需要确保 tasks 变量是全局可访问的，或者通过 getter 获取
+                tasks.push(newTask);
+                saveData(); 
+                
+                window.app.alertMessage('Task added to Dashboard', 'success');
+            }
 
-            // 4. 刷新列表 (关键步骤，让按钮消失，显示租客名字)
-            renderProperties();
+            // 关闭弹窗并跳转
+            if (modal) modal.style.display = 'none';
+            
+            window.app.switchView('property');
+            // 延迟一点点跳转详情页，体验更好
+            setTimeout(() => {
+                if (window.app.viewPropertyDetails) {
+                    window.app.viewPropertyDetails(context.propId);
+                }
+            }, 100);
         }
 
-		// 1. 打开弹窗的函数
-        function openQuickOwnerModal(prefillName = '') {
-            // 重置表单
-            document.getElementById('quickOwnerForm').reset();
+        function handleLinkUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                console.log('File selected:', file.name);
+                
+                const btnText = input.nextElementSibling;
+                const originalText = btnText.innerHTML;
+                btnText.innerHTML = 'Uploading...';
+                
+                setTimeout(() => {
+                    window.app.alertMessage('Agreement uploaded successfully!', 'success');
+                    document.getElementById('linkSuccessModal').style.display = 'none';
+                    
+                    const context = window.app.successContext;
+                    window.app.switchView('property');
+                    setTimeout(() => {
+                         if (window.app.viewPropertyDetails) {
+                            window.app.viewPropertyDetails(context.propId);
+                        }
+                    }, 100);
+                    
+                    btnText.innerHTML = originalText;
+                    input.value = ''; 
+                }, 1000);
+            }
+        }
+		
+		
+		function calcQuickLinkEnd() {
+            const startStr = document.getElementById('ql-start').value;
+            const termStr = document.getElementById('ql-term').value;
+            const endInput = document.getElementById('ql-end');
+
+            // 如果任意一项没填，就清空结束日期并退出
+            if (!startStr || !termStr) {
+                endInput.value = '';
+                return;
+            }
+
+            const startDate = new Date(startStr);
+            const months = parseInt(termStr);
+
+            if (isNaN(months)) return;
+
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + months);
+            endDate.setDate(endDate.getDate() - 1); 
+
+            const yyyy = endDate.getFullYear();
+            const mm = String(endDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(endDate.getDate()).padStart(2, '0');
             
-            // 如果是从搜索框点进来的，自动填入名字
+            endInput.value = `${yyyy}-${mm}-${dd}`;
+        }
+		
+
+        function openQuickOwnerModal(prefillName = '') {
+            document.getElementById('quickOwnerForm').reset();
             if (prefillName) {
                 document.getElementById('qo-name').value = prefillName;
             }
-            
-            // 显示弹窗
             document.getElementById('quickOwnerModal').style.display = 'flex';
         }
 
-        // 2. 处理弹窗提交 (保存数据 -> 关弹窗 -> 跳下一步)
         function handleQuickOwnerSubmit(e) {
             e.preventDefault();
             
-            // 获取表单数据
             const name = document.getElementById('qo-name').value;
             const phone = document.getElementById('qo-phone').value;
             const email = document.getElementById('qo-email').value;
@@ -2639,10 +3648,8 @@
             const managementFee = document.getElementById('qo-fee').value;
             const address = document.getElementById('qo-address').value;
             
-            // 创建新 ID
             const newId = `owner-${Date.now()}`;
             
-            // 保存完整的 Owner 数据
             saveOwnerData(newId, {
                 id: newId,
                 fullName: name,
@@ -2653,64 +3660,31 @@
                 address: address
             });
             
-            // 成功提示
             window.app.alertMessage('Owner profile created successfully!', 'success');
-
-            // 关闭弹窗
             document.getElementById('quickOwnerModal').style.display = 'none';
-            
-            // 【核心体验】自动选中并跳转到 Property Details
             selectOwnerAndProceed(newId);
         }
 
-        // 3. 选中并跳转下一步 (这是让流程顺滑的关键)
-        function selectOwnerAndProceed(ownerId) {
-            const currentPropId = document.getElementById('currentId').value;
-            
-            // 更新房产数据，关联 Owner，并标记进度为 Phase 1
-            updatePropertyData(currentPropId, { 
-                phase: 1, 
-                ownerId: ownerId 
-            });
-
-            // 更新任务状态
-            updateTaskData(`task-${currentPropId}`, { 
-                id: `task-${currentPropId}`, 
-                type: 'property', 
-                propId: currentPropId, 
-                phase: 1, 
-                description: 'Setup New Property', 
-                details: 'Step 2/2: Basic Property Details.', 
-                status: 'in_progress', 
-                userId: currentUserId 
-            });
-
-            // 立即渲染下一页
-            renderForm(currentPropId, 1, 'property');
-        }
-
-
-
-        // ===================================
-        // Global App Exposure & Initialization
-        // ===================================
-
-        window.app = {
+        Object.assign(window.app, {
             startApp: function() {
                 showLoading();
                 loadData();
                 renderProperties(); 
                 renderTasks();
+                renderDashboardStats();
                 switchView('dashboard'); 
                 
-                // Bind search bar for real-time filtering (Point 5)
-                document.getElementById('propertySearch').addEventListener('input', window.app.filterProperties);
+                // 绑定搜索框事件
+                const propSearch = document.getElementById('propertySearch');
+                if (propSearch) {
+                    propSearch.addEventListener('input', window.app.filterProperties);
+                }
                 
                 hideLoading(); 
             },
             simpleTenantEdit: false,
             switchView: switchView,
-			navigateAndAdd: navigateAndAdd,
+            navigateAndAdd: navigateAndAdd,
             toggleAddMenu: toggleAddMenu,
             handleNewEntry: handleNewEntry,
             continueFormTask: continueFormTask,
@@ -2718,107 +3692,245 @@
             goBackFromForm: goBackFromForm,
             deletePropertyHandler: deletePropertyHandler,
             deleteProfileHandler: deleteProfileHandler,
-			openQuickLinkModal: openQuickLinkModal,
-			closeQuickLinkModal: closeQuickLinkModal,
-			filterQuickLinkTenants: filterQuickLinkTenants,
-			selectQuickLinkTenant: selectQuickLinkTenant,
-			switchQuickLinkState: switchQuickLinkState,
+            openQuickLinkModal: openQuickLinkModal,
+            startAddButtonTutorial: startAddButtonTutorial,
+            finishAddButtonTutorial: finishAddButtonTutorial,
+            closeQuickLinkModal: closeQuickLinkModal,
+            filterQuickLinkTenants: filterQuickLinkTenants,
+            selectQuickLinkTenant: selectQuickLinkTenant,
+            switchQuickLinkState: switchQuickLinkState,
+            handleDynamicAdd: handleDynamicAdd, 
             viewPropertyDetails: viewPropertyDetails,
-			openQuickOwnerModal: openQuickOwnerModal,
-			handleQuickOwnerSubmit: handleQuickOwnerSubmit,
-			selectOwnerAndProceed: selectOwnerAndProceed,
+            openQuickOwnerModal: openQuickOwnerModal,
+            calcQuickLinkEnd: calcQuickLinkEnd,
+            handleQuickOwnerSubmit: handleQuickOwnerSubmit,
+            confirmLinkTenant: confirmLinkTenant,
+            selectOwnerAndProceed: selectOwnerAndProceed,
             viewOwnerDetails: viewOwnerDetails,
             viewTenantDetails: viewTenantDetails,
             renderForm: renderForm, 
-            sendRentReminder: sendRentReminder, // (Point 3)
-			createFirstRentTask: createFirstRentTask,
+            openQuickLinkPropertyModal: openQuickLinkPropertyModal,
+            filterQuickLinkProperties: filterQuickLinkProperties,
+            selectQuickLinkProperty: selectQuickLinkProperty,
+            sendRentReminder: sendRentReminder, 
+            createFirstRentTask: createFirstRentTask,
+            
+            createLinkedOwner: function() {
+                const propId = document.getElementById('currentId').value;
+                window.app.pendingReturnPropId = propId;
+                window.app.handleNewEntry('owner');
+            },
+
             selectOwner: function(ownerId) { 
-                document.getElementById('selectedOwnerId').value = ownerId;
-                document.getElementById('formSubmitButton').disabled = false;
-                document.getElementById('formSubmitButton').textContent = 'Next';
+                const ownerInput = document.getElementById('selectedOwnerId');
+                const submitBtn = document.getElementById('formSubmitButton');
+                
+                if (ownerInput) ownerInput.value = ownerId;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Next';
+                }
+
                 document.querySelectorAll('.owner-select-item').forEach(item => {
                     const icon = item.querySelector('.material-icons-round');
                     if (item.getAttribute('data-owner-id') === ownerId) {
                         item.classList.add('selected');
-                        icon.textContent = 'radio_button_checked';
+                        if (icon) icon.textContent = 'radio_button_checked';
                     } else {
                         item.classList.remove('selected');
-                        icon.textContent = 'radio_button_unchecked';
+                        if (icon) icon.textContent = 'radio_button_unchecked';
                     }
                 });
             },
-			validateNumber: function(input) {
-				// 1. 检查是否有非数字字符 (排除 0-9 以外的所有字符)
-				// 注意：type="number" 的输入框在某些浏览器会自动过滤，但为了保险我们手动处理
-				if (/[^0-9]/.test(input.value)) {
-					
-					// 2. 只有当确实检测到非法字符时，才执行替换和弹窗
-					// 这样不会干扰正常的数字输入
-					input.value = input.value.replace(/[^0-9]/g, '');
-					
-					// 3. 弹出错误提示 (调用你现有的 message box)
-					window.app.alertMessage('Numbers only', 'error');
-				}
-			},
-			calculateEndDate: function() {
-				const startInput = document.getElementById('t-leaseStart');
-				const termInput = document.getElementById('t-leaseTerm');
-				const endInput = document.getElementById('t-leaseEnd');
 
-				// 如果开始日期或租期没填，就不计算
-				if (!startInput.value || !termInput.value) return;
+            validateNumber: function(input) {
+                if (/[^0-9]/.test(input.value)) {
+                    input.value = input.value.replace(/[^0-9]/g, '');
+                    window.app.alertMessage('Numbers only', 'error');
+                }
+            },
 
-				// 获取数值
-				const startDate = new Date(startInput.value);
-				const months = parseInt(termInput.value);
+            calculateEndDate: function() {
+                const startInput = document.getElementById('t-leaseStart');
+                const termInput = document.getElementById('t-leaseTerm');
+                const endInput = document.getElementById('t-leaseEnd');
 
-				// 计算逻辑：开始日期 + X个月 - 1天
-				// 例如：1 Jan 2024 + 12个月 = 1 Jan 2025，再减1天 = 31 Dec 2024
-				const endDate = new Date(startDate);
-				endDate.setMonth(endDate.getMonth() + months);
-				endDate.setDate(endDate.getDate() - 1);
+                if (!startInput || !termInput || !endInput) return;
+                if (!startInput.value || !termInput.value) return;
 
-				// 格式化为 YYYY-MM-DD 以便填入 input type="date"
-				const yyyy = endDate.getFullYear();
-				const mm = String(endDate.getMonth() + 1).padStart(2, '0');
-				const dd = String(endDate.getDate()).padStart(2, '0');
-				
-				endInput.value = `${yyyy}-${mm}-${dd}`;
-			},
-			completeOnboardingTask: function(taskType) {
-				// 1. 在 localStorage 记录这个任务已经被用户手动“杀掉”了
-				// key 例如: 'setup_property_done', 'setup_owner_done'
-				localStorage.setItem(`setup_${taskType}_done`, 'true');
-				
-				// 2. 给用户一点反馈 (可选：弹个窗表扬一下)
-				window.app.alertMessage(`Great job! ${taskType} setup task completed.`, 'success');
-				
-				// 3. 刷新任务列表，让这个任务消失
-				renderTasks();
-			},
-			
+                const startDate = new Date(startInput.value);
+                const months = parseInt(termInput.value);
+
+                const endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + months);
+                endDate.setDate(endDate.getDate() - 1);
+
+                const yyyy = endDate.getFullYear();
+                const mm = String(endDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(endDate.getDate()).padStart(2, '0');
+                
+                endInput.value = `${yyyy}-${mm}-${dd}`;
+            },
+
+            completeOnboardingTask: function(taskType) {
+                localStorage.setItem(`setup_${taskType}_done`, 'true');
+                window.app.alertMessage(`Great job! ${taskType} setup task completed.`, 'success');
+                renderTasks();
+            },
+            
+            handleLinkAction: function(action) {
+                const context = window.app.successContext;
+                const modal = document.getElementById('linkSuccessModal');
+                
+                if (action === 'generate') {
+                    // 这里原本是 alert coming soon
+                    // 现在因为我们修好了 templates.js，这里可以直接调用生成
+                    if (context && context.tenantId) {
+                        window.app.generateAgreement(context.tenantId);
+                    } else {
+                        alert('Error: Missing context for agreement generation.');
+                    }
+                    if(modal) modal.style.display = 'none';
+                    return; 
+                }
+
+                if (action === 'skip') {
+                    const newTask = {
+                        id: 'task-agreement-' + Date.now(),
+                        type: 'upload_agreement',
+                        propId: context.propId,
+                        tenantId: context.tenantId,
+                        status: 'in_progress',
+                        description: `Upload Agreement for ${context.tenantName}`,
+                        details: 'Tenancy agreement is pending. Upload signed copy.',
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                    
+                    tasks.push(newTask);
+                    saveData(); 
+                    window.app.alertMessage('Task added to Dashboard', 'success');
+                }
+
+                if(modal) modal.style.display = 'none';
+                
+                window.app.switchView('property');
+                window.app.switchPropertyTab('property');
+            },
+
+            handleLinkUpload: function(input) {
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    console.log('File selected:', file.name);
+                    
+                    const btnText = input.nextElementSibling; 
+                    if (btnText) {
+                        const originalText = btnText.innerHTML;
+                        btnText.innerHTML = 'Uploading...';
+                        
+                        setTimeout(() => {
+                            window.app.alertMessage('Agreement uploaded successfully!', 'success');
+                            const modal = document.getElementById('linkSuccessModal');
+                            if (modal) modal.style.display = 'none';
+                            
+                            window.app.switchView('property');
+                            window.app.switchPropertyTab('property');
+                            
+                            btnText.innerHTML = originalText;
+                            input.value = ''; 
+                        }, 1000);
+                    }
+                }
+            },
+            
+            openTenantReviewModal: function(data) {
+                const list = document.getElementById('tenantReviewList');
+                if (!list) return;
+                
+                const fieldsToCheck = [
+                    { label: 'Full Name', key: 'fullName' },
+                    { label: 'Preferred Name', key: 'preferredName' },
+                    { label: 'IC / Passport', key: 'icPassport' },
+                    { label: 'Phone', key: 'phone' },
+                    { label: 'Email', key: 'email' },
+                    { label: 'Reg. Address', key: 'regAddress' }
+                ];
+
+                let html = '';
+                fieldsToCheck.forEach(field => {
+                    let displayValue = data[field.key] || ''; 
+                    if (field.key === 'leaseTerm' && displayValue) {
+                        displayValue += ' Months';
+                    }
+                    html += `
+                        <div class="review-row">
+                            <div class="review-label">${field.label}</div>
+                            <div class="review-value" style="min-height: 19px;">${displayValue}</div>
+                        </div>
+                    `;
+                });
+
+                list.innerHTML = html;
+                document.getElementById('tenantReviewModal').style.display = 'flex';
+            },
+
+            submitVerifiedTenant: function() {
+                const pending = window.app.pendingTenantContext;
+                if (!pending) return;
+
+                const { data } = pending; 
+                const { currentId, isSimpleTenantEdit, currentPhase, tenant } = pending.context; 
+
+                if (isSimpleTenantEdit) {
+                    saveTenantData(currentId, { ...data, phase: tenant && tenant.phase ? tenant.phase : 4 });
+                    saveData();
+                    window.app.alertMessage('Tenant updated successfully.', 'success');
+                    switchView('property');
+                    switchPropertyTab('tenant');
+                } 
+                else if (currentPhase === '0') {
+                    saveTenantData(currentId, { ...data, phase: 4 });
+                    const task = getTaskByTenantId(currentId);
+                    if (task) { 
+                        tasks = tasks.filter(t => t.id !== task.id); 
+                    }
+                    saveData();
+                    window.app.alertMessage('Tenant profile created!', 'success');
+                    switchView('property');
+                    switchPropertyTab('tenant');
+                }
+
+                window.app.pendingTenantContext = null;
+                document.getElementById('tenantReviewModal').style.display = 'none';
+            },
+            
             handleFormSubmit: handleFormSubmit, 
             updateRentLabel: updateRentLabel, 
             toggleCollapse: toggleCollapse, 
             viewDummyFile: viewDummyFile, 
             selectTenant: selectTenant, 
             checkSelectPlaceholder: checkSelectPlaceholder,
+            startLinkTutorial: startLinkTutorial, 
+            endTutorial: endTutorial,             
             switchPropertyTab: switchPropertyTab,
-			selectOwnerAndProceed: selectOwnerAndProceed, // 新增注册
             filterProperties: filterProperties, 
+            
             filterOwners: (filter) => { 
                 const ownerListContainer = document.getElementById('ownerListContainer');
-                if (!ownerListContainer) return; // 防止在空状态页调用报错
+                if (!ownerListContainer) return; 
 
                 const filterValue = (filter || '').toLowerCase().trim();
                 
-                // 筛选逻辑
-                const filteredOwners = owners.filter(o => 
+                let filteredOwners = owners.filter(o => 
                     (o.fullName && o.fullName.toLowerCase().includes(filterValue)) ||
                     (o.phone && o.phone.includes(filterValue))
                 );
 
-                // 如果没搜到
+                filteredOwners.sort((a, b) => {
+                    const nameA = (a.fullName || '').toLowerCase();
+                    const nameB = (b.fullName || '').toLowerCase();
+                    return nameA.localeCompare(nameB);
+                });
+
                 if (filteredOwners.length === 0) {
                     ownerListContainer.innerHTML = `
                         <div style="text-align: center; padding: 30px 10px;">
@@ -2829,11 +3941,8 @@
                     return;
                 }
 
-                // 渲染卡片列表
                 ownerListContainer.innerHTML = filteredOwners.map(o => {
                     const initial = o.fullName ? o.fullName.charAt(0).toUpperCase() : 'O';
-                    
-                    // 注意：这里的 onclick 改成了 selectOwnerAndProceed
                     return `
                         <div class="owner-select-card" onclick="window.app.selectOwnerAndProceed('${o.id}')">
                             <div class="owner-icon-placeholder">${initial}</div>
@@ -2846,9 +3955,8 @@
                     `;
                 }).join('');
             }
-        };
+        }); 
 
-        // Start the application on window load
         window.onload = window.app.startApp;
     </script>
 </body>
