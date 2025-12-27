@@ -10,15 +10,12 @@ window.app = window.app || {};
 window.app.generateTenancyAgreementHTML = function(data) {
     
     // --- 1. 数据格式化工具 ---
-    
-    // 格式化日期 (例: 01 October 2025)
     const formatDate = (dateStr) => {
         if (!dateStr) return '<span style="color:red">[MISSING DATE]</span>';
         const d = new Date(dateStr);
         return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
     };
 
-    // 格式化金额 (例: 2,500.00)
     const formatMoney = (val) => {
         return val ? parseFloat(val).toLocaleString('en-MY', {minimumFractionDigits: 2}) : '0.00';
     };
@@ -27,32 +24,53 @@ window.app.generateTenancyAgreementHTML = function(data) {
     const prop = data.property || {};
     const owner = data.owner || {};
     const tenant = data.tenant || {};
+    const renewalYears = tenant.renewalTerm || '1'; // 动态续约年限
+    const isReviewMode = data.isReviewMode || false; // 是否开启审核辅助模式
     
-    // 自动计算押金 (如果数据库没存，就按标准算：2个月押金 + 0.5个月水电)
     const monthlyRent = parseFloat(tenant.monthlyRent || 0);
-    const securityDep = monthlyRent * 2;
-    const utilityDep = monthlyRent * 0.5;
+    const securityDep = tenant.securityDeposit || (monthlyRent * 2);
+    const utilityDep = tenant.utilityDeposit || (monthlyRent * 1);
 
     // --- 3. 返回完整的 HTML 模板 ---
     return `
     <!DOCTYPE html>
-    <html>
+    <html class="${isReviewMode ? 'review-mode' : ''}">
     <head>
-        <title>Tenancy Agreement - ${prop.name}</title>
+        <title>Tenancy Agreement - ${prop.address || 'Contract'}</title>
         <style>
             /* === 打印专用样式 === */
             @media print {
-                @page { size: A4; margin: 2.54cm; } /* 标准 A4 边距 */
-                body { -webkit-print-color-adjust: exact; }
-                .page-break { page-break-after: always; } /* 强制分页 */
+                @page { size: A4; margin: 2.54cm; } 
+                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .page-break { page-break-after: always; }
+                .no-print { display: none !important; }
+                /* 打印时强制移除高亮颜色，改为纯黑白 */
+                .highlight-required { 
+                    background-color: transparent !important; 
+                    border-bottom: 1px solid #000 !important;
+                    padding: 0 !important;
+                }
+            }
+
+            /* === 高亮样式 (默认/预览) === */
+            .highlight-required {
+                background-color: #ffff00;
+                padding: 0 2px;
+                font-weight: bold;
+            }
+
+            /* 审核模式：浅蓝色视觉辅助，不误导用户 */
+            .review-mode .highlight-required {
+                background-color: rgba(58, 134, 255, 0.1) !important;
+                border-bottom: 2px solid #3A86FF;
             }
 
             /* === 全局排版 === */
             body {
-                font-family: 'Times New Roman', Times, serif; /* 法律文件标准字体 */
+                font-family: 'Times New Roman', Times, serif;
                 font-size: 11pt;
                 line-height: 1.4;
-                text-align: justify; /* 两端对齐 */
+                text-align: justify;
                 color: #000;
                 background: #fff;
                 margin: 0;
@@ -63,8 +81,8 @@ window.app.generateTenancyAgreementHTML = function(data) {
             strong { font-weight: bold; }
             .text-center { text-align: center; }
             .uppercase { text-transform: uppercase; }
+            .page-break { page-break-after: always; }
             
-            /* 封面标题 */
             .cover-title {
                 font-size: 24pt;
                 font-weight: bold;
@@ -74,34 +92,39 @@ window.app.generateTenancyAgreementHTML = function(data) {
                 margin-bottom: 60px;
             }
             
-            /* 列表样式 */
-            ul { list-style-type: none; padding-left: 20px; }
-            li { margin-bottom: 8px; }
+            .signature-table { width: 100%; margin-top: 30px; }
+            .signature-table td { width: 50%; vertical-align: top; padding: 15px; }
+            .sign-line { border-top: 1px solid #000; width: 90%; margin-top: 40px; margin-bottom: 5px; }
+            .digital-sig-img { max-width: 180px; max-height: 90px; display: block; margin: 5px 0; }
 
-            /* 签名区 */
-            .signature-table { width: 100%; margin-top: 50px; }
-            .signature-table td { width: 50%; vertical-align: top; padding: 20px; }
-            .sign-line { border-top: 1px solid #000; width: 90%; margin-top: 50px; margin-bottom: 5px; }
-
-            /* 附表样式 (The Schedule) */
             .schedule-title { text-align: center; font-weight: bold; font-size: 14pt; margin-bottom: 5px; }
             table.schedule { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            table.schedule td { border: 1px solid #000; padding: 8px; vertical-align: top; }
+            table.schedule td { border: 1px solid #000; padding: 10px; vertical-align: top; }
             .col-part { width: 10%; font-weight: bold; text-align: center; }
             .col-desc { width: 35%; font-weight: bold; }
             .col-val { width: 55%; }
+            ul { list-style-type: none; padding-left: 20px; }
+            li { margin-bottom: 8px; }
+
+            .no-print-toolbar {
+                position: fixed; top: 0; left: 0; width: 100%; 
+                background: #333; color: #fff; padding: 10px; 
+                text-align: center; z-index: 9999; font-family: sans-serif;
+            }
         </style>
     </head>
     <body>
 
-        <div class="page-break">
+        ${isReviewMode ? `<div class="no-print no-print-toolbar">Reviewing Document: Highlights are hidden in the final PDF. <button onclick="window.print()" style="margin-left:15px; cursor:pointer; padding:5px 10px;">Download / Print PDF</button></div>` : ''}
+
+        <div class="page-break" style="${isReviewMode ? 'margin-top:50px;' : ''}">
             <div class="cover-title">TENANCY AGREEMENT</div>
             
             <div class="text-center" style="margin-bottom: 40px;">BETWEEN</div>
 
             <div class="text-center" style="margin-bottom: 40px;">
-                <strong>${owner.fullName || 'LANDLORD NAME'}</strong><br>
-                (NRIC: ${owner.icPassport || '_________________'})<br>
+                <span class="highlight-required">${owner.fullName || 'LANDLORD NAME'}</span><br>
+                (NRIC: <span class="highlight-required">${owner.icPassport || '_________________'}</span>)<br>
                 <br>
                 (Hereinafter referred to as "The Landlord")
             </div>
@@ -109,8 +132,8 @@ window.app.generateTenancyAgreementHTML = function(data) {
             <div class="text-center" style="margin-bottom: 40px;">AND</div>
 
             <div class="text-center" style="margin-bottom: 40px;">
-                <strong>${tenant.fullName || 'TENANT NAME'}</strong><br>
-                (NRIC/Passport: ${tenant.icPassport || '_________________'})<br>
+                <span class="highlight-required">${tenant.fullName || 'TENANT NAME'}</span><br>
+                (NRIC/Passport: <span class="highlight-required">${tenant.icPassport || '_________________'}</span>)<br>
                 <br>
                 (Hereinafter referred to as "The Tenant")
             </div>
@@ -118,7 +141,7 @@ window.app.generateTenancyAgreementHTML = function(data) {
             <br><br><br>
             <div class="text-center">
                 <strong>PROPERTY ADDRESS:</strong><br>
-                <span class="uppercase">${prop.address || 'Address Line 1'}, ${prop.city || ''}, ${prop.state || ''} ${prop.postalCode || ''}</span>
+                <span class="uppercase highlight-required">${prop.address || 'ADDRESS NOT PROVIDED'}, ${prop.city || ''}, ${prop.state || ''} ${prop.postalCode || ''}</span>
             </div>
         </div>
 
@@ -212,9 +235,11 @@ window.app.generateTenancyAgreementHTML = function(data) {
             <p><strong>10. RENEWAL OF TENANCY</strong><br>
             If the Tenant shall be desirous of renewing this tenancy for a further term from the expiration of the term hereby created the Tenant shall give a two (2) months' notice in writing before the expiration of the term hereby created, of the Tenant's desire (provided if the Tenant shall have paid the rent hereby reserved and shall have performed and observed the several stipulations herein contained and on the Tenant's part to be performed and observed up to the expiration of the term hereby created) then the Landlord will let the Premises to the Tenant for a further term as specified in <strong>Part 5(B) of the First Schedule</strong> from the expiration of the term hereby created at a rental to be mutually agreed between the parties hereto based on the prevailing market rate at the time of the renewal and the renewal shall be subject in all other respects to the same terms and conditions as this Agreement save and except this provision for renewal.</p>
 
-            <p><strong>11. TIME</strong><br>Time wherever mentioned in this Agreement shall be of the essence of this Agreement.</p>
+            <p><strong>11. TIME</strong><br>
+            Time wherever mentioned in this Agreement shall be of the essence of this Agreement.</p>
 
-            <p><strong>12. COSTS</strong><br>All stamp duty and other costs and expenses (save and except for the Tenant's solicitors' costs, if any) incurred or to be incurred in relation to the preparation, execution and completion of this Agreement shall be borne and paid by the Tenant absolutely.</p>
+            <p><strong>12. COSTS</strong><br>
+            All stamp duty and other costs and expenses (save and except for the Tenant's solicitors' costs, if any) incurred or to be incurred in relation to the preparation, execution and completion of this Agreement shall be borne and paid by the Tenant absolutely.</p>
 
             <p><strong>13. NOTICES</strong></p>
             <p><strong>13.1</strong> All notices hereunder shall be in writing signed by the parties by whom it is served or by its solicitors and shall be sufficiently given if left by hand at or sent by registered post or telefax either to the party to whom such notice is addressed at its address stated herein or to such other address as such party may notify to the other party in writing or to such party's solicitor or agents duly authorised. Any notices so sent or delivered shall be deemed to have been served and received:-</p>
@@ -224,13 +249,17 @@ window.app.generateTenancyAgreementHTML = function(data) {
             <p><strong>13.2</strong> Any service of legal process which includes writ of summons and other pleadings may be sent to the parties by prepared registered post to the address stated herein and the same shall be deemed to have been duly served and duly received by the parties upon the expiry of three (3) days after the day of posting of the same.</p>
             <p><strong>13.3</strong> No change in address for service howsoever brought about shall be effective or binding on the parties unless actual notice of such change has been given to the other party.</p>
 
-            <p><strong>14. WAIVER</strong><br>Any indulgence given by the Landlord in respect of any covenants, undertakings, stipulations, obligations or agreements to be performed or observed by the Tenant or the neglect or forbearance by the Landlord in enforcing any of his rights or remedies herein this Agreement contained shall not constitute or be construed as a waiver of or prejudice the Landlord's said rights and remedies.</p>
+            <p><strong>14. WAIVER</strong><br>
+            Any indulgence given by the Landlord in respect of any covenants, undertakings, stipulations, obligations or agreements to be performed or observed by the Tenant or the neglect or forbearance by the Landlord in enforcing any of his rights or remedies herein this Agreement contained shall not constitute or be construed as a waiver of or prejudice the Landlord's said rights and remedies.</p>
 
-            <p><strong>15. GOVERNING LAW</strong><br>This Agreement shall be governed by the laws of Malaysia.</p>
+            <p><strong>15. GOVERNING LAW</strong><br>
+            This Agreement shall be governed by the laws of Malaysia.</p>
 
-            <p><strong>16. SEVERABILITY</strong><br>In the event that any one or more of the provisions contained in this Agreement or their performance thereof shall for any reason be held to be unenforceable illegal or otherwise invalid in any respect under the law governing this Agreement, such unenforceability, illegality or invalidity shall not affect the remaining provisions of the relevant clause(s) or any other provisions of this Agreement and this Agreement shall then be construed as if such unenforceable, illegal or invalid provisions had never been contained herein.</p>
+            <p><strong>16. SEVERABILITY</strong><br>
+            In the event that any one or more of the provisions contained in this Agreement or their performance thereof shall for any reason be held to be unenforceable illegal or otherwise invalid in any respect under the law governing this Agreement, such unenforceability, illegality or invalidity shall not affect the remaining provisions of the relevant clause(s) or any other provisions of this Agreement and this Agreement shall then be construed as if such unenforceable, illegal or invalid provisions had never been contained herein.</p>
 
-            <p><strong>17. BINDING EFFECT</strong><br>This Agreement shall be binding on the heirs, personal representatives and assigns of the Landlord and the Tenant respectively.</p>
+            <p><strong>17. BINDING EFFECT</strong><br>
+            This Agreement shall be binding on the heirs, personal representatives and assigns of the Landlord and the Tenant respectively.</p>
 
             <p><strong>18. INTERPRETATIONS</strong></p>
             <p><strong>18.1</strong> The Schedules hereto shall have full effect and shall be read as part of this Agreement as if they were incorporated herein and this Agreement together with the said Schedules shall constitute the whole agreement between the parties hereto and it is expressly declared that no variation hereof shall be effective unless made by the parties hereto in writing.</p>
@@ -251,16 +280,16 @@ window.app.generateTenancyAgreementHTML = function(data) {
                         in the presence of:-
                         <br><br><br><br>
                         <div class="sign-line"></div>
-                        Name: <strong>${owner.fullName || ''}</strong><br>
-                        NRIC: ${owner.icPassport || ''}
+                        Name: <span class="highlight-required">${owner.fullName || ''}</span><br>
+                        NRIC: <span class="highlight-required">${owner.icPassport || ''}</span>
                     </td>
                     <td>
                         <strong>Signed by the Tenant</strong><br>
                         in the presence of:-
-                        <br><br><br><br>
-                        <div class="sign-line"></div>
-                        Name: <strong>${tenant.fullName || ''}</strong><br>
-                        NRIC: ${tenant.icPassport || ''}
+                        <br><br>
+                        ${tenant.digitalSignature ? `<img src="${tenant.digitalSignature}" class="digital-sig-img">` : '<div class="sign-line"></div>'}
+                        Name: <span class="highlight-required">${tenant.fullName || ''}</span><br>
+                        NRIC: <span class="highlight-required">${tenant.icPassport || ''}</span>
                     </td>
                 </tr>
             </table>
@@ -274,73 +303,73 @@ window.app.generateTenancyAgreementHTML = function(data) {
                 <tr>
                     <td class="col-part">PART 1</td>
                     <td class="col-desc">DATE OF AGREEMENT</td>
-                    <td class="col-val">${formatDate(data.date)}</td>
+                    <td class="col-val"><span class="highlight-required">${formatDate(data.date)}</span></td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 2</td>
                     <td class="col-desc">NAME & ADDRESS OF THE LANDLORD</td>
                     <td class="col-val">
-                        <strong>${owner.fullName}</strong><br>
-                        ${owner.address || 'Address not provided'}
+                        <span class="highlight-required">${owner.fullName}</span><br>
+                        <span class="highlight-required">${owner.address || 'Address not provided'}</span>
                     </td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 3</td>
                     <td class="col-desc">NAME & ADDRESS OF THE TENANT</td>
                     <td class="col-val">
-                        <strong>${tenant.fullName}</strong><br>
-                        ${tenant.regAddress || 'Address as per NRIC'}
+                        <span class="highlight-required">${tenant.fullName}</span><br>
+                        <span class="highlight-required">${tenant.regAddress || tenant.address || 'Address as per NRIC'}</span>
                     </td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 4</td>
                     <td class="col-desc">DEMISED PREMISES</td>
-                    <td class="col-val">
-                        ${prop.name}<br>
-                        ${prop.address}, ${prop.city}, ${prop.state}
+                    <td class="col-val highlight-required" style="text-transform: uppercase;">
+                        ${prop.address || ''}<br>
+                        ${prop.postalCode || ''} ${prop.city || ''}, ${prop.state || ''}
                     </td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 5</td>
                     <td class="col-desc">(A) FIXED TERM<br>(B) RENEWAL TERM</td>
                     <td class="col-val">
-                        (A) ${tenant.leaseTerm || '12'} Months<br>
-                        (B) 1 Year (subject to renewal)
+                        (A) <span class="highlight-required">${tenant.leaseTerm || '12'} Months</span><br>
+                        (B) ${renewalYears} Year(s) (subject to renewal)
                     </td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 6</td>
                     <td class="col-desc">COMMENCEMENT DATE</td>
-                    <td class="col-val">${formatDate(tenant.leaseStart)}</td>
+                    <td class="col-val"><span class="highlight-required">${formatDate(tenant.leaseStart)}</span></td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 7</td>
                     <td class="col-desc">EXPIRY DATE</td>
-                    <td class="col-val">${formatDate(tenant.leaseEnd)}</td>
+                    <td class="col-val"><span class="highlight-required">${formatDate(tenant.leaseEnd)}</span></td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 8</td>
                     <td class="col-desc">MONTHLY RENTAL</td>
                     <td class="col-val">
-                        <strong>RM ${formatMoney(monthlyRent)}</strong>
+                        <strong class="highlight-required">RM ${formatMoney(monthlyRent)}</strong>
                     </td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 8<br>(Cont.)</td>
                     <td class="col-desc">LANDLORD BANK ACCOUNT</td>
                     <td class="col-val">
-                        ${owner.bankDetails || 'To be advised'}
+                        <span class="highlight-required">${owner.bankDetails || 'To be advised'}</span>
                     </td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 9</td>
                     <td class="col-desc">RENTAL DEPOSIT</td>
-                    <td class="col-val">RM ${formatMoney(securityDep)}</td>
+                    <td class="col-val"><span class="highlight-required">RM ${formatMoney(securityDep)}</span></td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 10</td>
                     <td class="col-desc">UTILITIES DEPOSIT</td>
-                    <td class="col-val">RM ${formatMoney(utilityDep)}</td>
+                    <td class="col-val"><span class="highlight-required">RM ${formatMoney(utilityDep)}</span></td>
                 </tr>
                 <tr>
                     <td class="col-part">PART 11</td>
