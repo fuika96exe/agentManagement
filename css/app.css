@@ -1839,3 +1839,10 @@ body {
     align-items: center;
     gap: 6px;
 }
+
+#sig-canvas {
+    touch-action: none; /* 极其重要：防止手机端拖动时页面滚动 */
+    cursor: crosshair;
+    display: block;
+    background-color: #fafafa;
+}
