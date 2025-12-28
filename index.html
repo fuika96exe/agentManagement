@@ -2154,77 +2154,93 @@
 			document.getElementById('linkSuccessModal').style.display = 'flex';
 		};
 
+		// 核心逻辑：带有强力拦截检查的生成函数
 		window.app.generateAgreement = function(tenantId) {
-			const tenant = tenants.find(t => t.id === tenantId);
+			const tenant = getTenantById(tenantId);
 			if (!tenant) return;
 
 			const property = properties.find(p => p.tenantId === tenant.id);
 			const owner = property ? owners.find(o => o.id === property.ownerId) : null;
 
-			// --- 1. 更新检查清单：加入 Owner's Bank Details ---
+			// --- 1. 定义法律核心字段及其实际值 ---
 			const checkList = [
-				{ label: "Owner's NRIC", value: owner?.icPassport, key: 'icPassport', type: 'owner', id: owner?.id },
-				{ label: "Owner's Address", value: owner?.address, key: 'address', type: 'owner', id: owner?.id },
-				{ label: "Owner's Bank Account", value: owner?.bankDetails, key: 'bankDetails', type: 'owner', id: owner?.id }, // 新增检查项
-				{ label: "Tenant's NRIC/Passport", value: tenant.icPassport, key: 'icPassport', type: 'tenant', id: tenant.id },
-				{ label: "Tenant's Address", value: tenant.regAddress, key: 'regAddress', type: 'tenant', id: tenant.id },
-				{ label: "Property Address", value: property?.address, key: 'address', type: 'property', id: property?.id }
+				{ label: "Landlord NRIC/Passport", value: owner?.icPassport, key: 'icPassport', type: 'owner', id: owner?.id },
+				{ label: "Landlord Address", value: owner?.address, key: 'address', type: 'owner', id: owner?.id },
+				{ label: "Landlord Bank Account", value: owner?.bankDetails, key: 'bankDetails', type: 'owner', id: owner?.id },
+				{ label: "Tenant NRIC/Passport", value: tenant.icPassport, key: 'icPassport', type: 'tenant', id: tenant.id },
+				{ label: "Tenant Address (NRIC)", value: tenant.regAddress, key: 'regAddress', type: 'tenant', id: tenant.id }
 			];
 
-			const missingItems = checkList.filter(item => !item.value || item.value.trim() === "");
+			// --- 2. 识别拦截无效数据（包括只有横线的情况） ---
+			const isInvalid = (val) => {
+				if (!val) return true;
+				const cleanVal = val.toString().trim().toLowerCase();
+				// 增加对常见占位符的检查
+				return cleanVal === "" || 
+					   cleanVal.replace(/[^a-zA-Z0-9]/g, '') === "" || // 全是符号/横线
+					   cleanVal.includes("not provided") || 
+					   cleanVal.includes("to be advised");
+			};
 
-			// --- 2. 如果资料缺失，弹出行内补录窗 (保持原有逻辑不变) ---
+			const missingItems = checkList.filter(item => isInvalid(item.value));
+
+			// --- 3. 强制补录逻辑 ---
 			if (missingItems.length > 0) {
-				let inlineFieldsHtml = '<div style="background:#f9f9f9; border:1px solid #ddd; border-radius:8px; padding:15px; margin-top:15px; text-align:left;">';
-				inlineFieldsHtml += '<p style="font-size:12px; color:#666; margin-top:0;">Please fill in the missing details for the legal agreement:</p>';
+				let inlineFieldsHtml = `
+					<div style="background:#fff5f5; border:1.5px solid #f56565; border-radius:12px; padding:15px; margin-top:15px; text-align:left;">
+						<p style="font-size:13px; color:#c53030; font-weight:bold; margin:0 0 10px 0;">⚠️ Legal Requirement: Missing Information</p>
+				`;
 				
 				missingItems.forEach((item, index) => {
 					inlineFieldsHtml += `
 						<div style="margin-bottom:12px;">
-							<label style="font-size:11px; font-weight:700; color:#3A86FF; display:block; margin-bottom:4px;">${item.label}</label>
-							<input type="text" id="inline-fix-${index}" class="inline-missing-input" 
-								   placeholder="Enter ${item.label}..."
-								   style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; font-size:14px; box-sizing:border-box;">
+							<label style="font-size:11px; font-weight:700; color:#444; display:block; margin-bottom:4px;">${item.label} <span style="color:red">*</span></label>
+							<input type="text" id="inline-fix-${index}" placeholder="Enter real information..."
+								   style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-size:14px; box-sizing:border-box; outline:none;">
 						</div>`;
 				});
 				inlineFieldsHtml += '</div>';
 
 				window.app.showConfirmation(
-					'Missing Information',
-					`Almost there! We need a few more details for the legal agreement.`,
+					'Complete Agreement Details',
+					`The following information is required for the agreement to be legally valid:`,
 					(confirmed) => {
 						if (confirmed) {
+							let allGood = true;
 							missingItems.forEach((item, index) => {
-								const newValue = document.getElementById(`inline-fix-${index}`).value.trim();
-								if (newValue !== "") {
-									if (item.type === 'owner') {
+								const inputVal = document.getElementById(`inline-fix-${index}`).value.trim();
+								if (isInvalid(inputVal)) {
+									allGood = false;
+								} else {
+									if (item.type === 'owner' && item.id) {
 										const o = getOwnerById(item.id);
-										if (o) { o[item.key] = newValue; saveOwnerData(item.id, o); }
+										if (o) { o[item.key] = inputVal; saveOwnerData(item.id, o); }
 									} else if (item.type === 'tenant') {
 										const t = getTenantById(item.id);
-										if (t) { t[item.key] = newValue; saveTenantData(item.id, t); }
-									} else if (item.type === 'property') {
-										const p = getPropertyById(item.id);
-										if (p) { p[item.key] = newValue; updatePropertyData(item.id, p); }
+										if (t) { t[item.key] = inputVal; saveTenantData(item.id, t); }
 									}
 								}
 							});
 
+							if (!allGood) {
+								window.app.alertMessage('Please fill in all required fields properly.', 'error');
+								return;
+							}
+
 							saveData();
-							window.app.alertMessage('Data updated! Re-generating...', 'success');
-							setTimeout(() => { window.app.generateAgreement(tenantId); }, 1000);
+							window.app.alertMessage('Information updated! Generating...', 'success');
+							setTimeout(() => { window.app.generateAgreement(tenantId); }, 600);
 						}
 					},
-					'Save & Generate',
-					'btn-primary-modal'
+					'Save & Generate', 'btn-primary-modal'
 				);
 
 				const msgElem = document.getElementById('confirmModalMessage');
 				if (msgElem) msgElem.innerHTML += inlineFieldsHtml;
-				return; 
+				return; // 🛑 核心拦截：不执行下方的生成逻辑
 			}
 
-			// --- 3. 资料完整，开始生成 (调用原有逻辑) ---
+			// --- 4. 只有数据完整才执行生成 ---
 			const agreementData = {
 				date: new Date().toISOString(),
 				tenant: tenant,
@@ -2237,15 +2253,20 @@
 			if (printWindow) {
 				printWindow.document.write(htmlContent);
 				printWindow.document.close();
-				printWindow.onload = function() {
-					printWindow.focus();
-					setTimeout(() => { printWindow.print(); }, 500);
-				};
 			}
-			// ... 状态更新逻辑保持不变 ...
 		};
 	
-
+		window.app.openSignaturePad = function() {
+			// 假设你的签名板弹窗 ID 是 signatureModal
+			const signatureModal = document.getElementById('signatureModal');
+			if (signatureModal) {
+				signatureModal.style.display = 'flex';
+				// 如果你使用了 SignaturePad 插件，记得清空画布
+				if (window.app.signaturePad) window.app.signaturePad.clear();
+			} else {
+				alert("找不到签名组件，请确认 signatureModal 是否存在。");
+			}
+		};
 
 
 
@@ -3560,8 +3581,9 @@
 
 		window.app.autoCalcDeposits = function(rentValue) {
 			const rent = parseFloat(rentValue) || 0;
-			document.getElementById('ql-sec-dep').value = rent * 2;
-			document.getElementById('ql-util-dep').value = rent * 1; // 遵照你的建议设为1个月
+			// 自动填充 2+1 押金
+			document.getElementById('ql-sec-dep').value = (rent * 2).toFixed(2);
+			document.getElementById('ql-util-dep').value = (rent * 1).toFixed(2);
 		};
 
         function selectQuickLinkTenant(tenantId) {
@@ -3911,144 +3933,6 @@
                     window.app.alertMessage('Numbers only', 'error');
                 }
             },
-
-			generateAgreement: function(tenantId) {
-				const tenant = getTenantById(tenantId);
-				if (!tenant) return;
-				
-				const property = properties.find(p => p.tenantId === tenant.id);
-				const owner = property ? owners.find(o => o.id === property.ownerId) : null;
-
-				const agreementData = {
-					date: new Date().toISOString(),
-					tenant: tenant,
-					property: property,
-					owner: owner,
-					isReviewMode: true // 默认开启审核辅助
-				};
-
-				const htmlContent = window.app.generateTenancyAgreementHTML(agreementData);
-				const printWindow = window.open('', '_blank');
-				printWindow.document.write(htmlContent);
-				printWindow.document.close();
-				
-				// 模拟：给租客发送链接（实际上是打开签名页）
-				window.app.alertMessage('Agreement link copied to clipboard for tenant!', 'success');
-			},
-
-			// 2. 签名板逻辑
-			openSignature: function() {
-				const modal = document.getElementById('signatureModal');
-				const canvas = document.getElementById('sig-canvas');
-				const ctx = canvas.getContext('2d');
-				
-				// 显示弹窗
-				modal.style.display = 'flex';
-
-				// 设置绘图样式
-				ctx.strokeStyle = "#000"; // 黑色线条
-				ctx.lineWidth = 3;        // 线条宽度
-				ctx.lineCap = "round";    // 圆润笔触
-				let drawing = false;
-
-				// 坐标转换工具：将屏幕触摸点转换为 Canvas 内部坐标
-				function getPos(e) {
-					const rect = canvas.getBoundingClientRect();
-					// 兼容手机 (touches) 和电脑 (clientX)
-					const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-					const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-					return {
-						x: clientX - rect.left,
-						y: clientY - rect.top
-					};
-				}
-
-				// --- 触摸事件 (手机端核心) ---
-				canvas.addEventListener("touchstart", function(e) {
-					drawing = true;
-					const pos = getPos(e);
-					ctx.beginPath();
-					ctx.moveTo(pos.x, pos.y);
-					e.preventDefault(); // 防止滚动页面
-				}, { passive: false });
-
-				canvas.addEventListener("touchmove", function(e) {
-					if (!drawing) return;
-					const pos = getPos(e);
-					ctx.lineTo(pos.x, pos.y);
-					ctx.stroke();
-					e.preventDefault();
-				}, { passive: false });
-
-				canvas.addEventListener("touchend", function() {
-					drawing = false;
-				});
-
-				// --- 鼠标事件 (PC 端兼容) ---
-				canvas.addEventListener("mousedown", function(e) {
-					drawing = true;
-					const pos = getPos(e);
-					ctx.beginPath();
-					ctx.moveTo(pos.x, pos.y);
-				});
-
-				canvas.addEventListener("mousemove", function(e) {
-					if (drawing) {
-						const pos = getPos(e);
-						ctx.lineTo(pos.x, pos.y);
-						ctx.stroke();
-					}
-				});
-
-				canvas.addEventListener("mouseup", function() {
-					drawing = false;
-				});
-
-				// 清除画布功能
-				window.app.closeSignature = function() {
-					ctx.clearRect(0, 0, canvas.width, canvas.height);
-				};
-			},
-
-			saveSignature: function() {
-				const canvas = document.getElementById('sig-canvas');
-				// 检查画布是否为空（简单判断）
-				const blank = document.createElement('canvas');
-				blank.width = canvas.width;
-				blank.height = canvas.height;
-				if (canvas.toDataURL() === blank.toDataURL()) {
-					window.app.alertMessage('Please sign before confirming', 'error');
-					return;
-				}
-
-				const signatureImg = canvas.toDataURL("image/png"); // 转换成 Base64 图片
-				
-				// 获取当前正在操作的租客 ID
-				const context = window.app.successContext;
-				if (context && context.tenantId) {
-					const tenant = getTenantById(context.tenantId);
-					if (tenant) {
-						tenant.digitalSignature = signatureImg; // 保存签名
-						tenant.phase = 4; // 标记为已签署
-						saveTenantData(tenant.id, tenant);
-						
-						// 同时更新房产状态
-						const prop = getPropertyById(context.propId);
-						if (prop) {
-							prop.status = 'Rented';
-							updatePropertyData(prop.id, prop);
-						}
-						
-						saveData();
-						document.getElementById('signatureModal').style.display = 'none';
-						window.app.alertMessage('Agreement signed successfully!', 'success');
-						
-						// 刷新视图
-						window.app.switchView('property');
-						window.app.switchPropertyTab('tenant');
-					}
-				}
-			},
 
             calculateEndDate: function() {
                 const startInput = document.getElementById('t-leaseStart');
