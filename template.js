@@ -30,6 +30,18 @@ window.app.generateTenancyAgreementHTML = function(data) {
     const tenant = data.tenant || {};
     const renewalYears = tenant.renewalTerm || '1';
     
+	let contractAddress = (prop.address || '') + ', ' + (prop.city || '') + ', ' + (prop.state || '') + ' ' + (prop.postalCode || '');
+
+    // 如果是分租模式，且有房间数据
+    if (prop.rentalType === 'room_by_room' && prop.rooms) {
+        // 在所有房间里找，看哪个房间关联了当前的租客 ID
+        const targetRoom = prop.rooms.find(r => r.tenantId === tenant.id);
+        if (targetRoom) {
+            // 如果找到了，把房间名（如 "Master Room"）加到地址最前面
+            contractAddress = targetRoom.name + ", " + contractAddress;
+        }
+    }
+	
     const monthlyRent = parseFloat(tenant.monthlyRent || 0);
     const securityDep = tenant.securityDeposit || (monthlyRent * 2);
     const utilityDep = tenant.utilityDeposit || (monthlyRent * 1);
@@ -177,7 +189,7 @@ window.app.generateTenancyAgreementHTML = function(data) {
                     <strong style="font-size: 12pt;">PROPERTY ADDRESS:</strong><br>
                     <div style="margin-top:10px;">
                         <span class="uppercase">
-                            ${highlight((prop.address || 'Address Line 1') + ', ' + (prop.city || '') + ', ' + (prop.state || '') + ' ' + (prop.postalCode || ''))}
+                            ${highlight(contractAddress.toUpperCase())}
                         </span>
                     </div>
                 </div>
@@ -379,7 +391,7 @@ window.app.generateTenancyAgreementHTML = function(data) {
                         <td class="col-desc">DEMISED PREMISES</td>
                         <td class="col-val">
                             <span class="uppercase">
-                                ${highlight((prop.address || '_________________') + ', ' + (prop.postalCode || '') + ' ' + (prop.city || '') + ', ' + (prop.state || ''))}
+                                ${highlight(contractAddress.toUpperCase())}
                             </span>
                         </td>
                     </tr>
@@ -465,22 +477,20 @@ window.app.generateTenancyAgreementHTML = function(data) {
 			}
 
 			function showLocalSignaturePad() {
-				// 创建全屏遮罩
 				const overlay = document.createElement('div');
 				overlay.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:20000;display:flex;align-items:center;justify-content:center;flex-direction:column;";
 				overlay.id = "temp-sig-overlay";
 
-				// 创建签名容器
-				overlay.innerHTML = \`
-					<div style="background:#fff;padding:20px;border-radius:15px;width:90%;max-width:400px;text-align:center;">
-						<h3 style="margin:0 0 10px 0;font-family:sans-serif;">Draw Your Signature</h3>
-						<canvas id="temp-sig-canvas" width="320" height="200" style="border:2px dashed #ddd;background:#fafafa;touch-action:none;cursor:crosshair;"></canvas>
-						<div style="margin-top:15px;display:flex;gap:10px;">
-							<button onclick="closeLocalSig()" style="flex:1;padding:12px;border:none;background:#eee;border-radius:8px;">Cancel</button>
-							<button onclick="saveLocalSig()" style="flex:1;padding:12px;border:none;background:#3A86FF;color:white;border-radius:8px;font-weight:bold;">Confirm</button>
-						</div>
-					</div>
-				\`;
+				// 🔥 修复点：使用普通字符串拼接，而不是模板字符串嵌套
+				overlay.innerHTML = 
+					'<div style="background:#fff;padding:20px;border-radius:15px;width:90%;max-width:400px;text-align:center;">' +
+						'<h3 style="margin:0 0 10px 0;font-family:sans-serif;">Draw Your Signature</h3>' +
+						'<canvas id="temp-sig-canvas" width="320" height="200" style="border:2px dashed #ddd;background:#fafafa;touch-action:none;cursor:crosshair;"></canvas>' +
+						'<div style="margin-top:15px;display:flex;gap:10px;">' +
+							'<button onclick="closeLocalSig()" style="flex:1;padding:12px;border:none;background:#eee;border-radius:8px;">Cancel</button>' +
+							'<button onclick="saveLocalSig()" style="flex:1;padding:12px;border:none;background:#3A86FF;color:white;border-radius:8px;font-weight:bold;">Confirm</button>' +
+						'</div>' +
+					'</div>';
 
 				document.body.appendChild(overlay);
 
