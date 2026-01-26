@@ -1846,3 +1846,47 @@ body {
     display: block;
     background-color: #fafafa;
 }
+
+.room-entry-card {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    position: relative;
+}
+.room-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+.room-number-badge {
+    background: #3A86FF;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+.remove-room-btn {
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 20px;
+}
+.add-room-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    border: 2px dashed #3A86FF;
+    color: #3A86FF;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
